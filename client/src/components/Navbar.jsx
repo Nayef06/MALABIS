@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../LandingPage.css';
 import LogoFull from '../assets/LogoFull.png';
 
@@ -13,10 +13,36 @@ const AccountIcon = ({ inverted }) => (
 
 const Navbar = ({ accountInverted }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-logo">
         <img src={LogoFull} alt="Logo" />
+      </div>
+      <div className="navbar-tabs">
+        <button
+          className={`nav-tab ${isActive('/clothes') ? 'nav-tab-active' : ''}`}
+          onClick={() => navigate('/clothes')}
+        >
+          Clothes
+        </button>
+        <button
+          className={`nav-tab ${isActive('/outfits') ? 'nav-tab-active' : ''}`}
+          onClick={() => navigate('/outfits')}
+        >
+          Outfits
+        </button>
+        <button
+          className={`nav-tab ${isActive('/generator') ? 'nav-tab-active' : ''}`}
+          onClick={() => navigate('/generator')}
+        >
+          Generator
+        </button>
       </div>
       <div className="navbar-buttons">
         <button
