@@ -75,6 +75,8 @@ const AccountPage = () => {
 
   const [popup, setPopup] = useState({ show: false, type: 'success', message: '' });
 
+  const [username, setUsername] = useState('');
+
   useEffect(() => {
     // Fetch current user info
     const fetchUser = async () => {
@@ -84,6 +86,7 @@ const AccountPage = () => {
           const user = await res.json();
           setDisplayName(user.displayName || '');
           setNewDisplayName(user.displayName || '');
+          setUsername(user.username || '');
         }
       } catch (err) {
         // ignore
@@ -233,6 +236,15 @@ const AccountPage = () => {
           </div>
         </div>
         <button onClick={handleLogout} className="auth-button" style={{ marginTop: 24, background: '#1b2554' }}>Logout</button>
+        {username === 'nayef' && (
+          <button
+            onClick={() => navigate('/dev')}
+            className="auth-button"
+            style={{ marginTop: 12, background: '#e0e0ff', color: '#131314' }}
+          >
+            DEV PAGE
+          </button>
+        )}
       </div>
     </div>
   );

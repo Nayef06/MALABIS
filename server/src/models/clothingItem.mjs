@@ -23,7 +23,19 @@ const ClothingItemSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: allowedColors,
-  }
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  imageLink: {
+    type: String,
+    required: true,
+  },
+  isFavorited: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 export const ClothingItem = mongoose.model("ClothingItem", ClothingItemSchema); 

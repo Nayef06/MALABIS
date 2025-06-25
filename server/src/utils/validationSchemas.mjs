@@ -60,5 +60,21 @@ export const clothingItemValidationSchema = {
       options: [['red', 'blue', 'green', 'yellow', 'black', 'white', 'purple', 'orange', 'gray', 'brown']],
       errorMessage: 'Invalid color'
     }
+  },
+  name: {
+    in: ['body'],
+    isString: true,
+    exists: {
+      errorMessage: 'Name is required'
+    },
+    notEmpty: { errorMessage: 'Name cannot be empty' }
+  },
+  imageLink: {
+    in: ['body'],
+    isString: true,
+    exists: {
+      errorMessage: 'Image link is required'
+    },
+    notEmpty: { errorMessage: 'Image link cannot be empty' }
   }
 }; 
