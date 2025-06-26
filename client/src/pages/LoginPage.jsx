@@ -21,7 +21,7 @@ const LoginPage = () => {
       });
 
       if (response.ok) {
-        navigate('/placeholder'); // Redirect to placeholder page after login
+        navigate('/clothes'); // Redirect to placeholder page after login
       } else {
         setError('Invalid username or password. Please try again.');
       }

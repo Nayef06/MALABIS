@@ -3,7 +3,6 @@ import LandingPage from './LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
-import PlaceholderPage from './pages/PlaceholderPage';
 import AccountPage from './pages/AccountPage';
 import ClothesPage from './pages/ClothesPage';
 import OutfitsPage from './pages/OutfitsPage';
@@ -23,12 +22,6 @@ function App() {
           <>
             <Navbar accountInverted={false} />
             <DashboardPage />
-          </>
-        } />
-        <Route path="/placeholder" element={
-          <>
-            <Navbar accountInverted={false} />
-            <PlaceholderPage />
           </>
         } />
         <Route path="/account" element={
