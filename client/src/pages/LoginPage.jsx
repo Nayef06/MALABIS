@@ -10,7 +10,7 @@ const LoginPage = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(''); // Clear previous errors
+    setError(''); 
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -21,7 +21,7 @@ const LoginPage = () => {
       });
 
       if (response.ok) {
-        navigate('/clothes'); // Redirect to placeholder page after login
+        navigate('/clothes');
       } else {
         setError('Invalid username or password. Please try again.');
       }

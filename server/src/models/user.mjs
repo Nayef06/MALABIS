@@ -21,6 +21,10 @@ const UserSchema = new mongoose.Schema({
       "shoe1", "shoe2", "shoe3"
     ], 
   },
+  outfits: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Outfit",
+  }],
 });
 
 export const User = mongoose.model("User", UserSchema); 

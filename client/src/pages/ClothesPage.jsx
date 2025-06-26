@@ -45,7 +45,6 @@ const ConfirmPopup = ({ open, onConfirm, onCancel }) => {
   );
 };
 
-// Utility to get a light tint for a color name
 const colorTints = {
   black: '#e5e7eb',
   white: '#f8fafc',
@@ -57,7 +56,6 @@ const colorTints = {
   orange: '#fff7ed',
   gray: '#f3f4f6',
   brown: '#f8f5f2',
-  // Add more as needed
 };
 function getColorTint(color) {
   return colorTints[color?.toLowerCase()] || '#e8f0fe';
@@ -86,7 +84,6 @@ const ClothesPage = () => {
     fetchItems();
   }, []);
 
-  // Group items by type
   const grouped = items.reduce((acc, item) => {
     if (!acc[item.type]) acc[item.type] = [];
     acc[item.type].push(item);
@@ -100,7 +97,6 @@ const ClothesPage = () => {
       if (!res.ok) throw new Error('Failed to delete');
       setItems(items => items.filter(item => item._id !== id));
     } catch (err) {
-      // Optionally show error popup
     } finally {
       setDeletingId(null);
       setConfirmId(null);
@@ -109,7 +105,6 @@ const ClothesPage = () => {
 
   const handleFavorite = async (item) => {
     const newFav = !item.isFavorited;
-    // Optimistically update UI
     setItems(items => items.map(i => i._id === item._id ? { ...i, isFavorited: newFav } : i));
     try {
       await fetch(`/api/clothing/${item._id}/favorite`, {
@@ -118,7 +113,6 @@ const ClothesPage = () => {
         body: JSON.stringify({ isFavorited: newFav }),
       });
     } catch (err) {
-      // Optionally show error
     }
   };
 

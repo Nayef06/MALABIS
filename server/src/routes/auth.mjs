@@ -71,7 +71,6 @@ router.post(
   async (req, res) => {
     if (!req.user) return res.sendStatus(401);
     const { displayName, password } = req.body;
-    // Server-side validation
     if (displayName !== undefined && displayName.trim().length < 3) {
       return res.status(400).json({ error: "Display name must be at least 3 characters." });
     }

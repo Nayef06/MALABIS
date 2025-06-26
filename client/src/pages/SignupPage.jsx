@@ -22,7 +22,6 @@ const SignupPage = () => {
       if (response.ok) {
         navigate('/login');
       } else {
-        // Handle signup failure
         console.error('Signup failed');
       }
     } catch (error) {

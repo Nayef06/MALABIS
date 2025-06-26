@@ -78,7 +78,6 @@ const AccountPage = () => {
   const [username, setUsername] = useState('');
 
   useEffect(() => {
-    // Fetch current user info
     const fetchUser = async () => {
       try {
         const res = await fetch('/api/auth/status');
@@ -89,13 +88,11 @@ const AccountPage = () => {
           setUsername(user.username || '');
         }
       } catch (err) {
-        // ignore
       }
     };
     fetchUser();
   }, []);
 
-  // Hide popup after 2 seconds
   useEffect(() => {
     let timer;
     if (popup.show) {
@@ -155,7 +152,6 @@ const AccountPage = () => {
       await fetch('/api/auth/logout', { method: 'POST' });
       navigate('/login');
     } catch (err) {
-      // Optionally show error
     }
   };
 
