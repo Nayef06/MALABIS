@@ -24,6 +24,7 @@ const UserSchema = new mongoose.Schema({
   outfits: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Outfit",
+    default: [],
   }],
 });
 
