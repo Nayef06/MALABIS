@@ -1,498 +1,503 @@
 import React, { useState, useEffect } from 'react';
-import Draggable from 'react-draggable';
 import '../LandingPage.css';
 
-const CATEGORY_LABELS = {
-  shirt: 'Shirts',
-  pants: 'Pants',
-  shoes: 'Shoes',
-  hat: 'Hats',
-  jacket: 'Jackets',
-  accessory: 'Accessories',
+// Reuse icons and confirm popup from ClothesPage
+const TrashIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="8" width="2" height="7" rx="1" fill="#e53e3e"/>
+    <rect x="9" y="8" width="2" height="7" rx="1" fill="#e53e3e"/>
+    <rect x="13" y="8" width="2" height="7" rx="1" fill="#e53e3e"/>
+    <rect x="3" y="5" width="14" height="2" rx="1" fill="#e53e3e"/>
+    <rect x="7" y="2" width="6" height="2" rx="1" fill="#e53e3e"/>
+  </svg>
+);
+const StarIcon = ({ size = 20, filled = false }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill={filled ? '#1b2554' : 'none'} stroke="#1b2554" strokeWidth="1.5" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="10,2 12.59,7.36 18.51,8.09 14,12.26 15.18,18.09 10,15.1 4.82,18.09 6,12.26 1.49,8.09 7.41,7.36" />
+  </svg>
+);
+const ConfirmPopup = ({ open, onConfirm, onCancel }) => {
+  if (!open) return null;
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div style={{ background: '#fff', borderRadius: 12, padding: 32, minWidth: 280, boxShadow: '0 4px 24px rgba(0,0,0,0.13)', textAlign: 'center' }}>
+        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 18 }}>Delete this outfit?</div>
+        <div style={{ color: '#5f6f8f', fontSize: 15, marginBottom: 24 }}>This action cannot be undone.</div>
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+          <button onClick={onCancel} style={{ padding: '8px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: '#fff', color: '#1b2554', fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
+          <button onClick={onConfirm} style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: '#e53e3e', color: '#fff', fontWeight: 500, cursor: 'pointer' }}>Delete</button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
-const DEFAULT_SIZE = 120;
-const MAX_SIZE = DEFAULT_SIZE * 2;
-const DRAG_OUT_OF_BOUNDS = 30;
+const cardStyle = {
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  background: '#fff',
+  borderRadius: 25,
+  boxShadow: '0 2px 16px rgba(27,37,84,0.08)',
+  padding: 0,
+  minWidth: 288,
+  maxWidth: 306,
+  minHeight: 342,
+  marginBottom: 0,
+  transition: 'box-shadow 0.25s cubic-bezier(.4,2,.6,1), transform 0.22s cubic-bezier(.4,2,.6,1)',
+  overflow: 'hidden',
+};
+const iconBtnStyle = {
+  width: 40,
+  height: 40,
+  borderRadius: '50%',
+  background: '#f4f6fa',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: 'none',
+  cursor: 'pointer',
+  transition: 'background 0.18s, transform 0.18s',
+  boxShadow: '0 1px 4px rgba(27,37,84,0.06)',
+  padding: 0,
+};
+const iconBtnDeleteHover = {
+  background: '#ffe5e5',
+  transform: 'scale(1.15)',
+};
+const iconBtnDeleteDisabled = {
+  background: '#f4f6fa',
+  cursor: 'not-allowed',
+  opacity: 0.5,
+  pointerEvents: 'none',
+};
+const iconRowStyle = {
+  display: 'flex',
+  gap: 16,
+  alignItems: 'center',
+  position: 'absolute',
+  top: 18,
+  right: 18,
+  zIndex: 2,
+};
+
+function OutfitSlotModal({ open, onClose, onSave }) {
+  const [slots, setSlots] = useState(Array(8).fill(null));
+  const [pickerSlot, setPickerSlot] = useState(null); // index of slot being filled
+  const [clothes, setClothes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [fitName, setFitName] = useState('');
+
+  useEffect(() => {
+    if (open) {
+      setSlots(Array(8).fill(null));
+      setPickerSlot(null);
+      setFitName('');
+      setLoading(true);
+      fetch('/api/clothing/inventory')
+        .then(res => res.json())
+        .then(data => setClothes(data.items || []))
+        .finally(() => setLoading(false));
+    }
+  }, [open]);
+
+  const handleSlotClick = (idx) => setPickerSlot(idx);
+  const handleClothingPick = (item) => {
+    setSlots(slots => slots.map((s, i) => i === pickerSlot ? item : s));
+    setPickerSlot(null);
+  };
+  const handleRemove = (idx) => setSlots(slots => slots.map((s, i) => i === idx ? null : s));
+  const handleSave = () => {
+    const clothingItems = slots.filter(Boolean).map(item => item._id);
+    if (clothingItems.length === 0) return;
+    onSave({ name: fitName || 'New Outfit', clothingItems });
+  };
+
+  // Card-like theme
+  const navy = '#1b2554';
+  const navyLight = '#232b53';
+  const slotAreaBg = '#fff';
+  const slotAreaBorder = '1.5px solid #e3e7ef';
+  const accent = '#7b8cff';
+  return open ? (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div style={{
+        background: '#fff',
+        borderRadius: 25,
+        padding: 0,
+        minWidth: 440,
+        minHeight: 580,
+        position: 'relative',
+        boxShadow: '0 8px 32px rgba(27,37,84,0.13)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        overflow: 'hidden',
+        border: '1.5px solid #e3e7ef',
+      }}>
+        {/* Header with title and close */}
+        <div style={{
+          width: '100%',
+          background: 'none',
+          padding: '28px 36px 10px 36px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <div style={{ fontWeight: 700, fontSize: 26, color: navy, letterSpacing: 1 }}>Create Outfit</div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: 28,
+              color: '#7b8cff',
+              cursor: 'pointer',
+              borderRadius: '50%',
+              width: 38,
+              height: 38,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 0.18s',
+            }}
+            onMouseOver={e => e.currentTarget.style.background = '#f4f6fa'}
+            onMouseOut={e => e.currentTarget.style.background = 'none'}
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+        {/* Name input */}
+        <div style={{ width: '100%', padding: '0 36px', marginTop: 8, marginBottom: 8 }}>
+          <input
+            type="text"
+            value={fitName}
+            onChange={e => setFitName(e.target.value)}
+            placeholder="Outfit name..."
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              borderRadius: 10,
+              border: '1.5px solid #e3e7ef',
+              fontSize: 18,
+              fontWeight: 500,
+              color: navy,
+              background: '#f7f8fa',
+              outline: 'none',
+              marginBottom: 0,
+              marginTop: 0,
+              boxSizing: 'border-box',
+              transition: 'border 0.18s',
+            }}
+            maxLength={32}
+          />
+        </div>
+        {/* Slot system area */}
+        <div style={{
+          display: 'flex', flexDirection: 'row', gap: 32, justifyContent: 'center', alignItems: 'center',
+          background: slotAreaBg,
+          border: slotAreaBorder,
+          borderRadius: 22,
+          margin: '24px 0 0 0',
+          padding: '24px 18px',
+          minHeight: 320,
+          boxSizing: 'border-box',
+          boxShadow: '0 2px 8px rgba(27,37,84,0.06)',
+        }}>
+          {/* Left column: 3 large slots */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, justifyContent: 'center' }}>
+            {[0,1,2].map(idx => (
+              <Slot key={idx} item={slots[idx]} onClick={() => handleSlotClick(idx)} onRemove={() => handleRemove(idx)} large accent={accent} />
+            ))}
+          </div>
+          {/* Right column: 5 small slots */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18, justifyContent: 'space-between' }}>
+            {[3,4,5,6,7].map(idx => (
+              <Slot key={idx} item={slots[idx]} onClick={() => handleSlotClick(idx)} onRemove={() => handleRemove(idx)} accent={accent} />
+            ))}
+          </div>
+        </div>
+        {/* Save button */}
+        <button
+          onClick={handleSave}
+          disabled={slots.every(s => !s)}
+          style={{
+            margin: '32px 0 24px 0',
+            padding: '16px 44px',
+            borderRadius: 12,
+            background: navy,
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: 20,
+            border: 'none',
+            cursor: slots.every(s => !s) ? 'not-allowed' : 'pointer',
+            opacity: slots.every(s => !s) ? 0.5 : 1,
+            boxShadow: '0 2px 8px rgba(27,37,84,0.10)',
+            transition: 'background 0.18s, box-shadow 0.18s',
+          }}
+          onMouseOver={e => { if (!slots.every(s => !s)) e.currentTarget.style.background = navyLight; }}
+          onMouseOut={e => { if (!slots.every(s => !s)) e.currentTarget.style.background = navy; }}
+        >
+          Save Outfit
+        </button>
+        {/* Clothing picker */}
+        {pickerSlot !== null && (
+          <div style={{ position: 'absolute', top: 80, left: '50%', transform: 'translateX(-50%)', background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(0,0,0,0.18)', padding: 24, zIndex: 1100, minWidth: 340 }}>
+            <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 12 }}>Pick a clothing item</div>
+            {loading ? <div>Loading...</div> : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, maxHeight: 260, overflowY: 'auto' }}>
+                {clothes.map(item => (
+                  <div key={item._id} style={{ border: '1px solid #eee', borderRadius: 10, padding: 8, cursor: 'pointer', width: 80, textAlign: 'center', background: '#f7f8fa' }} onClick={() => handleClothingPick(item)}>
+                    <img src={item.imageLink} alt={item.name} style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8, background: '#fff' }} />
+                    <div style={{ fontSize: 12, marginTop: 4 }}>{item.name}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button onClick={() => setPickerSlot(null)} style={{ marginTop: 16, background: 'none', border: 'none', color: accent, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
+          </div>
+        )}
+      </div>
+    </div>
+  ) : null;
+}
+
+function Slot({ item, onClick, onRemove, large, readOnly, accent }) {
+  const emptyBg = '#f8fafc';
+  const filledBg = '#fff';
+  const border = '1.5px solid #e3e7ef';
+  const size = large ? 140 : 80;
+  return (
+    <div onClick={readOnly ? undefined : onClick} style={{
+      width: size,
+      height: size,
+      background: item ? filledBg : emptyBg,
+      borderRadius: 24,
+      marginRight: 0,
+      marginLeft: 0,
+      marginBottom: 0,
+      marginTop: 0,
+      boxShadow: '0 2px 8px rgba(27,37,84,0.10)',
+      border: border,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', cursor: readOnly ? 'default' : 'pointer', overflow: 'hidden',
+      transition: 'background 0.18s',
+    }}>
+      {item ? (
+        <>
+          <img src={item.imageLink} alt={item.name} style={{ width: large ? 100 : 56, height: large ? 100 : 56, objectFit: 'cover', borderRadius: 12 }} />
+          {!readOnly && <button onClick={e => { e.stopPropagation(); onRemove(); }} style={{ position: 'absolute', top: 4, right: 4, background: '#fff', border: 'none', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, cursor: 'pointer', boxShadow: '0 1px 4px rgba(27,37,84,0.10)' }}>&times;</button>}
+        </>
+      ) : (
+        <span style={{ color: accent || '#b0b0b0', fontSize: large ? 48 : 28, fontWeight: 700 }}>+</span>
+      )}
+    </div>
+  );
+}
 
 const OutfitsPage = () => {
   const [showModal, setShowModal] = useState(false);
-  const [clothingItems, setClothingItems] = useState([]);
-  const [fitItems, setFitItems] = useState([]); // {item, x, y, size}
-  const [selectedFitId, setSelectedFitId] = useState(null); // _id of selected item
-  const [resizingIdx, setResizingIdx] = useState(null); // index of item being resized
-  const [isMobile, setIsMobile] = useState(false);
-  const [savedOutfits, setSavedOutfits] = useState([]);
-  const [saving, setSaving] = useState(false);
-  const [outfitName, setOutfitName] = useState("");
-
-  useEffect(() => {
-    fetch('/api/clothing/inventory')
-      .then(res => res.json())
-      .then(data => setClothingItems(data.items || []));
-  }, []);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 600);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Fetch saved outfits
-  useEffect(() => {
-    fetch('/api/outfits')
-      .then(res => res.json())
-      .then(data => setSavedOutfits(data.outfits || []));
-  }, []);
-
-  // Add item to fit area at default position/size
-  const handleAddToFit = (item) => {
-    if (!fitItems.some(f => f.item._id === item._id)) {
-      setFitItems([...fitItems, { item, x: 40, y: 40, size: DEFAULT_SIZE }]);
+  const [outfits, setOutfits] = useState([]);
+  const [confirmId, setConfirmId] = useState(null);
+  const fetchOutfits = async () => {
+    try {
+      const res = await fetch('/api/outfits');
+      if (!res.ok) throw new Error('Failed to fetch outfits');
+      const data = await res.json();
+      // Sort: favorited outfits first
+      const sorted = (data.outfits || []).slice().sort((a, b) => (b.isFavorited ? 1 : 0) - (a.isFavorited ? 1 : 0));
+      setOutfits(sorted);
+    } catch (err) {
+      setOutfits([]);
     }
   };
+  useEffect(() => { fetchOutfits(); }, []);
 
-  // Remove item from fit area
-  const handleRemoveFromFit = (id) => {
-    setFitItems(fitItems.filter(f => f.item._id !== id));
-    if (selectedFitId === id) setSelectedFitId(null);
-  };
-
-  // Handle drag
-  const handleDrag = (idx, e, data) => {
-    setFitItems(fitItems => fitItems.map((f, i) => i === idx ? { ...f, x: data.x, y: data.y } : f));
-  };
-
-  // Handle resize (even less sensitive, 20px steps, only after 20px movement)
-  const handleResize = (idx, delta) => {
-    setFitItems(fitItems => fitItems.map((f, i) => {
-      if (i !== idx) return f;
-      const step = Math.floor(Math.abs(delta) / 20) * 20 * Math.sign(delta);
-      if (step === 0) return f;
-      return { ...f, size: Math.max(60, f.size + step) };
-    }));
-  };
-
-  // Group clothing items by type
-  const grouped = clothingItems.reduce((acc, item) => {
-    if (!acc[item.type]) acc[item.type] = [];
-    acc[item.type].push(item);
-    return acc;
-  }, {});
-
-  // When an image is clicked, bring it to the front by moving it to the end of fitItems
-  const handleSelectFitItem = (id) => {
-    setSelectedFitId(id);
-    setFitItems(fitItems => {
-      const idx = fitItems.findIndex(f => f.item._id === id);
-      if (idx === -1) return fitItems;
-      const item = fitItems[idx];
-      const newArr = fitItems.slice(0, idx).concat(fitItems.slice(idx + 1)).concat([item]);
-      return newArr;
-    });
-  };
-
-  const handleSaveOutfit = async () => {
-    if (!outfitName.trim() || fitItems.length === 0) return;
-    setSaving(true);
-    const clothingItems = fitItems.map(f => ({
-      clothingItem: f.item._id,
-      x: f.x,
-      y: f.y,
-      size: f.size,
-    }));
+  const handleSaveOutfit = async ({ name, clothingItems }) => {
     try {
       const res = await fetch('/api/outfits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: outfitName, clothingItems }),
+        body: JSON.stringify({ name, clothingItems }),
       });
-      if (res.ok) {
-        setShowModal(false);
-        setFitItems([]);
-        setOutfitName("");
-        // Refresh saved outfits
-        const data = await res.json();
-        setSavedOutfits(prev => [data.outfit, ...prev]);
-      }
-    } finally {
-      setSaving(false);
+      if (!res.ok) throw new Error('Failed to save outfit');
+      setShowModal(false);
+      fetchOutfits();
+    } catch (err) {
+      alert('Could not save outfit.');
     }
   };
 
-  const sideWhiteBorder = 12;
+  const handleFavorite = async (outfit) => {
+    const newFav = !outfit.isFavorited;
+    let updated;
+    setOutfits(outfits => {
+      updated = outfits.map(o => o._id === outfit._id ? { ...o, isFavorited: newFav } : o);
+      // Move favorited to top
+      return newFav
+        ? [updated.find(o => o._id === outfit._id), ...updated.filter(o => o._id !== outfit._id)]
+        : updated.filter(o => o._id === outfit._id ? false : true).concat(updated.find(o => o._id === outfit._id));
+    });
+    try {
+      await fetch(`/api/outfits/${outfit._id}/favorite`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFavorited: newFav }),
+      });
+      fetchOutfits();
+    } catch (err) {}
+  };
+
+  const handleDelete = async (id) => {
+    setConfirmId(id);
+  };
+  const confirmDelete = async () => {
+    try {
+      await fetch(`/api/outfits/${confirmId}`, { method: 'DELETE' });
+      setOutfits(outfits => outfits.filter(o => o._id !== confirmId));
+      setConfirmId(null);
+    } catch (err) {
+      setConfirmId(null);
+    }
+  };
 
   return (
     <div className="page-container" style={{ display: 'block', paddingLeft: 32, paddingTop: 100 }}>
       <h1 style={{ textAlign: 'left', margin: 0, marginBottom: 32 }}>My Outfits</h1>
-      {/* Saved Outfits Cards */}
-      <div style={{
-        display: 'flex',
-        gap: 16,
-        flexWrap: 'wrap',
-        marginBottom: 32,
-        maxWidth: (240 + 16) * 5 - 16, // 5 cards + 4 gaps
-      }}>
-        {/* New Fit Button as Card */}
+      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
         <div
           onClick={() => setShowModal(true)}
           style={{
-            width: 240,
-            height: 420,
-            background: '#fff',
-            border: '2px dashed #b0b0b0',
-            borderRadius: 18,
-            boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
-            display: 'flex',
+            ...cardStyle,
+            minWidth: 288,
+            maxWidth: 306,
+            minHeight: 342,
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            fontSize: 64,
             color: '#b0b0b0',
-            transition: 'box-shadow 0.2s',
-            marginBottom: 0,
-            position: 'relative',
+            fontSize: 64,
+            border: '2px dashed #b0b0b0',
+            background: '#fff',
           }}
           aria-label="Create Outfit"
         >
           +
         </div>
-        {savedOutfits.map(outfit => {
-          // Card size and editor size (identical)
-          const cardW = 240, cardH = 420, editorW = 260, editorH = 400;
-          const scale = Math.min(cardW / editorW, cardH / editorH);
-          const offsetX = (cardW - editorW * scale) / 2;
-          const offsetY = (cardH - editorH * scale) / 2;
-          return (
-            <div key={outfit._id} style={{
-              width: 240,
-              height: 420,
-              background: '#fff',
-              border: '1.5px solid #eee',
-              borderRadius: 18,
-              boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
-              position: 'relative',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              paddingLeft: sideWhiteBorder,
-              paddingRight: sideWhiteBorder,
-              boxSizing: 'border-box',
-            }}>
-              <div style={{ fontWeight: 700, fontSize: 18, margin: '10px 0 4px 0', textAlign: 'center', width: '100%' }}>{outfit.name}</div>
-              <div style={{ position: 'relative', width: 240 - 2 * sideWhiteBorder, height: cardH - 32, background: '#f7f8fa', borderRadius: 12, overflow: 'hidden', margin: '0 auto' }}>
-                {outfit.clothingItems && outfit.clothingItems.map((f, idx) => {
-                  return (
-                    <img
-                      key={f.clothingItem}
-                      src={f.clothingItem?.imageLink || (f.clothingItem?.imageLink === undefined && clothingItems.find(ci => ci._id === f.clothingItem)?.imageLink) || ''}
-                      alt=""
-                      style={{
-                        position: 'absolute',
-                        left: f.x * scale + offsetX,
-                        top: f.y * scale + offsetY,
-                        width: f.size * scale,
-                        height: f.size * scale,
-                        objectFit: 'contain',
-                        borderRadius: 10,
-                        background: 'none',
-                        border: 'none',
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
+        {outfits.map((outfit, i) => (
+          <OutfitCard key={outfit._id || i} outfit={outfit} onFavorite={handleFavorite} onDelete={handleDelete} />
+        ))}
       </div>
-      {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0,0,0,0.3)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-        }}>
-          <div style={{
-            background: '#fff',
-            padding: isMobile ? '12px' : '32px',
-            borderRadius: '12px',
-            minWidth: isMobile ? '95vw' : '900px',
-            minHeight: isMobile ? '90vh' : '600px',
-            position: 'relative',
-            boxShadow: '0 2px 16px rgba(0,0,0,0.15)',
-            display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? 12 : 32,
-            maxWidth: '95vw',
-            width: isMobile ? '95vw' : undefined,
-            height: isMobile ? '90vh' : undefined,
-          }}>
-            <button
-              onClick={() => setShowModal(false)}
-              style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                background: 'transparent',
-                border: 'none',
-                fontSize: '20px',
-                cursor: 'pointer',
-              }}
-              aria-label="Close"
-            >
-              &times;
-            </button>
-            {/* Left: Current Fit (drag area) */}
-            <div style={{
-              flex: isMobile ? 'none' : '0 0 264px',
-              maxWidth: isMobile ? '100%' : 264,
-              minWidth: isMobile ? '0' : 264,
-              borderRight: isMobile ? 'none' : '1px solid #eee',
-              borderBottom: isMobile ? '1px solid #eee' : 'none',
-              paddingRight: isMobile ? 0 : 24,
-              paddingBottom: isMobile ? 16 : 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              maxHeight: isMobile ? undefined : 520,
-              overflow: isMobile ? 'visible' : 'hidden',
-              position: 'relative',
-              width: isMobile ? '100%' : undefined,
-              background: '#fff',
-              paddingLeft: sideWhiteBorder,
-              paddingRight: sideWhiteBorder,
-              boxSizing: 'border-box',
-            }}>
-              <div style={{ fontWeight: 600, marginBottom: 16 }}>Current Fit</div>
-              <div style={{
-                position: 'relative',
-                width: isMobile ? '100%' : 240,
-                height: isMobile ? 220 : 400,
-                background: '#f7f8fa',
-                borderRadius: 16,
-                border: '1px solid #e0e0e0',
-                overflow: 'hidden',
-                margin: '0 auto',
-              }}>
-                {fitItems.length === 0 ? (
-                  <div style={{ color: '#bbb', fontSize: 16, textAlign: 'center', marginTop: 40 }}>Drag items here</div>
-                ) : (
-                  fitItems.map((f, idx) => (
-                    <Draggable
-                      key={f.item._id}
-                      position={{ x: f.x, y: f.y }}
-                      onDrag={(e, data) => handleDrag(idx, e, data)}
-                      bounds={{
-                        left: -DRAG_OUT_OF_BOUNDS,
-                        top: -DRAG_OUT_OF_BOUNDS,
-                        right: 260 - f.size + DRAG_OUT_OF_BOUNDS,
-                        bottom: 400 - f.size + DRAG_OUT_OF_BOUNDS,
-                      }}
-                      disabled={resizingIdx === idx}
-                    >
-                      <div
-                        style={{
-                          position: 'absolute',
-                          width: f.size,
-                          height: f.size,
-                          zIndex: idx + 2,
-                          userSelect: 'none',
-                          background: 'none',
-                          boxShadow: 'none',
-                          border: 'none',
-                        }}
-                      >
-                        <img
-                          src={f.item.imageLink}
-                          alt=""
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'contain',
-                            borderRadius: 0,
-                            background: 'none',
-                            border: 'none',
-                            boxShadow: 'none',
-                          }}
-                          draggable={false}
-                          onClick={() => handleSelectFitItem(f.item._id)}
-                          onTouchEnd={() => handleSelectFitItem(f.item._id)}
-                        />
-                        {/* Show controls only if selected */}
-                        {selectedFitId === f.item._id && (
-                          <>
-                            {/* Resize handle */}
-                            <button
-                              onMouseDown={e => {
-                                e.stopPropagation();
-                                setResizingIdx(idx);
-                                const startY = e.clientY;
-                                const startSize = f.size;
-                                const idxCopy = idx;
-                                function move(ev) {
-                                  let newSize = startSize + (ev.clientY - startY);
-                                  newSize = Math.max(60, Math.min(newSize, MAX_SIZE));
-                                  setFitItems(fitItems => fitItems.map((item, i) => i === idxCopy ? { ...item, size: newSize } : item));
-                                }
-                                function up() {
-                                  window.removeEventListener('mousemove', move);
-                                  window.removeEventListener('mouseup', up);
-                                  setResizingIdx(null);
-                                }
-                                window.addEventListener('mousemove', move);
-                                window.addEventListener('mouseup', up);
-                              }}
-                              onTouchStart={e => {
-                                e.stopPropagation();
-                                setResizingIdx(idx);
-                                const startY = e.touches[0].clientY;
-                                const startSize = f.size;
-                                const idxCopy = idx;
-                                function move(ev) {
-                                  if (!ev.touches || ev.touches.length === 0) return;
-                                  let newSize = startSize + (ev.touches[0].clientY - startY);
-                                  newSize = Math.max(60, Math.min(newSize, MAX_SIZE));
-                                  setFitItems(fitItems => fitItems.map((item, i) => i === idxCopy ? { ...item, size: newSize } : item));
-                                }
-                                function end() {
-                                  window.removeEventListener('touchmove', move);
-                                  window.removeEventListener('touchend', end);
-                                  setResizingIdx(null);
-                                }
-                                window.addEventListener('touchmove', move, { passive: false });
-                                window.addEventListener('touchend', end);
-                              }}
-                              style={{
-                                position: 'absolute',
-                                bottom: 4,
-                                right: 4,
-                                width: 22,
-                                height: 22,
-                                borderRadius: '50%',
-                                background: '#e0e0e0',
-                                border: 'none',
-                                cursor: 'nwse-resize',
-                                zIndex: 3,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: 16,
-                              }}
-                              title="Resize"
-                            >
-                              ↔
-                            </button>
-                            {/* Remove button */}
-                            <button
-                              onClick={e => { e.stopPropagation(); handleRemoveFromFit(f.item._id); }}
-                              onTouchStart={e => { e.stopPropagation(); handleRemoveFromFit(f.item._id); }}
-                              style={{
-                                position: 'absolute',
-                                top: 4,
-                                right: 4,
-                                width: 22,
-                                height: 22,
-                                borderRadius: '50%',
-                                background: '#fff',
-                                border: '1px solid #ccc',
-                                color: '#e53e3e',
-                                cursor: 'pointer',
-                                zIndex: 3,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: 15,
-                              }}
-                              title="Remove"
-                            >
-                              ×
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </Draggable>
-                  ))
-                )}
-              </div>
-              {/* Save Outfit Controls */}
-              <div style={{ marginTop: 18, width: '100%', display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
-                <input
-                  type="text"
-                  placeholder="Outfit name"
-                  value={outfitName}
-                  onChange={e => setOutfitName(e.target.value)}
-                  style={{ padding: 8, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, width: isMobile ? '100%' : 160 }}
-                  maxLength={32}
-                />
-                <button
-                  onClick={handleSaveOutfit}
-                  disabled={saving || !outfitName.trim() || fitItems.length === 0}
-                  style={{ padding: '8px 18px', borderRadius: 8, border: 'none', background: '#1b2554', color: '#fff', fontWeight: 600, fontSize: 15, cursor: saving || !outfitName.trim() || fitItems.length === 0 ? 'not-allowed' : 'pointer', opacity: saving || !outfitName.trim() || fitItems.length === 0 ? 0.6 : 1 }}
-                >
-                  {saving ? 'Saving...' : 'Save Outfit'}
-                </button>
-              </div>
-            </div>
-            {/* Right: Add Items (just images, click to add) */}
-            <div style={{
-              flex: 1,
-              minWidth: 0,
-              paddingLeft: isMobile ? 0 : 24,
-              paddingTop: isMobile ? 16 : 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: isMobile ? 'center' : 'flex-start',
-              overflowY: 'auto',
-              maxHeight: isMobile ? undefined : 520,
-              width: isMobile ? '100%' : undefined,
-            }}>
-              <div style={{ fontWeight: 600, marginBottom: 16 }}>Add Items</div>
-              {Object.keys(CATEGORY_LABELS).map(type => (
-                grouped[type] && grouped[type].length > 0 && (
-                  <div key={type} style={{ marginBottom: 18, width: '100%' }}>
-                    <div style={{ fontWeight: 500, color: '#1b2554', marginBottom: 8, fontSize: 18 }}>{CATEGORY_LABELS[type]}</div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 18 }}>
-                      {grouped[type].map(item => (
-                        <img
-                          key={item._id}
-                          src={item.imageLink}
-                          alt=""
-                          style={{
-                            width: 90,
-                            height: 90,
-                            objectFit: 'contain',
-                            borderRadius: 10,
-                            marginBottom: 8,
-                            cursor: fitItems.some(f => f.item._id === item._id) ? 'not-allowed' : 'pointer',
-                            opacity: fitItems.some(f => f.item._id === item._id) ? 0.3 : 1,
-                            border: 'none',
-                            background: 'none',
-                            boxShadow: 'none',
-                          }}
-                          onClick={() => !fitItems.some(f => f.item._id === item._id) && handleAddToFit(item)}
-                          title={fitItems.some(f => f.item._id === item._id) ? 'Already in fit' : 'Add to fit'}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <OutfitSlotModal open={showModal} onClose={() => setShowModal(false)} onSave={handleSaveOutfit} />
+      <ConfirmPopup open={!!confirmId} onConfirm={confirmDelete} onCancel={() => setConfirmId(null)} />
     </div>
   );
 };
+
+function OutfitCard({ outfit, onFavorite, onDelete }) {
+  const slots = Array(8).fill(null);
+  (outfit.clothingItems || []).forEach((item, idx) => {
+    if (idx < 8) slots[idx] = item;
+  });
+  // Split into large and small slots
+  const largeSlots = [0,1,2].map(idx => slots[idx]).filter(Boolean);
+  const smallSlots = [3,4,5,6,7].map(idx => slots[idx]).filter(Boolean);
+  // Soft modern background
+  const slotAreaBg = '#f4f6fa';
+  const slotAreaBorder = '1.5px solid #e3e7ef';
+  // Delete button hover/disabled state
+  const [delHover, setDelHover] = useState(false);
+  const delDisabled = !!outfit.isFavorited;
+  // Card hover state
+  const [cardHover, setCardHover] = useState(false);
+  const cardHoverStyle = cardHover ? {
+    boxShadow: '0 8px 32px rgba(27,37,84,0.13)',
+    transform: 'translateY(-6px) scale(1.03)',
+    zIndex: 2,
+  } : {};
+  return (
+    <div
+      style={{
+        ...cardStyle,
+        minWidth: 288,
+        maxWidth: 306,
+        minHeight: 342,
+        position: 'relative',
+        padding: 0,
+        overflow: 'visible',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'box-shadow 0.25s cubic-bezier(.4,2,.6,1), transform 0.22s cubic-bezier(.4,2,.6,1)',
+        ...cardHoverStyle,
+      }}
+      onMouseEnter={() => setCardHover(true)}
+      onMouseLeave={() => setCardHover(false)}
+    >
+      {/* Title row with star and delete */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 18px 0 18px', minHeight: 48 }}>
+        <div style={{ fontWeight: 700, fontSize: 20, color: '#1b2554', textTransform: 'capitalize', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 120 }}>
+          {outfit.name || 'Untitled'}
+        </div>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <button style={iconBtnStyle} onClick={() => onFavorite(outfit)} aria-label="Favorite">
+            <StarIcon filled={!!outfit.isFavorited} />
+          </button>
+          <button
+            style={{
+              ...iconBtnStyle,
+              ...(delDisabled ? iconBtnDeleteDisabled : (delHover ? iconBtnDeleteHover : {})),
+            }}
+            onClick={() => !delDisabled && onDelete(outfit._id)}
+            aria-label="Delete"
+            disabled={delDisabled}
+            onMouseEnter={() => setDelHover(true)}
+            onMouseLeave={() => setDelHover(false)}
+          >
+            <TrashIcon />
+          </button>
+        </div>
+      </div>
+      {/* Slot system area */}
+      <div style={{
+        display: 'flex', flexDirection: 'row', gap: 18, justifyContent: 'center', alignItems: 'stretch',
+        background: slotAreaBg,
+        border: slotAreaBorder,
+        borderRadius: 22,
+        margin: '18px',
+        padding: '18px 10px',
+        flex: 1,
+        minHeight: 220,
+        boxSizing: 'border-box',
+        boxShadow: '0 2px 8px rgba(27,37,84,0.06)',
+      }}>
+        {/* Only show columns if they have filled slots */}
+        {largeSlots.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'stretch', justifyContent: largeSlots.length > 1 ? 'space-between' : 'center', gap: largeSlots.length > 1 ? 0 : 10 }}>
+            {largeSlots.map((item, idx) => (
+              <div key={idx} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Slot item={item} large readOnly />
+              </div>
+            ))}
+          </div>
+        )}
+        {smallSlots.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'stretch', justifyContent: smallSlots.length > 1 ? 'space-between' : 'center', gap: smallSlots.length > 1 ? 0 : 10 }}>
+            {smallSlots.map((item, idx) => (
+              <div key={idx} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Slot item={item} readOnly />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default OutfitsPage; 
