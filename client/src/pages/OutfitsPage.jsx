@@ -350,8 +350,11 @@ const OutfitsPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isFavorited: newFav }),
       });
+      // Don't refetch on success - optimistic update is sufficient
+    } catch (err) {
+      // Only refetch on error to revert the optimistic update
       fetchOutfits();
-    } catch (err) {}
+    }
   };
 
   const handleDelete = async (id) => {
