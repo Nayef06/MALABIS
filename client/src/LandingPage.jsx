@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './LandingPage.css';
 import { Link } from 'react-router-dom';
 import LogoFull from './assets/LogoFull.png';
@@ -8,6 +9,25 @@ import icon from './assets/icon.png';
 
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const response = await fetch('/api/auth/status');
+        if (response.ok) {
+          // User is authenticated, redirect to clothes page
+          navigate('/clothes');
+        }
+      } catch (error) {
+        // If there's an error checking auth status, stay on landing page
+        console.error('Error checking authentication status:', error);
+      }
+    };
+
+    checkAuthStatus();
+  }, [navigate]);
+
   return (
     <div
       className="landing-page"
