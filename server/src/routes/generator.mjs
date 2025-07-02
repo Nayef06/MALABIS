@@ -4,7 +4,6 @@ import { User } from "../models/user.mjs";
 
 const router = Router();
 
-// Generate an outfit based on selected clothing types
 router.post("/api/generator/generate", async (req, res) => {
   if (!req.user) return res.sendStatus(401);
   
@@ -15,32 +14,25 @@ router.post("/api/generator/generate", async (req, res) => {
   }
 
   try {
-    // Get user's inventory
     const user = await User.findById(req.user._id);
     const inventory = await ClothingItem.find({ _id: { $in: user.inventory } });
     
-    // Group items by type
     const itemsByType = inventory.reduce((acc, item) => {
       if (!acc[item.type]) acc[item.type] = [];
       acc[item.type].push(item);
       return acc;
     }, {});
     
-    // Get locked items that should be preserved
     const lockedItemsData = inventory.filter(item => lockedItems.includes(item._id.toString()));
     
-    // Define the order: hat, jacket, shirt, pants, shoes
     const itemOrder = ['hat', 'jacket', 'shirt', 'pants', 'shoes'];
     
-    // Generate outfit by selecting one random item from each selected type in order
     const generatedOutfit = [];
     const missingTypes = [];
     
     for (const type of itemOrder) {
-      // Skip if this type wasn't selected
       if (!selectedTypes.includes(type)) continue;
       
-      // Check if we already have a locked item of this type
       const lockedItemOfType = lockedItemsData.find(item => item.type === type);
       if (lockedItemOfType) {
         generatedOutfit.push(lockedItemOfType);
@@ -48,7 +40,6 @@ router.post("/api/generator/generate", async (req, res) => {
       }
       
       if (itemsByType[type] && itemsByType[type].length > 0) {
-        // Randomly select an item from this type (excluding locked items)
         const availableItems = itemsByType[type].filter(item => 
           !lockedItems.includes(item._id.toString())
         );
@@ -64,17 +55,13 @@ router.post("/api/generator/generate", async (req, res) => {
       }
     }
     
-    // Generate accessories if requested
     if (accessoryCount > 0 && itemsByType['accessory'] && itemsByType['accessory'].length > 0) {
-      // Add locked accessories first
       const lockedAccessories = lockedItemsData.filter(item => item.type === 'accessory');
       lockedAccessories.forEach(item => generatedOutfit.push(item));
 
-      // Only fill remaining slots with random unlocked accessories
       const availableAccessories = itemsByType['accessory'].filter(item => 
         !lockedItems.includes(item._id.toString())
       );
-      // How many more accessories do we need?
       const remaining = Math.min(accessoryCount, 5) - lockedAccessories.length;
       if (remaining > 0) {
         const maxAccessoriesToGenerate = Math.min(remaining, availableAccessories.length);

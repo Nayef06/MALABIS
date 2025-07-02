@@ -4,7 +4,6 @@ import { User } from "../models/user.mjs";
 
 const router = Router();
 
-// Get all outfits for the logged-in user
 router.get("/api/outfits", async (req, res) => {
   if (!req.user) return res.sendStatus(401);
   try {
@@ -19,7 +18,6 @@ router.get("/api/outfits", async (req, res) => {
   }
 });
 
-// Create a new outfit and add to user's outfits
 router.post("/api/outfits", async (req, res) => {
   if (!req.user) return res.sendStatus(401);
   const { name, clothingItems } = req.body;
@@ -41,7 +39,6 @@ router.post("/api/outfits", async (req, res) => {
   }
 });
 
-// PATCH: Favorite/unfavorite an outfit
 router.patch("/api/outfits/:id/favorite", async (req, res) => {
   if (!req.user) return res.sendStatus(401);
   const { id } = req.params;
@@ -58,7 +55,6 @@ router.patch("/api/outfits/:id/favorite", async (req, res) => {
   }
 });
 
-// DELETE: Remove an outfit
 router.delete("/api/outfits/:id", async (req, res) => {
   if (!req.user) return res.sendStatus(401);
   const { id } = req.params;

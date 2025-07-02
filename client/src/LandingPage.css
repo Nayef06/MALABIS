@@ -223,7 +223,7 @@ body, .navbar, .navbar * {
   flex: 1;
   align-items: center;
   justify-content: center;
-  padding: 80px 4rem 2rem; /* Add padding for the fixed navbar */
+  padding: 80px 4rem 2rem; 
   gap: 2rem;
 }
 
@@ -361,7 +361,7 @@ body, .navbar, .navbar * {
 .page-container {
   min-height: 100vh;
   background-color: #f7f8fa;
-  padding-top: 80px; /* Account for fixed navbar */
+  padding-top: 80px; 
   display: flex;
   align-items: center;
   justify-content: center;

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../LandingPage.css';
 
-// Reuse icons and confirm popup from ClothesPage
 const TrashIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="5" y="8" width="2" height="7" rx="1" fill="#e53e3e"/>
@@ -86,7 +85,7 @@ const iconRowStyle = {
 
 function OutfitSlotModal({ open, onClose, onSave }) {
   const [slots, setSlots] = useState(Array(8).fill(null));
-  const [pickerSlot, setPickerSlot] = useState(null); // index of slot being filled
+  const [pickerSlot, setPickerSlot] = useState(null); 
   const [clothes, setClothes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fitName, setFitName] = useState('');
@@ -116,7 +115,6 @@ function OutfitSlotModal({ open, onClose, onSave }) {
     onSave({ name: fitName || 'New Outfit', clothingItems });
   };
 
-  // Card-like theme
   const navy = '#1b2554';
   const navyLight = '#232b53';
   const slotAreaBg = '#fff';
@@ -141,7 +139,6 @@ function OutfitSlotModal({ open, onClose, onSave }) {
         overflow: 'hidden',
         border: '1.5px solid #e3e7ef',
       }}>
-        {/* Header with title and close */}
         <div style={{
           width: '100%',
           background: 'none',
@@ -174,7 +171,6 @@ function OutfitSlotModal({ open, onClose, onSave }) {
             &times;
           </button>
         </div>
-        {/* Name input */}
         <div style={{ width: '100%', padding: '0 36px', marginTop: 8, marginBottom: 8 }}>
           <input
             type="text"
@@ -199,7 +195,6 @@ function OutfitSlotModal({ open, onClose, onSave }) {
             maxLength={32}
           />
         </div>
-        {/* Slot system area */}
         <div style={{
           display: 'flex', flexDirection: 'row', gap: 32, justifyContent: 'center', alignItems: 'center',
           background: slotAreaBg,
@@ -211,20 +206,17 @@ function OutfitSlotModal({ open, onClose, onSave }) {
           boxSizing: 'border-box',
           boxShadow: '0 2px 8px rgba(27,37,84,0.06)',
         }}>
-          {/* Left column: 3 large slots */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, justifyContent: 'center' }}>
             {[0,1,2].map(idx => (
               <Slot key={idx} item={slots[idx]} onClick={() => handleSlotClick(idx)} onRemove={() => handleRemove(idx)} large accent={accent} />
             ))}
           </div>
-          {/* Right column: 5 small slots */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18, justifyContent: 'space-between' }}>
             {[3,4,5,6,7].map(idx => (
               <Slot key={idx} item={slots[idx]} onClick={() => handleSlotClick(idx)} onRemove={() => handleRemove(idx)} accent={accent} />
             ))}
           </div>
         </div>
-        {/* Save button */}
         <button
           onClick={handleSave}
           disabled={slots.every(s => !s)}
@@ -247,7 +239,6 @@ function OutfitSlotModal({ open, onClose, onSave }) {
         >
           Save Outfit
         </button>
-        {/* Clothing picker */}
         {pickerSlot !== null && (
           <div style={{ position: 'absolute', top: 80, left: '50%', transform: 'translateX(-50%)', background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(0,0,0,0.18)', padding: 24, zIndex: 1100, minWidth: 340 }}>
             <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 12 }}>Pick a clothing item</div>
@@ -310,7 +301,6 @@ const OutfitsPage = () => {
       const res = await fetch('/api/outfits');
       if (!res.ok) throw new Error('Failed to fetch outfits');
       const data = await res.json();
-      // Sort: favorited outfits first
       const sorted = (data.outfits || []).slice().sort((a, b) => (b.isFavorited ? 1 : 0) - (a.isFavorited ? 1 : 0));
       setOutfits(sorted);
     } catch (err) {
@@ -339,7 +329,6 @@ const OutfitsPage = () => {
     let updated;
     setOutfits(outfits => {
       updated = outfits.map(o => o._id === outfit._id ? { ...o, isFavorited: newFav } : o);
-      // Move favorited to top
       return newFav
         ? [updated.find(o => o._id === outfit._id), ...updated.filter(o => o._id !== outfit._id)]
         : updated.filter(o => o._id === outfit._id ? false : true).concat(updated.find(o => o._id === outfit._id));
@@ -350,9 +339,7 @@ const OutfitsPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isFavorited: newFav }),
       });
-      // Don't refetch on success - optimistic update is sufficient
     } catch (err) {
-      // Only refetch on error to revert the optimistic update
       fetchOutfits();
     }
   };
@@ -408,16 +395,12 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
   (outfit.clothingItems || []).forEach((item, idx) => {
     if (idx < 8) slots[idx] = item;
   });
-  // Split into large and small slots
   const largeSlots = [0,1,2].map(idx => slots[idx]).filter(Boolean);
   const smallSlots = [3,4,5,6,7].map(idx => slots[idx]).filter(Boolean);
-  // Soft modern background
   const slotAreaBg = '#f4f6fa';
   const slotAreaBorder = '1.5px solid #e3e7ef';
-  // Delete button hover/disabled state
   const [delHover, setDelHover] = useState(false);
   const delDisabled = !!outfit.isFavorited;
-  // Card hover state
   const [cardHover, setCardHover] = useState(false);
   const cardHoverStyle = cardHover ? {
     boxShadow: '0 8px 32px rgba(27,37,84,0.13)',
@@ -442,7 +425,6 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
       onMouseEnter={() => setCardHover(true)}
       onMouseLeave={() => setCardHover(false)}
     >
-      {/* Title row with star and delete */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 18px 0 18px', minHeight: 48 }}>
         <div style={{ fontWeight: 700, fontSize: 20, color: '#1b2554', textTransform: 'capitalize', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 120 }}>
           {outfit.name || 'Untitled'}
@@ -466,7 +448,6 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
           </button>
         </div>
       </div>
-      {/* Slot system area */}
       <div style={{
         display: 'flex', flexDirection: 'row', gap: 18, justifyContent: 'center', alignItems: 'stretch',
         background: slotAreaBg,
@@ -479,7 +460,6 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
         boxSizing: 'border-box',
         boxShadow: '0 2px 8px rgba(27,37,84,0.06)',
       }}>
-        {/* Only show columns if they have filled slots */}
         {largeSlots.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'stretch', justifyContent: largeSlots.length > 1 ? 'space-between' : 'center', gap: largeSlots.length > 1 ? 0 : 10 }}>
             {largeSlots.map((item, idx) => (

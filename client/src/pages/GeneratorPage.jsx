@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../LandingPage.css';
 
-// Clothing type options with icons
 const CLOTHING_TYPES = [
   { id: 'shirt', label: 'Shirt', icon: '👕' },
   { id: 'pants', label: 'Pants', icon: '👖' },
@@ -11,7 +10,6 @@ const CLOTHING_TYPES = [
   { id: 'accessory', label: 'Accessory', icon: '💍' }
 ];
 
-// Compact checkbox component for sidebar (no emoji)
 const CompactCheckbox = ({ checked, onChange, label, itemCount, disabled }) => (
   <label style={{
     display: 'flex',
@@ -85,7 +83,6 @@ const CompactCheckbox = ({ checked, onChange, label, itemCount, disabled }) => (
   </label>
 );
 
-// Individual item slot with lock functionality (2x bigger)
 const ItemSlot = ({ item, type, isLocked, onLock, isCycling, availableItems }) => {
   if (!item) return null;
   
@@ -121,7 +118,6 @@ const ItemSlot = ({ item, type, isLocked, onLock, isCycling, availableItems }) =
             objectFit: 'cover'
           }}
         />
-        {/* Lock overlay */}
         {isLocked && (
           <div style={{
             position: 'absolute',
@@ -176,7 +172,6 @@ const ItemSlot = ({ item, type, isLocked, onLock, isCycling, availableItems }) =
   );
 };
 
-// TypeSelector with accessories as a counter
 const TypeSelector = ({ selectedTypes, onToggle, inventoryByType, accessoryCount, setAccessoryCount, maxAccessories, isGenerating }) => {
   const accessoryItems = inventoryByType['accessory'] || [];
   const hasAccessories = accessoryItems.length > 0;
@@ -279,7 +274,6 @@ const TypeSelector = ({ selectedTypes, onToggle, inventoryByType, accessoryCount
           </label>
         );
       })}
-      {/* Accessories counter */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -341,37 +335,29 @@ const TypeSelector = ({ selectedTypes, onToggle, inventoryByType, accessoryCount
   );
 };
 
-// Outfit card with accessory boxes to the left
 const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingIds, onSave, outfitName, setOutfitName, accessoryCount, selectedTypes }) => {
   const itemOrder = ['hat', 'jacket', 'shirt', 'pants', 'shoes'];
-  // Only include main clothing types that are selected
   const selectedMainTypes = itemOrder.filter(type => selectedTypes.includes(type));
-  // Prepare slots for all selected main types
   const slots = selectedMainTypes.map(type =>
     (outfit?.clothingItems || []).find(item => item.type === type) || null
   );
-  // Always split into two columns if more than 3 main types are selected
   const firstCol = slots.slice(0, 3);
   const secondCol = slots.slice(3);
   const hasSecondCol = secondCol.length > 0;
-  // Accessories: always use actual generated accessories
   const accessories = (outfit?.clothingItems || []).filter(item => item.type === 'accessory').slice(0, 5);
 
-  // Calculate accessory box height to match 3 main boxes (220px each + 8px gap each = 684px total)
-  const totalMainHeight = 684; // 3 * 220 + 2 * 8
-  const accessoryBoxHeight = (totalMainHeight - 32) / 5; // 5 boxes with 4 gaps of 8px each
+  const totalMainHeight = 684; 
+  const accessoryBoxHeight = (totalMainHeight - 32) / 5;
 
-  // Determine if we need two columns for main items
   const numMainCols = secondCol.length > 0 ? 2 : 1;
   const hasAccessoriesCol = accessoryCount > 0;
-  // Calculate card width: base width + extra for each column
   let cardWidth = 320;
   if (hasAccessoriesCol && numMainCols === 2) {
-    cardWidth = 700; // wider for accessories + 2 main columns
+    cardWidth = 700; 
   } else if (hasAccessoriesCol) {
-    cardWidth = 460; // wider for accessories + 1 main column
+    cardWidth = 460;
   } else if (numMainCols === 2) {
-    cardWidth = 525; // wider for 2 main columns
+    cardWidth = 525;
   }
 
   return (
@@ -392,7 +378,6 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
       overflow: 'hidden',
       transform: isGenerating ? 'scale(1.01)' : 'scale(1)'
     }}>
-      {/* Name textbox and save button in corner */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -408,16 +393,28 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
             onChange={e => setOutfitName(e.target.value)}
             placeholder="Name your outfit..."
             style={{
-              fontWeight: 700,
-              fontSize: '1.1rem',
+              fontWeight: 600,
+              fontSize: '1.13rem',
               color: '#1b2554',
-              border: 'none',
+              border: '1.5px solid #e3e7ef',
               outline: 'none',
-              background: 'transparent',
+              background: '#f7f9fc',
               width: '100%',
-              paddingRight: 28,
-              borderBottom: '1.5px solid #e3e7ef',
-              paddingBottom: 2
+              padding: '12px 20px',
+              borderRadius: 16,
+              marginTop: 2,
+              marginBottom: 2,
+              boxSizing: 'border-box',
+              transition: 'border-color 0.18s, box-shadow 0.18s',
+              boxShadow: 'none',
+            }}
+            onFocus={e => {
+              e.target.style.borderColor = '#42506a';
+              e.target.style.boxShadow = '0 0 0 2px #bfc6d133';
+            }}
+            onBlur={e => {
+              e.target.style.borderColor = '#e3e7ef';
+              e.target.style.boxShadow = 'none';
             }}
             maxLength={40}
           />
@@ -445,7 +442,6 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
           💾
         </button>
       </div>
-      {/* Slot system area: two columns if more than three items, accessories to the left */}
       <div style={{
         display: 'flex',
         flexDirection: 'row',
@@ -460,7 +456,6 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
         boxShadow: '0 2px 8px rgba(27,37,84,0.06)',
         gap: 24
       }}>
-        {/* Accessories column - only show if accessoryCount > 0 */}
         {accessoryCount > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginRight: 16, justifyContent: 'center', height: 684 }}>
             {[0,1,2,3,4].map(i => {
@@ -489,7 +484,6 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
                         alt={accessory.name}
                         style={{ width: '90%', height: '90%', objectFit: 'contain' }}
                       />
-                      {/* Lock icon in corner */}
                       <button
                         onClick={() => onLockItem(accessory._id)}
                         style={{
@@ -521,11 +515,9 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
             })}
           </div>
         )}
-        {/* Main clothing columns */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {firstCol.map((item, idx) => {
             if (!item) {
-              // Render empty slot
               return (
                 <div key={idx} style={{
                   width: 220,
@@ -570,7 +562,6 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
                       background: '#f4f6fa'
                     }}
                   />
-                  {/* Lock icon in corner */}
                   <button
                     onClick={() => onLockItem(item._id)}
                     style={{
@@ -604,7 +595,6 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {secondCol.map((item, idx) => {
               if (!item) {
-                // Render empty slot
                 return (
                   <div key={idx} style={{
                     width: 220,
@@ -649,7 +639,6 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
                         background: '#f4f6fa'
                       }}
                     />
-                    {/* Lock icon in corner */}
                     <button
                       onClick={() => onLockItem(item._id)}
                       style={{
@@ -698,7 +687,7 @@ const GeneratorPage = () => {
   const [maxAccessories, setMaxAccessories] = useState(5);
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
-  const [popupType, setPopupType] = useState('success'); // 'success' or 'error'
+  const [popupType, setPopupType] = useState('success');
   const [popupVisible, setPopupVisible] = useState(false);
 
   useEffect(() => {
@@ -759,7 +748,6 @@ const GeneratorPage = () => {
               clothingItems: data.outfit,
               _id: Date.now()
             });
-            // Animate only unlocked items
             setAnimatingIds(data.outfit.filter(item => !lockedItems.includes(item._id)).map(item => item._id));
           }
         }
@@ -770,7 +758,7 @@ const GeneratorPage = () => {
         clearInterval(cyclingIntervalRef.current);
         cyclingIntervalRef.current = null;
         setIsGenerating(false);
-        setTimeout(() => setAnimatingIds([]), 300); // Remove animation after a short delay
+        setTimeout(() => setAnimatingIds([]), 300);
       }
     }, 200);
   };
@@ -835,7 +823,6 @@ const GeneratorPage = () => {
 
   return (
     <div className="page-container" style={{ padding: '32px', paddingTop: '100px', userSelect: 'none' }}>
-      {/* Popup Snackbar with fade/slide animation */}
       {popupVisible && (
         <div style={{
           position: 'fixed',
@@ -858,9 +845,7 @@ const GeneratorPage = () => {
       )}
       <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
         
-        {/* Type selector on right */}
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', gap: 0 }}>
-          {/* Center - Outfit preview */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}>
             {generatedOutfit ? (
               <>
@@ -910,7 +895,6 @@ const GeneratorPage = () => {
               </div>
             )}
           </div>
-          {/* Right - Type selector */}
           <div style={{ minWidth: 320, position: 'absolute', left: '75%', top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}>
             <TypeSelector
               selectedTypes={selectedTypes}

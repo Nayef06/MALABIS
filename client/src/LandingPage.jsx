@@ -16,11 +16,9 @@ const LandingPage = () => {
       try {
         const response = await fetch('/api/auth/status');
         if (response.ok) {
-          // User is authenticated, redirect to clothes page
           navigate('/clothes');
         }
       } catch (error) {
-        // If there's an error checking auth status, stay on landing page
         console.error('Error checking authentication status:', error);
       }
     };
