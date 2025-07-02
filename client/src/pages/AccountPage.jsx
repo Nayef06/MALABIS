@@ -160,7 +160,6 @@ const AccountPage = () => {
       <Popup show={popup.show} type={popup.type}>{popup.message}</Popup>
       <div className="auth-form">
         <h2>Account Settings</h2>
-        {/* Display Name Section */}
         <div className="form-group">
           <label htmlFor="displayName">Display Name</label>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -195,7 +194,6 @@ const AccountPage = () => {
             )}
           </div>
         </div>
-        {/* Password Section */}
         <div className="form-group">
           <label htmlFor="password">Password</label>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>

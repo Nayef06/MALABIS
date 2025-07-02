@@ -85,7 +85,7 @@ body {
 }
 
 .auth-error {
-  color: #e53e3e; /* A reddish color for errors */
+  color: #e53e3e; 
   background-color: #fff5f5;
   border: 1px solid #fc8181;
   border-radius: 8px;
