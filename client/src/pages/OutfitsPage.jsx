@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import '../LandingPage.css';
 
+const CATEGORY_LABELS = {
+  shirt: 'Shirts',
+  pants: 'Pants',
+  shoes: 'Shoes',
+  hat: 'Hats',
+  jacket: 'Jackets',
+  accessory: 'Accessories',
+};
+
 const TrashIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="5" y="8" width="2" height="7" rx="1" fill="#e53e3e"/>
@@ -15,21 +24,147 @@ const StarIcon = ({ size = 20, filled = false }) => (
     <polygon points="10,2 12.59,7.36 18.51,8.09 14,12.26 15.18,18.09 10,15.1 4.82,18.09 6,12.26 1.49,8.09 7.41,7.36" />
   </svg>
 );
-const ConfirmPopup = ({ open, onConfirm, onCancel }) => {
-  if (!open) return null;
+const ConfirmPopup = ({ open, onConfirm, onCancel, itemType = 'outfit' }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setIsVisible(true);
+      setIsAnimating(true);
+    } else {
+      setIsAnimating(false);
+      const timer = setTimeout(() => setIsVisible(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
+  if (!isVisible) return null;
+
+  const backdropStyle = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    background: 'rgba(0,0,0,0.4)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: isAnimating ? 1 : 0,
+    transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  };
+
+  const modalStyle = {
+    background: '#fff',
+    borderRadius: 24,
+    padding: 0,
+    minWidth: 400,
+    maxWidth: 480,
+    boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+    textAlign: 'center',
+    transform: isAnimating ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(20px)',
+    opacity: isAnimating ? 1 : 0,
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    border: '2px solid rgba(27,37,84,0.15)',
+    overflow: 'hidden',
+  };
+
+  const iconStyle = {
+    width: 80,
+    height: 80,
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #ff6b6b, #ee5a52)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '32px auto 24px',
+    boxShadow: '0 8px 24px rgba(238, 90, 82, 0.3)',
+    animation: isAnimating ? 'pulse 2s infinite' : 'none',
+  };
+
+  const buttonStyle = {
+    padding: '12px 24px',
+    borderRadius: 12,
+    border: 'none',
+    fontWeight: 600,
+    fontSize: 16,
+    cursor: 'pointer',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    minWidth: 120,
+  };
+
+  const cancelButtonStyle = {
+    ...buttonStyle,
+    background: '#f8f9fa',
+    color: '#6b7280',
+    border: '2px solid #e5e7eb',
+  };
+
+  const deleteButtonStyle = {
+    ...buttonStyle,
+    background: 'linear-gradient(135deg, #ff6b6b, #ee5a52)',
+    color: '#fff',
+    boxShadow: '0 4px 12px rgba(238, 90, 82, 0.3)',
+  };
+
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <div style={{ background: '#fff', borderRadius: 12, padding: 32, minWidth: 280, boxShadow: '0 4px 24px rgba(0,0,0,0.13)', textAlign: 'center' }}>
-        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 18 }}>Delete this outfit?</div>
-        <div style={{ color: '#5f6f8f', fontSize: 15, marginBottom: 24 }}>This action cannot be undone.</div>
-        <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-          <button onClick={onCancel} style={{ padding: '8px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: '#fff', color: '#1b2554', fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
-          <button onClick={onConfirm} style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: '#e53e3e', color: '#fff', fontWeight: 500, cursor: 'pointer' }}>Delete</button>
+    <div style={backdropStyle} onClick={onCancel}>
+      <div style={modalStyle} onClick={e => e.stopPropagation()}>
+        <div style={iconStyle}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.9 1 3 1.9 3 3V21C3 22.1 3.9 23 5 23H19C20.1 23 21 22.1 21 21V9ZM19 9H14V4H5V21H19V9Z" fill="white"/>
+          </svg>
+        </div>
+        
+        <div style={{ padding: '0 32px 32px' }}>
+          <h3 style={{ 
+            fontWeight: 700, 
+            fontSize: 24, 
+            color: '#1b2554', 
+            margin: '0 0 12px 0',
+            letterSpacing: '-0.5px'
+          }}>
+            Delete this {itemType}?
+          </h3>
+          
+          <p style={{ 
+            color: '#6b7280', 
+            fontSize: 16, 
+            lineHeight: 1.5,
+            margin: '0 0 32px 0'
+          }}>
+            This action cannot be undone. The {itemType} will be permanently removed from your collection.
+          </p>
+          
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+            <button 
+              onClick={onCancel} 
+              style={cancelButtonStyle}
+              onMouseEnter={e => e.currentTarget.style.background = '#f1f3f4'}
+              onMouseLeave={e => e.currentTarget.style.background = '#f8f9fa'}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={onConfirm} 
+              style={deleteButtonStyle}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              Delete
+            </button>
+          </div>
         </div>
       </div>
+      
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+      `}</style>
     </div>
   );
 };
@@ -43,7 +178,7 @@ const cardStyle = {
   boxShadow: '0 2px 16px rgba(27,37,84,0.08)',
   padding: 0,
   minWidth: 288,
-  maxWidth: 306,
+  maxWidth: '100%',
   minHeight: 342,
   marginBottom: 0,
   transition: 'box-shadow 0.25s cubic-bezier(.4,2,.6,1), transform 0.22s cubic-bezier(.4,2,.6,1)',
@@ -119,7 +254,8 @@ function OutfitSlotModal({ open, onClose, onSave }) {
   const navyLight = '#232b53';
   const slotAreaBg = '#fff';
   const slotAreaBorder = '1.5px solid #e3e7ef';
-  const accent = '#7b8cff';
+  //const accent = '#7b8cff';
+  const accent = '#232b53';
   return open ? (
     <div style={{
       position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000,
@@ -154,7 +290,7 @@ function OutfitSlotModal({ open, onClose, onSave }) {
               background: 'none',
               border: 'none',
               fontSize: 28,
-              color: '#7b8cff',
+              color: '#232b53',
               cursor: 'pointer',
               borderRadius: '50%',
               width: 38,
@@ -171,29 +307,71 @@ function OutfitSlotModal({ open, onClose, onSave }) {
             &times;
           </button>
         </div>
-        <div style={{ width: '100%', padding: '0 36px', marginTop: 8, marginBottom: 8 }}>
-          <input
-            type="text"
-            value={fitName}
-            onChange={e => setFitName(e.target.value)}
-            placeholder="Outfit name..."
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              borderRadius: 10,
-              border: '1.5px solid #e3e7ef',
-              fontSize: 18,
-              fontWeight: 500,
-              color: navy,
-              background: '#f7f8fa',
-              outline: 'none',
-              marginBottom: 0,
-              marginTop: 0,
-              boxSizing: 'border-box',
-              transition: 'border 0.18s',
-            }}
-            maxLength={32}
-          />
+        <div style={{ 
+          width: '100%', 
+          padding: '0 36px', 
+          marginTop: 16, 
+          marginBottom: 16,
+          background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+          borderTop: '1px solid #e5e7eb',
+          borderBottom: '1px solid #e5e7eb',
+          paddingTop: 20,
+          paddingBottom: 20
+        }}>
+          <div style={{ marginBottom: 8 }}>
+            <label style={{
+              display: 'block',
+              fontWeight: 600,
+              fontSize: 16,
+              color: '#1b2554',
+              marginBottom: 8,
+              letterSpacing: '-0.3px'
+            }}>
+              Outfit Name
+            </label>
+            <input
+              type="text"
+              value={fitName}
+              onChange={e => setFitName(e.target.value)}
+              placeholder="Enter a name for your outfit..."
+              style={{
+                width: '100%',
+                padding: '16px 20px',
+                borderRadius: 12,
+                border: '2px solid #e3e7ef',
+                fontSize: 18,
+                fontWeight: 500,
+                color: navy,
+                background: '#fff',
+                outline: 'none',
+                marginBottom: 0,
+                marginTop: 0,
+                boxSizing: 'border-box',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              }}
+              maxLength={32}
+              onFocus={e => {
+                e.currentTarget.style.borderColor = '#1b2554';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(27,37,84,0.1)';
+              }}
+              onBlur={e => {
+                e.currentTarget.style.borderColor = '#e3e7ef';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+              }}
+            />
+            <div style={{
+              fontSize: 14,
+              color: '#6b7280',
+              marginTop: 6,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span>Give your outfit a memorable name</span>
+              <span>{fitName.length}/32</span>
+            </div>
+          </div>
         </div>
         <div style={{
           display: 'flex', flexDirection: 'row', gap: 32, justifyContent: 'center', alignItems: 'center',
@@ -222,37 +400,242 @@ function OutfitSlotModal({ open, onClose, onSave }) {
           disabled={slots.every(s => !s)}
           style={{
             margin: '32px 0 24px 0',
-            padding: '16px 44px',
-            borderRadius: 12,
-            background: navy,
-            color: '#fff',
+            padding: '16px 48px',
+            borderRadius: 16,
+            background: slots.every(s => !s) ? '#e5e7eb' : 'linear-gradient(135deg, #1b2554 0%, #232b53 100%)',
+            color: slots.every(s => !s) ? '#9ca3af' : '#fff',
             fontWeight: 700,
-            fontSize: 20,
+            fontSize: 18,
             border: 'none',
             cursor: slots.every(s => !s) ? 'not-allowed' : 'pointer',
-            opacity: slots.every(s => !s) ? 0.5 : 1,
-            boxShadow: '0 2px 8px rgba(27,37,84,0.10)',
-            transition: 'background 0.18s, box-shadow 0.18s',
+            opacity: slots.every(s => !s) ? 0.6 : 1,
+            boxShadow: slots.every(s => !s) ? '0 2px 4px rgba(0,0,0,0.05)' : '0 4px 16px rgba(27,37,84,0.25), 0 2px 8px rgba(27,37,84,0.15)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: slots.every(s => !s) ? 'none' : 'translateY(0)',
+            position: 'relative',
+            overflow: 'hidden',
           }}
-          onMouseOver={e => { if (!slots.every(s => !s)) e.currentTarget.style.background = navyLight; }}
-          onMouseOut={e => { if (!slots.every(s => !s)) e.currentTarget.style.background = navy; }}
+          onMouseOver={e => { 
+            if (!slots.every(s => !s)) {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(27,37,84,0.35), 0 4px 12px rgba(27,37,84,0.2)';
+            }
+          }}
+          onMouseOut={e => { 
+            if (!slots.every(s => !s)) {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(27,37,84,0.25), 0 2px 8px rgba(27,37,84,0.15)';
+            }
+          }}
+          onMouseDown={e => {
+            if (!slots.every(s => !s)) {
+              e.currentTarget.style.transform = 'translateY(0)';
+            }
+          }}
         >
-          Save Outfit
+          <span style={{ position: 'relative', zIndex: 1 }}>Save Outfit</span>
         </button>
         {pickerSlot !== null && (
-          <div style={{ position: 'absolute', top: 80, left: '50%', transform: 'translateX(-50%)', background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(0,0,0,0.18)', padding: 24, zIndex: 1100, minWidth: 340 }}>
-            <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 12 }}>Pick a clothing item</div>
-            {loading ? <div>Loading...</div> : (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, maxHeight: 260, overflowY: 'auto' }}>
-                {clothes.map(item => (
-                  <div key={item._id} style={{ border: '1px solid #eee', borderRadius: 10, padding: 8, cursor: 'pointer', width: 80, textAlign: 'center', background: '#f7f8fa' }} onClick={() => handleClothingPick(item)}>
-                    <img src={item.imageLink} alt={item.name} style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8, background: '#fff' }} />
-                    <div style={{ fontSize: 12, marginTop: 4 }}>{item.name}</div>
-                  </div>
-                ))}
+          <div style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            width: '100vw', 
+            height: '100vh', 
+            background: 'rgba(0,0,0,0.4)', 
+            zIndex: 1200,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}>
+            <div style={{ 
+              background: '#fff', 
+              borderRadius: 24, 
+              boxShadow: '0 20px 60px rgba(0,0,0,0.25)', 
+              padding: 0, 
+              zIndex: 1201, 
+              width: '90%',
+              maxWidth: 800,
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              border: '2px solid rgba(27,37,84,0.15)',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                padding: '24px 32px 16px 32px',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)'
+              }}>
+                <div style={{ 
+                  fontWeight: 700, 
+                  fontSize: 24, 
+                  color: '#1b2554',
+                  letterSpacing: '-0.5px'
+                }}>
+                  Pick a clothing item
+                </div>
+                <button 
+                  onClick={() => setPickerSlot(null)} 
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    fontSize: 24,
+                    color: '#6b7280',
+                    cursor: 'pointer', 
+                    borderRadius: '50%',
+                    width: 40,
+                    height: 40,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  &times;
+                </button>
               </div>
-            )}
-            <button onClick={() => setPickerSlot(null)} style={{ marginTop: 16, background: 'none', border: 'none', color: accent, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
+
+              <div style={{ 
+                padding: '24px 32px 32px 32px',
+                flex: 1,
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                {loading ? (
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    height: '200px',
+                    fontSize: 18,
+                    color: '#6b7280'
+                  }}>
+                    Loading your clothing items...
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ 
+                      maxHeight: 'calc(90vh - 200px)',
+                      overflowY: 'auto',
+                      padding: '8px 0'
+                    }}>
+                      {(() => {
+                        const grouped = clothes.reduce((acc, item) => {
+                          if (!acc[item.type]) acc[item.type] = [];
+                          acc[item.type].push(item);
+                          return acc;
+                        }, {});
+
+                        return Object.keys(CATEGORY_LABELS).map(type => (
+                          grouped[type] && grouped[type].length > 0 && (
+                            <div key={type} style={{ marginBottom: 32 }}>
+                              <h3 style={{
+                                fontWeight: 700,
+                                fontSize: 20,
+                                color: '#1b2554',
+                                margin: '0 0 20px 0',
+                                padding: '0 4px',
+                                letterSpacing: '-0.5px'
+                              }}>
+                                {CATEGORY_LABELS[type]}
+                              </h3>
+                              <div style={{ 
+                                display: 'grid', 
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                                gap: 20
+                              }}>
+                                {grouped[type].map(item => (
+                                  <div 
+                                    key={item._id} 
+                                    style={{ 
+                                      border: '2px solid #e5e7eb',
+                                      borderRadius: 16,
+                                      padding: '16px 12px',
+                                      cursor: 'pointer', 
+                                      textAlign: 'center', 
+                                      background: '#fff',
+                                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                                    }}
+                                    onClick={() => handleClothingPick(item)}
+                                    onMouseEnter={e => {
+                                      e.currentTarget.style.transform = 'translateY(-4px)';
+                                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
+                                      e.currentTarget.style.borderColor = '#1b2554';
+                                    }}
+                                    onMouseLeave={e => {
+                                      e.currentTarget.style.transform = 'translateY(0)';
+                                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)';
+                                      e.currentTarget.style.borderColor = '#e5e7eb';
+                                    }}
+                                  >
+                                    <div style={{
+                                      width: '100%',
+                                      height: '80px',
+                                      borderRadius: 12,
+                                      background: '#f8fafc',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      marginBottom: '12px',
+                                      overflow: 'hidden'
+                                    }}>
+                                      <img 
+                                        src={item.imageLink} 
+                                        alt={item.name} 
+                                        style={{ 
+                                          width: '100%', 
+                                          height: '100%', 
+                                          objectFit: 'cover',
+                                          borderRadius: 8
+                                        }} 
+                                      />
+                                    </div>
+                                    <div style={{ 
+                                      fontSize: 14, 
+                                      fontWeight: 600,
+                                      color: '#1b2554',
+                                      lineHeight: 1.3,
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap'
+                                    }}>
+                                      {item.name}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        ));
+                      })()}
+                    </div>
+                    
+                    {clothes.length === 0 && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '200px',
+                        fontSize: 18,
+                        color: '#6b7280',
+                        textAlign: 'center'
+                      }}>
+                        No clothing items found. Add some items to your inventory first!
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -358,15 +741,19 @@ const OutfitsPage = () => {
   };
 
   return (
-    <div className="page-container" style={{ display: 'block', paddingLeft: 32, paddingTop: 100 }}>
+    <div className="page-container" style={{ display: 'block', paddingLeft: 32, paddingRight: 16, paddingTop: 100 }}>
       <h1 style={{ textAlign: 'left', margin: 0, marginBottom: 32 }}>My Outfits</h1>
-      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fill, minmax(288px, 1fr))',
+        gap: 24,
+        maxWidth: '100%'
+      }}>
         <div
           onClick={() => setShowModal(true)}
           style={{
             ...cardStyle,
             minWidth: 288,
-            maxWidth: 306,
             minHeight: 342,
             alignItems: 'center',
             justifyContent: 'center',
@@ -385,7 +772,7 @@ const OutfitsPage = () => {
         ))}
       </div>
       <OutfitSlotModal open={showModal} onClose={() => setShowModal(false)} onSave={handleSaveOutfit} />
-      <ConfirmPopup open={!!confirmId} onConfirm={confirmDelete} onCancel={() => setConfirmId(null)} />
+      <ConfirmPopup open={!!confirmId} onConfirm={confirmDelete} onCancel={() => setConfirmId(null)} itemType="outfit" />
     </div>
   );
 };
@@ -412,7 +799,6 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
       style={{
         ...cardStyle,
         minWidth: 288,
-        maxWidth: 306,
         minHeight: 342,
         position: 'relative',
         padding: 0,
@@ -430,8 +816,13 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
           {outfit.name || 'Untitled'}
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <button style={iconBtnStyle} onClick={() => onFavorite(outfit)} aria-label="Favorite">
-            <StarIcon filled={!!outfit.isFavorited} />
+          <button 
+            style={{ ...iconBtnStyle, background: outfit.isFavorited ? '#e6eaff' : '#f4f6fa' }} 
+            onClick={() => onFavorite(outfit)} 
+            aria-label="Favorite"
+            title="Star"
+          >
+            <StarIcon size={25} filled={!!outfit.isFavorited} />
           </button>
           <button
             style={{

@@ -26,24 +26,150 @@ const StarIcon = ({ size = 20, filled = false }) => (
   </svg>
 );
 
-const ConfirmPopup = ({ open, onConfirm, onCancel }) => {
-  if (!open) return null;
+const ConfirmPopup = ({ open, onConfirm, onCancel, itemType = 'item' }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setIsVisible(true);
+      setIsAnimating(true);
+    } else {
+      setIsAnimating(false);
+      const timer = setTimeout(() => setIsVisible(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
+  if (!isVisible) return null;
+
+  const backdropStyle = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    background: 'rgba(0,0,0,0.4)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: isAnimating ? 1 : 0,
+    transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  };
+
+  const modalStyle = {
+    background: '#fff',
+    borderRadius: 24,
+    padding: 0,
+    minWidth: 400,
+    maxWidth: 480,
+    boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+    textAlign: 'center',
+    transform: isAnimating ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(20px)',
+    opacity: isAnimating ? 1 : 0,
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    border: '2px solid rgba(27,37,84,0.15)',
+    overflow: 'hidden',
+  };
+
+  const iconStyle = {
+    width: 80,
+    height: 80,
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #ff6b6b, #ee5a52)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '32px auto 24px',
+    boxShadow: '0 8px 24px rgba(238, 90, 82, 0.3)',
+    animation: isAnimating ? 'pulse 2s infinite' : 'none',
+  };
+
+  const buttonStyle = {
+    padding: '12px 24px',
+    borderRadius: 12,
+    border: 'none',
+    fontWeight: 600,
+    fontSize: 16,
+    cursor: 'pointer',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    minWidth: 120,
+  };
+
+  const cancelButtonStyle = {
+    ...buttonStyle,
+    background: '#f8f9fa',
+    color: '#6b7280',
+    border: '2px solid #e5e7eb',
+  };
+
+  const deleteButtonStyle = {
+    ...buttonStyle,
+    background: 'linear-gradient(135deg, #ff6b6b, #ee5a52)',
+    color: '#fff',
+    boxShadow: '0 4px 12px rgba(238, 90, 82, 0.3)',
+  };
+
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <div style={{ background: '#fff', borderRadius: 12, padding: 32, minWidth: 280, boxShadow: '0 4px 24px rgba(0,0,0,0.13)', textAlign: 'center' }}>
-        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 18 }}>Delete this item?</div>
-        <div style={{ color: '#5f6f8f', fontSize: 15, marginBottom: 24 }}>This action cannot be undone.</div>
-        <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-          <button onClick={onCancel} style={{ padding: '8px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: '#fff', color: '#1b2554', fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
-          <button onClick={onConfirm} style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: '#e53e3e', color: '#fff', fontWeight: 500, cursor: 'pointer' }}>Delete</button>
+    <div style={backdropStyle} onClick={onCancel}>
+      <div style={modalStyle} onClick={e => e.stopPropagation()}>
+        <div style={iconStyle}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.9 1 3 1.9 3 3V21C3 22.1 3.9 23 5 23H19C20.1 23 21 22.1 21 21V9ZM19 9H14V4H5V21H19V9Z" fill="white"/>
+          </svg>
         </div>
+        
+        <div style={{ padding: '0 32px 32px' }}>
+          <h3 style={{ 
+            fontWeight: 700, 
+            fontSize: 24, 
+            color: '#1b2554', 
+            margin: '0 0 12px 0',
+            letterSpacing: '-0.5px'
+          }}>
+            Delete this {itemType}?
+          </h3>
+          
+          <p style={{ 
+            color: '#6b7280', 
+            fontSize: 16, 
+            lineHeight: 1.5,
+            margin: '0 0 32px 0'
+          }}>
+            This action cannot be undone. The {itemType} will be permanently removed from your collection.
+          </p>
+          
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+            <button 
+              onClick={onCancel} 
+              style={cancelButtonStyle}
+              onMouseEnter={e => e.currentTarget.style.background = '#f1f3f4'}
+              onMouseLeave={e => e.currentTarget.style.background = '#f8f9fa'}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={onConfirm} 
+              style={deleteButtonStyle}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              Delete
+            </button>
+            </div>
+          </div>
+        </div>
+        
+        <style>{`
+          @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+          }
+        `}</style>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 const colorTints = {
   black: '#e5e7eb',
@@ -214,6 +340,7 @@ const ClothesPage = () => {
         open={!!confirmId}
         onCancel={() => setConfirmId(null)}
         onConfirm={() => handleDelete(confirmId)}
+        itemType="clothing item"
       />
       <div className="content" style={{ maxWidth: '100%', margin: '0', textAlign: 'left', width: '100%' }}>
         {items.length === 0 ? (
