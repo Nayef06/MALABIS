@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import './LandingPage.css';
 import { Link } from 'react-router-dom';
 import LogoFull from './assets/LogoFull.png';
-import pile from './assets/pile.png';
-import bg from './assets/bg3.png';
+import asset from './assets/ewar.png';
+import bg from './assets/bg4.png';
 import icon from './assets/icon.png';
 
 
@@ -69,7 +69,7 @@ const LandingPage = () => {
           </div>
         </div>
         <div className="image-section">
-          <img src={pile} alt="Clothing pile" />
+          <img src={asset} alt="Wardrobe" />
         </div>
       </main>
     </div>

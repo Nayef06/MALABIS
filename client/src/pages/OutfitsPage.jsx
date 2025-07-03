@@ -350,7 +350,7 @@ function OutfitSlotModal({ open, onClose, onSave }) {
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
               }}
-              maxLength={32}
+              maxLength={10}
               onFocus={e => {
                 e.currentTarget.style.borderColor = '#1b2554';
                 e.currentTarget.style.boxShadow = '0 4px 16px rgba(27,37,84,0.1)';
@@ -369,7 +369,7 @@ function OutfitSlotModal({ open, onClose, onSave }) {
               alignItems: 'center'
             }}>
               <span>Give your outfit a memorable name</span>
-              <span>{fitName.length}/32</span>
+              <span>{fitName.length}/10</span>
             </div>
           </div>
         </div>
@@ -684,7 +684,16 @@ const OutfitsPage = () => {
       const res = await fetch('/api/outfits');
       if (!res.ok) throw new Error('Failed to fetch outfits');
       const data = await res.json();
-      const sorted = (data.outfits || []).slice().sort((a, b) => (b.isFavorited ? 1 : 0) - (a.isFavorited ? 1 : 0));
+      const sorted = (data.outfits || []).slice().sort((a, b) => {
+        // First sort by favorite status (favorites first)
+        const favDiff = (b.isFavorited ? 1 : 0) - (a.isFavorited ? 1 : 0);
+        if (favDiff !== 0) return favDiff;
+        
+        // Then sort by name alphabetically
+        const nameA = (a.name || 'Untitled').toLowerCase();
+        const nameB = (b.name || 'Untitled').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
       setOutfits(sorted);
     } catch (err) {
       setOutfits([]);
@@ -709,12 +718,19 @@ const OutfitsPage = () => {
 
   const handleFavorite = async (outfit) => {
     const newFav = !outfit.isFavorited;
-    let updated;
     setOutfits(outfits => {
-      updated = outfits.map(o => o._id === outfit._id ? { ...o, isFavorited: newFav } : o);
-      return newFav
-        ? [updated.find(o => o._id === outfit._id), ...updated.filter(o => o._id !== outfit._id)]
-        : updated.filter(o => o._id === outfit._id ? false : true).concat(updated.find(o => o._id === outfit._id));
+      const updated = outfits.map(o => o._id === outfit._id ? { ...o, isFavorited: newFav } : o);
+      // Re-sort the outfits to maintain the correct order
+      return updated.sort((a, b) => {
+        // First sort by favorite status (favorites first)
+        const favDiff = (b.isFavorited ? 1 : 0) - (a.isFavorited ? 1 : 0);
+        if (favDiff !== 0) return favDiff;
+        
+        // Then sort by name alphabetically
+        const nameA = (a.name || 'Untitled').toLowerCase();
+        const nameB = (b.name || 'Untitled').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
     });
     try {
       await fetch(`/api/outfits/${outfit._id}/favorite`, {

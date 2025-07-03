@@ -100,7 +100,7 @@ const ItemSlot = ({ item, type, isLocked, onLock, isCycling, availableItems }) =
         height: 160,
         borderRadius: 16,
         overflow: 'hidden',
-        border: `3px solid ${isLocked ? '#38a169' : '#e3e7ef'}`,
+        border: `3px solid ${isLocked ? '#1b2554' : '#e3e7ef'}`,
         background: '#f4f6fa',
         display: 'flex',
         alignItems: 'center',
@@ -123,7 +123,7 @@ const ItemSlot = ({ item, type, isLocked, onLock, isCycling, availableItems }) =
             position: 'absolute',
             top: 8,
             right: 8,
-            background: '#38a169',
+            background: '#1b2554',
             color: 'white',
             borderRadius: '50%',
             width: 32,
@@ -155,7 +155,7 @@ const ItemSlot = ({ item, type, isLocked, onLock, isCycling, availableItems }) =
           width: 36,
           height: 36,
           borderRadius: '50%',
-          background: isLocked ? '#38a169' : '#f4f6fa',
+          background: isLocked ? '#1b2554' : '#f4f6fa',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -416,7 +416,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
               e.target.style.borderColor = '#e3e7ef';
               e.target.style.boxShadow = 'none';
             }}
-            maxLength={40}
+            maxLength={10}
           />
         </div>
         <button
@@ -426,7 +426,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
             width: 36,
             height: 36,
             borderRadius: '50%',
-            background: isGenerating || !outfitName.trim() ? '#e3e7ef' : '#38a169',
+            background: isGenerating || !outfitName.trim() ? '#e3e7ef' : '#1b2554',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -439,7 +439,20 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
           }}
           title="Save to My Outfits"
         >
-          💾
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17,21 17,13 7,13 7,21" />
+            <polyline points="7,3 7,8 15,8" />
+          </svg>
         </button>
       </div>
       <div style={{
@@ -468,7 +481,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
                   height: accessoryBoxHeight,
                   borderRadius: 12,
                   background: '#fff',
-                  border: `2px solid ${accessory ? (isLocked ? '#38a169' : '#e3e7ef') : '#e3e7ef'}`,
+                  border: `2px solid ${accessory ? (isLocked ? '#1b2554' : '#e3e7ef') : '#e3e7ef'}`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -493,7 +506,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
                           width: 20,
                           height: 20,
                           borderRadius: '50%',
-                          background: isLocked ? '#38a169' : '#f4f6fa',
+                          background: isLocked ? '#1b2554' : '#f4f6fa',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -542,7 +555,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
                   height: 220,
                   borderRadius: 20,
                   overflow: 'hidden',
-                  border: `4px solid ${isLocked ? '#38a169' : '#e3e7ef'}`,
+                  border: `4px solid ${isLocked ? '#1b2554' : '#e3e7ef'}`,
                   background: '#fff',
                   display: 'flex',
                   alignItems: 'center',
@@ -571,7 +584,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
                       width: 36,
                       height: 36,
                       borderRadius: '50%',
-                      background: isLocked ? '#38a169' : '#f4f6fa',
+                      background: isLocked ? '#1b2554' : '#f4f6fa',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -619,7 +632,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
                     height: 220,
                     borderRadius: 20,
                     overflow: 'hidden',
-                    border: `4px solid ${isLocked ? '#38a169' : '#e3e7ef'}`,
+                    border: `4px solid ${isLocked ? '#1b2554' : '#e3e7ef'}`,
                     background: '#fff',
                     display: 'flex',
                     alignItems: 'center',
@@ -648,7 +661,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
                         width: 36,
                         height: 36,
                         borderRadius: '50%',
-                        background: isLocked ? '#38a169' : '#f4f6fa',
+                        background: isLocked ? '#1b2554' : '#f4f6fa',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -829,7 +842,7 @@ const GeneratorPage = () => {
           top: 32,
           left: '50%',
           transform: `translateX(-50%) ${showPopup ? 'translateY(0)' : 'translateY(-16px)'}`,
-          background: popupType === 'success' ? '#38a169' : '#e53e3e',
+          background: popupType === 'success' ? '#1b2554' : '#e53e3e',
           color: 'white',
           padding: '16px 32px',
           borderRadius: 12,

@@ -102,7 +102,7 @@ const DevPage = () => {
             </div>
             <div className="form-group">
               <label>Name</label>
-              <input name="name" value={form.name} onChange={handleChange} required />
+              <input name="name" value={form.name} onChange={handleChange} maxLength={10} required />
             </div>
             <div className="form-group">
               <label>Image Link</label>

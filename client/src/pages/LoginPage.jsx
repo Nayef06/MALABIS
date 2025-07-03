@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
+import bg from '../assets/bg5.png';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -32,7 +33,16 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="auth-container">
+    <div 
+      className="auth-container"
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${bg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        minHeight: '100vh'
+      }}
+    >
       <form className="auth-form" onSubmit={handleLogin}>
         <button type="button" className="close-btn" onClick={() => navigate('/')}>×</button>
         <h2>Login</h2>
