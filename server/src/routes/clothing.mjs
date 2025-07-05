@@ -4,8 +4,24 @@ import { ClothingItem } from "../models/clothingItem.mjs";
 import { clothingItemValidationSchema } from "../utils/validationSchemas.mjs";
 import { checkSchema, validationResult } from "express-validator";
 import { User } from "../models/user.mjs";
+import multer from "multer";
+import { uploadToCloudinary } from "../utils/cloudinary.mjs";
 
 const router = Router()
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, 
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'), false);
+    }
+  },
+});
 
 router.get("/api/clothing", (req, res) => {
   if (!req.user) {
@@ -99,6 +115,36 @@ router.patch("/api/clothing/:id/favorite", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
+  }
+});
+
+
+router.post("/api/clothing/upload", upload.single('image'), async (req, res) => {
+  if (!req.user) {
+    return res.sendStatus(401);
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ error: 'No image file provided' });
+  }
+
+  const shouldRemoveBackground = req.body.removeBackground === 'true';
+
+  try {
+    const uploadResult = await uploadToCloudinary(req.file, shouldRemoveBackground);
+    
+    if (!uploadResult.success) {
+      return res.status(500).json({ error: uploadResult.error || 'Failed to upload image' });
+    }
+
+    res.json({ 
+      success: true, 
+      imageUrl: uploadResult.url,
+      publicId: uploadResult.publicId
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'Failed to upload image' });
   }
 });
 

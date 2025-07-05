@@ -7,7 +7,7 @@ import AccountPage from './pages/AccountPage';
 import ClothesPage from './pages/ClothesPage';
 import OutfitsPage from './pages/OutfitsPage';
 import GeneratorPage from './pages/GeneratorPage';
-import DevPage from './pages/DevPage';
+
 import Navbar from './components/Navbar';
 import './App.css';
 
@@ -48,7 +48,7 @@ function App() {
             <GeneratorPage />
           </>
         } />
-        <Route path="/dev" element={<DevPage />} />
+
       </Routes>
     </Router>
   );

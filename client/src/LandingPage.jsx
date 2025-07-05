@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import LogoFull from './assets/LogoFull.png';
 import asset from './assets/ewar.png';
 import bg from './assets/bg4.png';
-import icon from './assets/icon.png';
+import icon from './assets/logo.png';
 
 
 const LandingPage = () => {

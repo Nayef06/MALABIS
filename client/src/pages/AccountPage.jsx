@@ -230,15 +230,6 @@ const AccountPage = () => {
           </div>
         </div>
         <button onClick={handleLogout} className="auth-button" style={{ marginTop: 24, background: '#1b2554' }}>Logout</button>
-        {username === 'nayef' && (
-          <button
-            onClick={() => navigate('/dev')}
-            className="auth-button"
-            style={{ marginTop: 12, background: '#e0e0ff', color: '#131314' }}
-          >
-            DEV PAGE
-          </button>
-        )}
       </div>
     </div>
   );

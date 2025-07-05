@@ -171,10 +171,18 @@ const ConfirmPopup = ({ open, onConfirm, onCancel, itemType = 'item' }) => {
     );
   };
 
-const UploadPopup = ({ open, onClose }) => {
+const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    type: '',
+    color: ''
+  });
+  const [removeBackground, setRemoveBackground] = useState(false); // This requires a Cloudinary subscription, so im not using it for now
 
   useEffect(() => {
     if (open) {
@@ -182,7 +190,13 @@ const UploadPopup = ({ open, onClose }) => {
       setIsAnimating(true);
     } else {
       setIsAnimating(false);
-      const timer = setTimeout(() => setIsVisible(false), 300);
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        setSelectedFile(null);
+        setFormData({ name: '', type: '', color: '' });
+        setSelectedColor(null);
+        setUploading(false);
+      }, 300);
       return () => clearTimeout(timer);
     }
   }, [open]);
@@ -227,7 +241,6 @@ const UploadPopup = ({ open, onClose }) => {
           minHeight: '400px',
           width: '100%'
         }}>
-          {/* Left Half - Upload Section */}
           <div style={{ 
             flex: 1, 
             padding: '32px',
@@ -258,14 +271,48 @@ const UploadPopup = ({ open, onClose }) => {
               marginBottom: '16px',
               background: '#f9fafb',
               cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              position: 'relative',
+              overflow: 'hidden'
             }}
             onMouseEnter={e => e.currentTarget.style.borderColor = '#1b2554'}
             onMouseLeave={e => e.currentTarget.style.borderColor = '#d1d5db'}
             >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#9ca3af"/>
-              </svg>
+              {selectedFile ? (
+                <img 
+                  src={URL.createObjectURL(selectedFile)} 
+                  alt="Preview" 
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: '10px'
+                  }}
+                />
+              ) : (
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#9ca3af"/>
+                </svg>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  opacity: 0,
+                  cursor: 'pointer'
+                }}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setSelectedFile(file);
+                  }
+                }}
+              />
             </div>
             
             <p style={{ 
@@ -273,30 +320,33 @@ const UploadPopup = ({ open, onClose }) => {
               fontSize: 14, 
               margin: '0 0 16px 0'
             }}>
-              Click to upload image
+              {selectedFile ? selectedFile.name : 'Click to upload image'}
             </p>
             
-            <button 
-              style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                border: 'none',
-                fontWeight: 600,
-                fontSize: 14,
-                cursor: 'pointer',
-                background: 'linear-gradient(135deg, #1b2554 0%, #3b4a6b 100%)',
-                color: '#fff',
-                boxShadow: '0 2px 8px rgba(27, 37, 84, 0.2)',
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-            >
-              Choose File
-            </button>
+            {selectedFile && (
+              <button 
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  background: '#dc2626',
+                  color: '#fff',
+                  boxShadow: '0 2px 8px rgba(220, 38, 38, 0.2)',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  marginBottom: '8px'
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                onClick={() => setSelectedFile(null)}
+              >
+                Remove
+              </button>
+            )}
           </div>
 
-          {/* Right Half - Details Section */}
           <div style={{ 
             flex: 1, 
             padding: '32px',
@@ -314,7 +364,6 @@ const UploadPopup = ({ open, onClose }) => {
               Item Details
             </h3>
             
-            {/* Name Input */}
             <div style={{ marginBottom: '20px', width: '100%' }}>
               <label style={{ 
                 display: 'block', 
@@ -325,10 +374,12 @@ const UploadPopup = ({ open, onClose }) => {
               }}>
                 Name
               </label>
-              <input 
-                type="text" 
-                placeholder="Enter item name"
+              <input
+                type="text"
+                placeholder="Enter clothing name"
                 maxLength={10}
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
                 style={{
                   width: '100%',
                   padding: '12px 16px',
@@ -336,6 +387,7 @@ const UploadPopup = ({ open, onClose }) => {
                   border: '2px solid #e5e7eb',
                   fontSize: '14px',
                   outline: 'none',
+                  background: '#fff',
                   transition: 'border-color 0.2s ease'
                 }}
                 onFocus={e => e.target.style.borderColor = '#1b2554'}
@@ -343,7 +395,6 @@ const UploadPopup = ({ open, onClose }) => {
               />
             </div>
 
-            {/* Type Selector */}
             <div style={{ marginBottom: '20px', width: '100%' }}>
               <label style={{ 
                 display: 'block', 
@@ -355,6 +406,8 @@ const UploadPopup = ({ open, onClose }) => {
                 Type
               </label>
               <select 
+                value={formData.type}
+                onChange={(e) => setFormData({...formData, type: e.target.value})}
                 style={{
                   width: '100%',
                   padding: '12px 16px',
@@ -379,7 +432,8 @@ const UploadPopup = ({ open, onClose }) => {
               </select>
             </div>
 
-            {/* Color Selector */}
+
+
             <div style={{ marginBottom: '20px', width: '100%' }}>
               <label style={{ 
                 display: 'block', 
@@ -421,7 +475,10 @@ const UploadPopup = ({ open, onClose }) => {
                     }}
                     onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
                     onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-                    onClick={() => setSelectedColor(name)}
+                    onClick={() => {
+                      setSelectedColor(name);
+                      setFormData({...formData, color: name});
+                    }}
                     title={name}
                   >
                     {selectedColor === name && (
@@ -448,7 +505,6 @@ const UploadPopup = ({ open, onClose }) => {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div style={{ 
               display: 'flex', 
               gap: '12px', 
@@ -475,6 +531,7 @@ const UploadPopup = ({ open, onClose }) => {
                 Cancel
               </button>
               <button 
+                disabled={!selectedFile || !formData.name || !formData.type || !formData.color || uploading}
                 style={{
                   flex: 1,
                   padding: '12px 16px',
@@ -482,16 +539,74 @@ const UploadPopup = ({ open, onClose }) => {
                   border: 'none',
                   fontWeight: 600,
                   fontSize: 14,
-                  cursor: 'pointer',
-                  background: 'linear-gradient(135deg, #1b2554 0%, #3b4a6b 100%)',
+                  cursor: (!selectedFile || !formData.name || !formData.type || !formData.color || uploading) ? 'not-allowed' : 'pointer',
+                  background: (!selectedFile || !formData.name || !formData.type || !formData.color || uploading) 
+                    ? '#9ca3af' 
+                    : 'linear-gradient(135deg, #1b2554 0%, #3b4a6b 100%)',
                   color: '#fff',
-                  boxShadow: '0 2px 8px rgba(27, 37, 84, 0.2)',
+                  boxShadow: (!selectedFile || !formData.name || !formData.type || !formData.color || uploading) 
+                    ? 'none' 
+                    : '0 2px 8px rgba(27, 37, 84, 0.2)',
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  opacity: (!selectedFile || !formData.name || !formData.type || !formData.color || uploading) ? 0.6 : 1,
                 }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+                onMouseEnter={e => {
+                  if (selectedFile && formData.name && formData.type && formData.color && !uploading) {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }
+                }}
                 onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                onClick={async () => {
+                  if (!selectedFile || !formData.name || !formData.type || !formData.color || uploading) return;
+                  
+                  setUploading(true);
+                  try {
+                    const formDataToSend = new FormData();
+                    formDataToSend.append('image', selectedFile);
+                    formDataToSend.append('removeBackground', removeBackground);
+                    
+                    const uploadRes = await fetch('/api/clothing/upload', {
+                      method: 'POST',
+                      body: formDataToSend,
+                    });
+                    
+                    if (!uploadRes.ok) {
+                      throw new Error('Failed to upload image');
+                    }
+                    
+                    const uploadData = await uploadRes.json();
+                    
+                    const clothingRes = await fetch('/api/clothing', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        name: formData.name,
+                        type: formData.type,
+                        color: formData.color,
+                        imageLink: uploadData.imageUrl
+                      }),
+                    });
+                    
+                    if (!clothingRes.ok) {
+                      throw new Error('Failed to create clothing item');
+                    }
+                    
+                    setSelectedFile(null);
+                    setFormData({ name: '', type: '', color: '' });
+                    setSelectedColor(null);
+                    onClose();
+                    if (onUploadSuccess) {
+                      onUploadSuccess();
+                    }
+                  } catch (error) {
+                    console.error('Upload error:', error);
+                    alert('Failed to upload clothing item. Please try again.');
+                  } finally {
+                    setUploading(false);
+                  }
+                }}
               >
-                Upload
+                {uploading ? 'Uploading...' : 'Upload'}
               </button>
             </div>
           </div>
@@ -524,6 +639,17 @@ const ClothesPage = () => {
   const [deletingId, setDeletingId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
   const [showUploadPopup, setShowUploadPopup] = useState(false);
+
+  const refreshItems = async () => {
+    try {
+      const res = await fetch('/api/clothing/inventory');
+      if (!res.ok) throw new Error('Failed to fetch inventory');
+      const data = await res.json();
+      setItems(data.items || []);
+    } catch (err) {
+      setError('Could not load your clothes.');
+    }
+  };
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -676,9 +802,9 @@ const ClothesPage = () => {
       <UploadPopup
         open={showUploadPopup}
         onClose={() => setShowUploadPopup(false)}
+        onUploadSuccess={refreshItems}
       />
       <div className="content" style={{ maxWidth: '100%', margin: '0', textAlign: 'left', width: '100%' }}>
-        {/* Upload Button */}
         <div style={{ 
           marginBottom: 32, 
           display: 'flex', 

@@ -331,10 +331,23 @@ body, .navbar, .navbar * {
     align-items: center;
     justify-content: center;
     margin-bottom: 2.5rem;
+    margin-top: 2rem;
   }
 
   .mobile-logo-icon {
     height: 120px;
+  }
+  
+  @media (max-width: 768px) {
+    .mobile-logo-icon {
+      height: 80px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .mobile-logo-icon {
+      height: 60px;
+    }
   }
 
   .mobile-logo-text {
