@@ -335,7 +335,7 @@ const TypeSelector = ({ selectedTypes, onToggle, inventoryByType, accessoryCount
   );
 };
 
-const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingIds, onSave, outfitName, setOutfitName, accessoryCount, selectedTypes }) => {
+const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingIds, onSave, outfitName, setOutfitName, accessoryCount, selectedTypes, onRemoveItem }) => {
   const itemOrder = ['hat', 'jacket', 'shirt', 'pants', 'shoes'];
   const selectedMainTypes = itemOrder.filter(type => selectedTypes.includes(type));
   const slots = selectedMainTypes.map(type =>
@@ -521,6 +521,32 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
                       >
                         {isLocked ? '🔒' : '🔓'}
                       </button>
+                      <button
+                        onClick={() => onRemoveItem(accessory._id)}
+                        style={{
+                          position: 'absolute',
+                          top: 4,
+                          left: 4,
+                          width: 16,
+                          height: 16,
+                          borderRadius: '50%',
+                          background: 'transparent',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          fontSize: 10,
+                          color: '#9ca3af',
+                          zIndex: 2
+                        }}
+                        title="Remove accessory"
+                        onMouseEnter={e => e.currentTarget.style.color = '#6b7280'}
+                        onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}
+                      >
+                        ×
+                      </button>
                     </>
                   )}
                 </div>
@@ -599,6 +625,32 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
                   >
                     {isLocked ? '🔒' : '🔓'}
                   </button>
+                                      <button
+                      onClick={() => onRemoveItem(item._id)}
+                      style={{
+                        position: 'absolute',
+                        top: 10,
+                        left: 10,
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        background: 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        fontSize: 20,
+                        color: '#9ca3af',
+                        zIndex: 2
+                      }}
+                      title="Remove item"
+                      onMouseEnter={e => e.currentTarget.style.color = '#6b7280'}
+                      onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}
+                    >
+                      ×
+                    </button>
                 </div>
               </div>
             );
@@ -676,6 +728,32 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
                     >
                       {isLocked ? '🔒' : '🔓'}
                     </button>
+                    <button
+                      onClick={() => onRemoveItem(item._id)}
+                      style={{
+                        position: 'absolute',
+                        top: 10,
+                        left: 10,
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        background: 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        fontSize: 20,
+                        color: '#9ca3af',
+                        zIndex: 2
+                      }}
+                      title="Remove item"
+                      onMouseEnter={e => e.currentTarget.style.color = '#6b7280'}
+                      onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}
+                    >
+                      ×
+                    </button>
                   </div>
                 </div>
               );
@@ -732,6 +810,17 @@ const GeneratorPage = () => {
         ? prev.filter(id => id !== itemId)
         : [...prev, itemId]
     );
+  };
+
+  const handleRemoveItem = (itemId) => {
+    if (generatedOutfit) {
+      setGeneratedOutfit(prev => ({
+        ...prev,
+        clothingItems: prev.clothingItems.filter(item => item._id !== itemId)
+      }));
+      // Also remove from locked items if it was locked
+      setLockedItems(prev => prev.filter(id => id !== itemId));
+    }
   };
 
   const generateOutfit = async () => {
@@ -873,6 +962,7 @@ const GeneratorPage = () => {
                   setOutfitName={setOutfitName}
                   accessoryCount={accessoryCount}
                   selectedTypes={selectedTypes}
+                  onRemoveItem={handleRemoveItem}
                 />
               </>
             ) : (

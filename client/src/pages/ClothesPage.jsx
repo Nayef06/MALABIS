@@ -171,6 +171,336 @@ const ConfirmPopup = ({ open, onConfirm, onCancel, itemType = 'item' }) => {
     );
   };
 
+const UploadPopup = ({ open, onClose }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [selectedColor, setSelectedColor] = useState(null);
+
+  useEffect(() => {
+    if (open) {
+      setIsVisible(true);
+      setIsAnimating(true);
+    } else {
+      setIsAnimating(false);
+      const timer = setTimeout(() => setIsVisible(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
+  if (!isVisible) return null;
+
+  const backdropStyle = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    background: 'rgba(0,0,0,0.4)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: isAnimating ? 1 : 0,
+    transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  };
+
+  const modalStyle = {
+    background: '#fff',
+    borderRadius: 24,
+    padding: 0,
+    minWidth: 600,
+    maxWidth: 700,
+    boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+    textAlign: 'center',
+    transform: isAnimating ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(20px)',
+    opacity: isAnimating ? 1 : 0,
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    border: '2px solid rgba(27,37,84,0.15)',
+    overflow: 'hidden',
+  };
+
+  return (
+    <div style={backdropStyle} onClick={onClose}>
+      <div style={modalStyle} onClick={e => e.stopPropagation()}>
+        <div style={{ 
+          display: 'flex', 
+          minHeight: '400px',
+          width: '100%'
+        }}>
+          {/* Left Half - Upload Section */}
+          <div style={{ 
+            flex: 1, 
+            padding: '32px',
+            borderRight: '1px solid #e5e7eb',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <h3 style={{ 
+              fontWeight: 700, 
+              fontSize: 20, 
+              color: '#1b2554', 
+              margin: '0 0 24px 0',
+              letterSpacing: '-0.5px'
+            }}>
+              Upload Image
+            </h3>
+            
+            <div style={{
+              width: '120px',
+              height: '120px',
+              border: '2px dashed #d1d5db',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px',
+              background: '#f9fafb',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = '#1b2554'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = '#d1d5db'}
+            >
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#9ca3af"/>
+              </svg>
+            </div>
+            
+            <p style={{ 
+              color: '#6b7280', 
+              fontSize: 14, 
+              margin: '0 0 16px 0'
+            }}>
+              Click to upload image
+            </p>
+            
+            <button 
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: 'none',
+                fontWeight: 600,
+                fontSize: 14,
+                cursor: 'pointer',
+                background: 'linear-gradient(135deg, #1b2554 0%, #3b4a6b 100%)',
+                color: '#fff',
+                boxShadow: '0 2px 8px rgba(27, 37, 84, 0.2)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              Choose File
+            </button>
+          </div>
+
+          {/* Right Half - Details Section */}
+          <div style={{ 
+            flex: 1, 
+            padding: '32px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start'
+          }}>
+            <h3 style={{ 
+              fontWeight: 700, 
+              fontSize: 20, 
+              color: '#1b2554', 
+              margin: '0 0 24px 0',
+              letterSpacing: '-0.5px'
+            }}>
+              Item Details
+            </h3>
+            
+            {/* Name Input */}
+            <div style={{ marginBottom: '20px', width: '100%' }}>
+              <label style={{ 
+                display: 'block', 
+                fontSize: '14px', 
+                fontWeight: '600', 
+                color: '#374151', 
+                marginBottom: '8px' 
+              }}>
+                Name
+              </label>
+              <input 
+                type="text" 
+                placeholder="Enter item name"
+                maxLength={10}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  border: '2px solid #e5e7eb',
+                  fontSize: '14px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s ease'
+                }}
+                onFocus={e => e.target.style.borderColor = '#1b2554'}
+                onBlur={e => e.target.style.borderColor = '#e5e7eb'}
+              />
+            </div>
+
+            {/* Type Selector */}
+            <div style={{ marginBottom: '20px', width: '100%' }}>
+              <label style={{ 
+                display: 'block', 
+                fontSize: '14px', 
+                fontWeight: '600', 
+                color: '#374151', 
+                marginBottom: '8px' 
+              }}>
+                Type
+              </label>
+              <select 
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  border: '2px solid #e5e7eb',
+                  fontSize: '14px',
+                  outline: 'none',
+                  background: '#fff',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.2s ease'
+                }}
+                onFocus={e => e.target.style.borderColor = '#1b2554'}
+                onBlur={e => e.target.style.borderColor = '#e5e7eb'}
+              >
+                <option value="">Select type</option>
+                <option value="shirt">Shirt</option>
+                <option value="pants">Pants</option>
+                <option value="shoes">Shoes</option>
+                <option value="hat">Hat</option>
+                <option value="jacket">Jacket</option>
+                <option value="accessory">Accessory</option>
+              </select>
+            </div>
+
+            {/* Color Selector */}
+            <div style={{ marginBottom: '20px', width: '100%' }}>
+              <label style={{ 
+                display: 'block', 
+                fontSize: '14px', 
+                fontWeight: '600', 
+                color: '#374151', 
+                marginBottom: '8px' 
+              }}>
+                Color
+              </label>
+              <div style={{ 
+                display: 'flex', 
+                gap: '8px', 
+                flexWrap: 'wrap' 
+              }}>
+                {[
+                  { name: 'red', color: '#fd151b' },
+                  { name: 'orange', color: '#fb5607' },
+                  { name: 'yellow', color: '#ffbe0b' },
+                  { name: 'green', color: '#8ac926' },
+                  { name: 'blue', color: '#70d6ff' },
+                  { name: 'purple', color: '#b5179e' },
+                  { name: 'brown', color: '#dab785' },
+                  { name: 'black', color: '#0c090d' },
+                  { name: 'grey', color: '#e6e6ea' },
+                  { name: 'white', color: '#f7fff7' }
+                ].map(({ name, color }) => (
+                  <div
+                    key={name}
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      background: color,
+                      border: selectedColor === name ? '3px solid #1b2554' : '2px solid #e5e7eb',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      position: 'relative'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                    onClick={() => setSelectedColor(name)}
+                    title={name}
+                  >
+                    {selectedColor === name && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '-4px',
+                        right: '-4px',
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '50%',
+                        background: '#1b2554',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '2px solid #fff'
+                      }}>
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#fff"/>
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ 
+              display: 'flex', 
+              gap: '12px', 
+              marginTop: 'auto',
+              width: '100%'
+            }}>
+              <button 
+                onClick={onClose} 
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  border: '2px solid #e5e7eb',
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  background: '#fff',
+                  color: '#6b7280',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+              >
+                Cancel
+              </button>
+              <button 
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  background: 'linear-gradient(135deg, #1b2554 0%, #3b4a6b 100%)',
+                  color: '#fff',
+                  boxShadow: '0 2px 8px rgba(27, 37, 84, 0.2)',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                Upload
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const colorTints = {
   black: '#e5e7eb',
   white: '#f8fafc',
@@ -193,6 +523,7 @@ const ClothesPage = () => {
   const [error, setError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
+  const [showUploadPopup, setShowUploadPopup] = useState(false);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -342,7 +673,45 @@ const ClothesPage = () => {
         onConfirm={() => handleDelete(confirmId)}
         itemType="clothing item"
       />
+      <UploadPopup
+        open={showUploadPopup}
+        onClose={() => setShowUploadPopup(false)}
+      />
       <div className="content" style={{ maxWidth: '100%', margin: '0', textAlign: 'left', width: '100%' }}>
+        {/* Upload Button */}
+        <div style={{ 
+          marginBottom: 32, 
+          display: 'flex', 
+          justifyContent: 'flex-start',
+          alignItems: 'center'
+        }}>
+          <button
+            style={{
+              background: 'linear-gradient(135deg, #1b2554 0%, #3b4a6b 100%)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 12,
+              padding: '12px 24px',
+              fontSize: 16,
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              boxShadow: '0 4px 12px rgba(27, 37, 84, 0.3)',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+            onClick={() => setShowUploadPopup(true)}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.9 1 3 1.9 3 3V21C3 22.1 3.9 23 5 23H19C20.1 23 21 22.1 21 21V9ZM19 9H14V4H5V21H19V9Z" fill="currentColor"/>
+            </svg>
+            Upload Clothing
+          </button>
+        </div>
+        
         {items.length === 0 ? (
           <p>Your inventory is empty.</p>
         ) : (
