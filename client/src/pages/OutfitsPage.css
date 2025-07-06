@@ -1,0 +1,69 @@
+
+@media (max-width: 768px) {
+  .page-container {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  
+  .outfit-card {
+    min-width: 260px !important;
+    max-width: 280px !important;
+  }
+  
+  .outfit-slot-area {
+    padding: 12px 8px !important;
+    gap: 12px !important;
+  }
+  
+  .outfit-slot {
+    width: 100px !important;
+    height: 100px !important;
+  }
+  
+  .outfit-slot-large {
+    width: 120px !important;
+    height: 120px !important;
+  }
+  
+  .outfit-slot img {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  
+  .outfit-slot-large img {
+    width: 90px !important;
+    height: 90px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .outfit-card {
+    min-width: 240px !important;
+    max-width: 260px !important;
+  }
+  
+  .outfit-slot-area {
+    padding: 10px 6px !important;
+    gap: 10px !important;
+  }
+  
+  .outfit-slot {
+    width: 90px !important;
+    height: 90px !important;
+  }
+  
+  .outfit-slot-large {
+    width: 110px !important;
+    height: 110px !important;
+  }
+  
+  .outfit-slot img {
+    width: 70px !important;
+    height: 70px !important;
+  }
+  
+  .outfit-slot-large img {
+    width: 80px !important;
+    height: 80px !important;
+  }
+} 

@@ -8,7 +8,9 @@ MALABIS is a full-stack web app that helps you keep your wardrobe in check and l
 - **AI Outfit Suggestions** – Get automatically generated outfit combos  
 - **User Auth** – Secure login/signup with session handling  
 - **Responsive UI** – Works smoothly on both desktop and mobile  
-- **Cloud Image Storage** – Integrated with Cloudinary  
+- **Cloud Image Storage** – Integrated with Cloudinary
+- **Background Removal** – Automatic background removal for clothing uploads  
+- **Image Optimization** – Automatic resizing and compression for optimal performance  
 - **Persistent Sessions** – Managed with MongoDB and Express sessions  
 
 ## 🛠️ Tech Stack

@@ -1,0 +1,43 @@
+@media (max-width: 768px) {
+  .page-container {
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .content {
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  .upload-button-container {
+    justify-content: center !important;
+  }
+  
+  .category-title {
+    text-align: center !important;
+    font-size: 32px !important;
+  }
+  
+  .clothing-row {
+    justify-content: center !important;
+    gap: 24px !important;
+  }
+  
+  .clothing-card {
+    min-width: 260px !important;
+    max-width: 280px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .clothing-card {
+    min-width: 240px !important;
+    max-width: 260px !important;
+  }
+  
+  .category-title {
+    font-size: 28px !important;
+  }
+} 

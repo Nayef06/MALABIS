@@ -1,5 +1,7 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import '../LandingPage.css';
+import './GeneratorPage.css';
 
 const CLOTHING_TYPES = [
   { id: 'shirt', label: 'Shirt', icon: '👕' },
@@ -115,7 +117,7 @@ const ItemSlot = ({ item, type, isLocked, onLock, isCycling, availableItems }) =
           style={{
             width: '100%',
             height: '100%',
-            objectFit: 'cover'
+            objectFit: 'contain'
           }}
         />
         {isLocked && (
@@ -178,7 +180,7 @@ const TypeSelector = ({ selectedTypes, onToggle, inventoryByType, accessoryCount
   const actualMaxAccessories = Math.min(5, accessoryItems.length);
   
   return (
-    <div style={{
+    <div className="type-selector-container" style={{
       display: 'flex',
       flexDirection: 'column',
       gap: '16px',
@@ -190,7 +192,7 @@ const TypeSelector = ({ selectedTypes, onToggle, inventoryByType, accessoryCount
         const disabled = itemCount === 0 || isGenerating;
         const checked = selectedTypes.includes(type.id);
         return (
-          <label key={type.id} style={{
+          <label key={type.id} className="type-selector-item" style={{
             display: 'flex',
             alignItems: 'center',
             fontWeight: 500,
@@ -274,7 +276,7 @@ const TypeSelector = ({ selectedTypes, onToggle, inventoryByType, accessoryCount
           </label>
         );
       })}
-      <div style={{
+      <div className="accessories-counter" style={{
         display: 'flex',
         alignItems: 'center',
         gap: 10,
@@ -361,7 +363,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
   }
 
   return (
-    <div style={{
+    <div className="outfit-card" style={{
       position: 'relative',
       display: 'flex',
       flexDirection: 'column',
@@ -455,7 +457,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
           </svg>
         </button>
       </div>
-      <div style={{
+      <div className="outfit-card-content" style={{
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center',
@@ -470,12 +472,12 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
         gap: 24
       }}>
         {accessoryCount > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginRight: 16, justifyContent: 'center', height: 684 }}>
+          <div className="outfit-accessories-column" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginRight: 16, justifyContent: 'center', height: 684 }}>
             {[0,1,2,3,4].map(i => {
               const accessory = accessories[i];
               const isLocked = accessory ? lockedItems.includes(accessory._id) : false;
               return (
-                <div key={i} style={{
+                <div className="outfit-accessory-item" key={i} style={{
                   position: 'relative',
                   width: accessoryBoxHeight,
                   height: accessoryBoxHeight,
@@ -554,7 +556,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
             })}
           </div>
         )}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="outfit-main-columns" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {firstCol.map((item, idx) => {
             if (!item) {
               return (
@@ -657,7 +659,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
           })}
         </div>
         {secondCol.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="outfit-main-columns" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {secondCol.map((item, idx) => {
               if (!item) {
                 return (
@@ -818,7 +820,6 @@ const GeneratorPage = () => {
         ...prev,
         clothingItems: prev.clothingItems.filter(item => item._id !== itemId)
       }));
-      // Also remove from locked items if it was locked
       setLockedItems(prev => prev.filter(id => id !== itemId));
     }
   };
@@ -947,8 +948,8 @@ const GeneratorPage = () => {
       )}
       <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
         
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', gap: 0 }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}>
+        <div className="generator-container" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', gap: 0 }}>
+          <div className="generator-card-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}>
             {generatedOutfit ? (
               <>
                 <OutfitCard
@@ -966,7 +967,7 @@ const GeneratorPage = () => {
                 />
               </>
             ) : (
-              <div style={{
+              <div className="generator-empty-card" style={{
                 background: '#f4f6fa',
                 border: '3px dashed #e3e7ef',
                 borderRadius: '30px',
@@ -979,7 +980,7 @@ const GeneratorPage = () => {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <div style={{ fontSize: '6rem', marginBottom: '24px' }}>🎨</div>
+                <div className="emoji" style={{ fontSize: '6rem', marginBottom: '24px' }}>🎨</div>
                 <h3 style={{
                   fontSize: '1.5rem',
                   fontWeight: '600',
@@ -998,7 +999,7 @@ const GeneratorPage = () => {
               </div>
             )}
           </div>
-          <div style={{ minWidth: 320, position: 'absolute', left: '75%', top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}>
+          <div className="generator-sidebar" style={{ minWidth: 320, position: 'absolute', left: '75%', top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}>
             <TypeSelector
               selectedTypes={selectedTypes}
               onToggle={handleTypeToggle}

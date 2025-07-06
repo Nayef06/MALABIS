@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../LandingPage.css';
+import './OutfitsPage.css';
 
 const CATEGORY_LABELS = {
   shirt: 'Shirts',
@@ -649,23 +650,27 @@ function Slot({ item, onClick, onRemove, large, readOnly, accent }) {
   const border = '1.5px solid #e3e7ef';
   const size = large ? 140 : 80;
   return (
-    <div onClick={readOnly ? undefined : onClick} style={{
-      width: size,
-      height: size,
-      background: item ? filledBg : emptyBg,
-      borderRadius: 24,
-      marginRight: 0,
-      marginLeft: 0,
-      marginBottom: 0,
-      marginTop: 0,
-      boxShadow: '0 2px 8px rgba(27,37,84,0.10)',
-      border: border,
-      display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', cursor: readOnly ? 'default' : 'pointer', overflow: 'hidden',
-      transition: 'background 0.18s',
-    }}>
+    <div 
+      className={`outfit-slot ${large ? 'outfit-slot-large' : ''}`}
+      onClick={readOnly ? undefined : onClick} 
+      style={{
+        width: size,
+        height: size,
+        background: item ? filledBg : emptyBg,
+        borderRadius: 24,
+        marginRight: 0,
+        marginLeft: 0,
+        marginBottom: 0,
+        marginTop: 0,
+        boxShadow: '0 2px 8px rgba(27,37,84,0.10)',
+        border: border,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', cursor: readOnly ? 'default' : 'pointer', overflow: 'hidden',
+        transition: 'background 0.18s',
+      }}
+    >
       {item ? (
         <>
-          <img src={item.imageLink} alt={item.name} style={{ width: large ? 100 : 56, height: large ? 100 : 56, objectFit: 'cover', borderRadius: 12 }} />
+          <img src={item.imageLink} alt={item.name} style={{ width: large ? 100 : 56, height: large ? 100 : 56, objectFit: 'contain', borderRadius: 12 }} />
           {!readOnly && <button onClick={e => { e.stopPropagation(); onRemove(); }} style={{ position: 'absolute', top: 4, right: 4, background: '#fff', border: 'none', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, cursor: 'pointer', boxShadow: '0 1px 4px rgba(27,37,84,0.10)' }}>&times;</button>}
         </>
       ) : (
@@ -685,11 +690,9 @@ const OutfitsPage = () => {
       if (!res.ok) throw new Error('Failed to fetch outfits');
       const data = await res.json();
       const sorted = (data.outfits || []).slice().sort((a, b) => {
-        // First sort by favorite status (favorites first)
         const favDiff = (b.isFavorited ? 1 : 0) - (a.isFavorited ? 1 : 0);
         if (favDiff !== 0) return favDiff;
         
-        // Then sort by name alphabetically
         const nameA = (a.name || 'Untitled').toLowerCase();
         const nameB = (b.name || 'Untitled').toLowerCase();
         return nameA.localeCompare(nameB);
@@ -720,13 +723,10 @@ const OutfitsPage = () => {
     const newFav = !outfit.isFavorited;
     setOutfits(outfits => {
       const updated = outfits.map(o => o._id === outfit._id ? { ...o, isFavorited: newFav } : o);
-      // Re-sort the outfits to maintain the correct order
       return updated.sort((a, b) => {
-        // First sort by favorite status (favorites first)
         const favDiff = (b.isFavorited ? 1 : 0) - (a.isFavorited ? 1 : 0);
         if (favDiff !== 0) return favDiff;
         
-        // Then sort by name alphabetically
         const nameA = (a.name || 'Untitled').toLowerCase();
         const nameB = (b.name || 'Untitled').toLowerCase();
         return nameA.localeCompare(nameB);
@@ -812,6 +812,7 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
   } : {};
   return (
     <div
+      className="outfit-card"
       style={{
         ...cardStyle,
         minWidth: 288,
@@ -855,7 +856,7 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
           </button>
         </div>
       </div>
-      <div style={{
+      <div className="outfit-slot-area" style={{
         display: 'flex', flexDirection: 'row', gap: 18, justifyContent: 'center', alignItems: 'stretch',
         background: slotAreaBg,
         border: slotAreaBorder,

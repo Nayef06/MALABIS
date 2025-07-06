@@ -1,0 +1,176 @@
+@media (max-width: 1400px) {
+  .generator-container {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 24px !important;
+  }
+  
+  .generator-sidebar {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    min-width: 100% !important;
+    max-width: 400px !important;
+    order: -1 !important;
+  }
+  
+  .generator-card-container {
+    order: 1 !important;
+  }
+  
+  .generator-empty-card {
+    min-width: 100% !important;
+    max-width: 600px !important;
+    min-height: 400px !important;
+    padding: 40px !important;
+  }
+  
+  .type-selector-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+  }
+  
+  .type-selector-item {
+    margin-bottom: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px !important;
+    padding-top: 80px !important;
+  }
+  
+  .generator-sidebar {
+    max-width: 100% !important;
+    padding: 0 16px !important;
+  }
+  
+  .generator-empty-card {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    min-height: 300px !important;
+    padding: 24px !important;
+  }
+  
+  .generator-empty-card h3 {
+    font-size: 1.2rem !important;
+  }
+  
+  .generator-empty-card p {
+    font-size: 1rem !important;
+  }
+  
+  .generator-empty-card .emoji {
+    font-size: 4rem !important;
+  }
+  
+  .type-selector-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+  }
+  
+  .type-selector-item {
+    margin-bottom: 0 !important;
+  }
+  
+  .outfit-accessories-column {
+    display: none !important;
+  }
+  
+  .accessories-counter {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .generator-sidebar {
+    padding: 0 8px !important;
+  }
+  
+  .generator-empty-card {
+    padding: 20px !important;
+    min-height: 250px !important;
+  }
+  
+  .generator-empty-card h3 {
+    font-size: 1.1rem !important;
+  }
+  
+  .generator-empty-card p {
+    font-size: 0.9rem !important;
+  }
+  
+  .generator-empty-card .emoji {
+    font-size: 3rem !important;
+  }
+  
+  .outfit-accessories-column {
+    display: none !important;
+  }
+  
+  .accessories-counter {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .outfit-card {
+    max-width: 100% !important;
+    width: 100% !important;
+    min-width: 320px !important;
+  }
+  
+  .outfit-card-content {
+    padding: 12px 16px !important;
+    gap: 16px !important;
+  }
+  
+  .outfit-accessories-column {
+    margin-right: 12px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .outfit-card {
+    min-width: 280px !important;
+  }
+  
+  .outfit-card-content {
+    padding: 8px 12px !important;
+    gap: 12px !important;
+    flex-direction: column !important;
+  }
+  
+  .outfit-main-columns {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  
+  .outfit-accessories-column {
+    margin-right: 0 !important;
+    margin-bottom: 12px !important;
+    flex-direction: row !important;
+    height: auto !important;
+    justify-content: center !important;
+  }
+  
+  .outfit-accessory-item {
+    width: 60px !important;
+    height: 60px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .outfit-card {
+    min-width: 260px !important;
+  }
+  
+  .outfit-card-content {
+    padding: 6px 8px !important;
+    gap: 8px !important;
+  }
+} 

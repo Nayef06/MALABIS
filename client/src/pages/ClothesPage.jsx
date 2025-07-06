@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../LandingPage.css';
+import './ClothesPage.css';
 
 const CATEGORY_LABELS = {
   shirt: 'Shirts',
@@ -182,7 +183,7 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
     type: '',
     color: ''
   });
-  const [removeBackground, setRemoveBackground] = useState(false); // This requires a Cloudinary subscription, so im not using it for now
+  const [removeBackground, setRemoveBackground] = useState(true); // Background removal is now enabled
 
   useEffect(() => {
     if (open) {
@@ -432,8 +433,6 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
               </select>
             </div>
 
-
-
             <div style={{ marginBottom: '20px', width: '100%' }}>
               <label style={{ 
                 display: 'block', 
@@ -502,6 +501,64 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
                     )}
                   </div>
                 ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '20px', width: '100%' }}>
+              <label style={{ 
+                display: 'block', 
+                fontSize: '14px', 
+                fontWeight: '600', 
+                color: '#374151', 
+                marginBottom: '8px' 
+              }}>
+                Background Removal
+              </label>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                border: '2px solid #e5e7eb',
+                background: '#fff',
+                transition: 'border-color 0.2s ease'
+              }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = '#1b2554'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+              >
+                <div
+                  style={{
+                    width: '62px',
+                    height: '24px',
+                    borderRadius: '12px',
+                    background: removeBackground ? '#1b2554' : '#e5e7eb',
+                    position: 'relative',
+                    transition: 'background 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '2px',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setRemoveBackground(!removeBackground)}
+                >
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    background: '#fff',
+                    transform: removeBackground ? 'translateX(20px)' : 'translateX(0)',
+                    transition: 'transform 0.2s ease',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }} />
+                </div>
+                <span style={{
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  marginLeft: '8px'
+                }}>
+                  Remove background from uploaded images
+                </span>
               </div>
             </div>
 
@@ -805,7 +862,7 @@ const ClothesPage = () => {
         onUploadSuccess={refreshItems}
       />
       <div className="content" style={{ maxWidth: '100%', margin: '0', textAlign: 'left', width: '100%' }}>
-        <div style={{ 
+        <div className="upload-button-container" style={{ 
           marginBottom: 32, 
           display: 'flex', 
           justifyContent: 'flex-start',
@@ -844,8 +901,8 @@ const ClothesPage = () => {
           Object.keys(CATEGORY_LABELS).map(type => (
             grouped[type] && grouped[type].length > 0 && (
               <div key={type} style={{ marginBottom: 40 }}>
-                <h2 style={categoryTitleStyle}>{CATEGORY_LABELS[type]}</h2>
-                <div style={rowStyle}>
+                <h2 className="category-title" style={categoryTitleStyle}>{CATEGORY_LABELS[type]}</h2>
+                <div className="clothing-row" style={rowStyle}>
                   {[...grouped[type]].sort((a, b) => (b.isFavorited ? 1 : 0) - (a.isFavorited ? 1 : 0)).map(item => (
                     <div
                       key={item._id}

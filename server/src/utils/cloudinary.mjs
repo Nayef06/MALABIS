@@ -1,4 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
+import dotenv from 'dotenv';
+dotenv.config();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -11,19 +13,15 @@ export const uploadToCloudinary = async (file, removeBackground = true) => {
     const b64 = Buffer.from(file.buffer).toString('base64');
     const dataURI = `data:${file.mimetype};base64,${b64}`;
     
-
-console.log();    const uploadOptions = {
+    const uploadOptions = {
       folder: 'malabis-clothing',
       resource_type: 'auto',
       transformation: [
+        ...(removeBackground ? [{ effect: 'background_removal' }] : []),
         { width: 800, height: 800, crop: 'limit' },
         { quality: 'auto' }
       ]
     };
-
-    if (removeBackground) {
-      uploadOptions.background_removal = 'remove_the_background';
-    }
 
     const result = await cloudinary.uploader.upload(dataURI, uploadOptions);
     

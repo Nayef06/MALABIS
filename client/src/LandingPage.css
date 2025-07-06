@@ -373,6 +373,36 @@ body, .navbar, .navbar * {
   .text-section p {
     font-size: 1.5rem;
   }
+  
+  @media (max-width: 768px) {
+    .text-section h1 {
+      font-size: 3.5rem;
+    }
+    .text-section p {
+      font-size: 1.4rem;
+    }
+    
+    .get-started-btn,
+    .creator-btn {
+      font-size: 0.95rem;
+      padding: 0.9rem 1.8rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .text-section h1 {
+      font-size: 2rem;
+    }
+    .text-section p {
+      font-size: 1rem;
+    }
+    
+    .get-started-btn,
+    .creator-btn {
+      font-size: 0.9rem;
+      padding: 0.8rem 1.5rem;
+    }
+  }
 
   .action-buttons {
     justify-content: center;
