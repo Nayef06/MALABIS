@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "main": "src/index.mjs",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
   "scripts": {
     "start": "node src/index.mjs",
     "dev": "nodemon src/index.mjs"
@@ -24,5 +27,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.x"
   }
 }
