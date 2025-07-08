@@ -5,7 +5,6 @@ MALABIS is a full-stack web app that helps you keep your wardrobe in check and l
 ## 🚀 Features
 
 - **Wardrobe Management** – Upload, view, and organize your clothes  
-- **AI Outfit Suggestions** – Get automatically generated outfit combos  
 - **User Auth** – Secure login/signup with session handling  
 - **Responsive UI** – Works smoothly on both desktop and mobile  
 - **Cloud Image Storage** – Integrated with Cloudinary
@@ -18,7 +17,6 @@ MALABIS is a full-stack web app that helps you keep your wardrobe in check and l
 ### Frontend
 - **React 18** – Core framework  
 - **React Router DOM** – Routing  
-- **React Draggable** – Drag-and-drop for clothing items  
 - **Vite** – Fast build/dev tool  
 - **CSS3** – Custom styles + responsive design  
 
