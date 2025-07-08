@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import '../LandingPage.css';
-import './Auth.css'; 
+import './Auth.css';
+import { apiFetch } from '../api';
 
 const DashboardPage = () => {
   const [user, setUser] = useState(null);
@@ -13,7 +14,7 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const response = await fetch('/api/auth/status');
+        const response = await apiFetch('/api/auth/status');
         if (response.ok) {
           const data = await response.json();
           setUser(data);
@@ -34,7 +35,7 @@ const DashboardPage = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await apiFetch('/api/auth/logout', { method: 'POST' });
       navigate('/login');
     } catch (err) {
       console.error('Failed to log out', err);

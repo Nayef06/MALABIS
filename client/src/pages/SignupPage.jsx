@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
 import bg from '../assets/bg5.png';
+import { apiFetch } from '../api';
 
 const SignupPage = () => {
   const [username, setUsername] = useState('');
@@ -12,7 +13,7 @@ const SignupPage = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/auth/signup', {
+      const response = await apiFetch('/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

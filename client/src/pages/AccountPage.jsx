@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiFetch } from '../api';
 
 const EditIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -80,7 +81,7 @@ const AccountPage = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch('/api/auth/status');
+        const res = await apiFetch('/api/auth/status');
         if (res.ok) {
           const user = await res.json();
           setDisplayName(user.displayName || '');
@@ -107,7 +108,7 @@ const AccountPage = () => {
       return;
     }
     try {
-      const res = await fetch('/api/auth/update-profile', {
+      const res = await apiFetch('/api/auth/update-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ displayName: newDisplayName }),
@@ -130,7 +131,7 @@ const AccountPage = () => {
       return;
     }
     try {
-      const res = await fetch('/api/auth/update-profile', {
+      const res = await apiFetch('/api/auth/update-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
@@ -149,7 +150,7 @@ const AccountPage = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await apiFetch('/api/auth/logout', { method: 'POST' });
       navigate('/login');
     } catch (err) {
     }

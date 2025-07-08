@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../LandingPage.css';
 import './OutfitsPage.css';
+import { apiFetch } from '../api';
 
 const CATEGORY_LABELS = {
   shirt: 'Shirts',
@@ -232,8 +233,7 @@ function OutfitSlotModal({ open, onClose, onSave }) {
       setPickerSlot(null);
       setFitName('');
       setLoading(true);
-      fetch('/api/clothing/inventory')
-        .then(res => res.json())
+      apiFetch('/api/clothing/inventory')
         .then(data => setClothes(data.items || []))
         .finally(() => setLoading(false));
     }
@@ -686,7 +686,7 @@ const OutfitsPage = () => {
   const [confirmId, setConfirmId] = useState(null);
   const fetchOutfits = async () => {
     try {
-      const res = await fetch('/api/outfits');
+      const res = await apiFetch('/api/outfits');
       if (!res.ok) throw new Error('Failed to fetch outfits');
       const data = await res.json();
       const sorted = (data.outfits || []).slice().sort((a, b) => {
@@ -706,7 +706,7 @@ const OutfitsPage = () => {
 
   const handleSaveOutfit = async ({ name, clothingItems }) => {
     try {
-      const res = await fetch('/api/outfits', {
+      const res = await apiFetch('/api/outfits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, clothingItems }),
@@ -733,7 +733,7 @@ const OutfitsPage = () => {
       });
     });
     try {
-      await fetch(`/api/outfits/${outfit._id}/favorite`, {
+      await apiFetch(`/api/outfits/${outfit._id}/favorite`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isFavorited: newFav }),
@@ -748,7 +748,7 @@ const OutfitsPage = () => {
   };
   const confirmDelete = async () => {
     try {
-      await fetch(`/api/outfits/${confirmId}`, { method: 'DELETE' });
+      await apiFetch(`/api/outfits/${confirmId}`, { method: 'DELETE' });
       setOutfits(outfits => outfits.filter(o => o._id !== confirmId));
       setConfirmId(null);
     } catch (err) {

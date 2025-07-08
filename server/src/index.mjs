@@ -9,8 +9,18 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 import "./strategies/local-strategy.mjs";
+import cors from "cors";
 
 const app = express();
+
+const allowedOrigins = [
+  'https://malabis-frontend.vercel.app',
+  'http://localhost:5173'
+];
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("Connected to MongoDB"))

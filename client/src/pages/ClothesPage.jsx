@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import '../LandingPage.css';
 import './ClothesPage.css';
+import { apiFetch } from '../api';
 
 const CATEGORY_LABELS = {
   shirt: 'Shirts',
@@ -622,7 +623,7 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
                     formDataToSend.append('image', selectedFile);
                     formDataToSend.append('removeBackground', removeBackground);
                     
-                    const uploadRes = await fetch('/api/clothing/upload', {
+                    const uploadRes = await apiFetch('/api/clothing/upload', {
                       method: 'POST',
                       body: formDataToSend,
                     });
@@ -633,7 +634,7 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
                     
                     const uploadData = await uploadRes.json();
                     
-                    const clothingRes = await fetch('/api/clothing', {
+                    const clothingRes = await apiFetch('/api/clothing', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
@@ -699,7 +700,7 @@ const ClothesPage = () => {
 
   const refreshItems = async () => {
     try {
-      const res = await fetch('/api/clothing/inventory');
+      const res = await apiFetch('/api/clothing/inventory');
       if (!res.ok) throw new Error('Failed to fetch inventory');
       const data = await res.json();
       setItems(data.items || []);
@@ -711,7 +712,7 @@ const ClothesPage = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const res = await fetch('/api/clothing/inventory');
+        const res = await apiFetch('/api/clothing/inventory');
         if (!res.ok) throw new Error('Failed to fetch inventory');
         const data = await res.json();
         setItems(data.items || []);
@@ -733,7 +734,7 @@ const ClothesPage = () => {
   const handleDelete = async (id) => {
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/clothing/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/clothing/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
       setItems(items => items.filter(item => item._id !== id));
     } catch (err) {
@@ -747,7 +748,7 @@ const ClothesPage = () => {
     const newFav = !item.isFavorited;
     setItems(items => items.map(i => i._id === item._id ? { ...i, isFavorited: newFav } : i));
     try {
-      await fetch(`/api/clothing/${item._id}/favorite`, {
+      await apiFetch(`/api/clothing/${item._id}/favorite`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isFavorited: newFav }),

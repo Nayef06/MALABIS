@@ -6,6 +6,7 @@ import LogoFull from './assets/LogoFull.png';
 import asset from './assets/ewar.png';
 import bg from './assets/bg4.png';
 import icon from './assets/logo.png';
+import { apiFetch } from './api';
 
 
 const LandingPage = () => {
@@ -14,7 +15,7 @@ const LandingPage = () => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await fetch('/api/auth/status');
+        const response = await apiFetch('/api/auth/status');
         if (response.ok) {
           navigate('/clothes');
         }

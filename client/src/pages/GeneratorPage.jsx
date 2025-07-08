@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../LandingPage.css';
 import './GeneratorPage.css';
+import { apiFetch } from '../api';
 
 const CLOTHING_TYPES = [
   { id: 'shirt', label: 'Shirt', icon: '👕' },
@@ -786,7 +787,7 @@ const GeneratorPage = () => {
   useEffect(() => {
     const fetchInventory = async () => {
       try {
-        const response = await fetch('/api/clothing/inventory');
+        const response = await apiFetch('/api/clothing/inventory');
         if (response.ok) {
           const data = await response.json();
           setInventory(data.items || []);
@@ -832,7 +833,7 @@ const GeneratorPage = () => {
     cyclingIntervalRef.current = setInterval(async () => {
       cycleCount++;
       try {
-        const response = await fetch('/api/generator/generate', {
+        const response = await apiFetch('/api/generator/generate', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -870,7 +871,7 @@ const GeneratorPage = () => {
     if (!generatedOutfit || generatedOutfit.clothingItems.length === 0) return;
     try {
       const clothingItems = generatedOutfit.clothingItems.map(item => item._id);
-      const response = await fetch('/api/outfits', {
+      const response = await apiFetch('/api/outfits', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
