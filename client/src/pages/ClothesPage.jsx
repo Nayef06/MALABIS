@@ -378,7 +378,7 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
               <input
                 type="text"
                 placeholder="Enter clothing name"
-                maxLength={10}
+                maxLength={15}
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 style={{

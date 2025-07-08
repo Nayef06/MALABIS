@@ -418,7 +418,7 @@ const OutfitCard = ({ outfit, lockedItems, onLockItem, isGenerating, animatingId
               e.target.style.borderColor = '#e3e7ef';
               e.target.style.boxShadow = 'none';
             }}
-            maxLength={10}
+            maxLength={15}
           />
         </div>
         <button

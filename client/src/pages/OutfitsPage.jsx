@@ -351,7 +351,7 @@ function OutfitSlotModal({ open, onClose, onSave }) {
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
               }}
-              maxLength={10}
+              maxLength={15}
               onFocus={e => {
                 e.currentTarget.style.borderColor = '#1b2554';
                 e.currentTarget.style.boxShadow = '0 4px 16px rgba(27,37,84,0.1)';
@@ -370,7 +370,7 @@ function OutfitSlotModal({ open, onClose, onSave }) {
               alignItems: 'center'
             }}>
               <span>Give your outfit a memorable name</span>
-              <span>{fitName.length}/10</span>
+              <span>{fitName.length}/15</span>
             </div>
           </div>
         </div>
@@ -829,7 +829,7 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
       onMouseLeave={() => setCardHover(false)}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 18px 0 18px', minHeight: 48 }}>
-        <div style={{ fontWeight: 700, fontSize: 20, color: '#1b2554', textTransform: 'capitalize', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 120 }}>
+        <div style={{ fontWeight: 700, fontSize: 20, color: '#1b2554', textTransform: 'capitalize', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>
           {outfit.name || 'Untitled'}
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
