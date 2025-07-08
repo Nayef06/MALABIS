@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config({ path: './.env' });
 
-import routes from './routes/index.mjs'
+import routes from '../api/index.mjs'
 import express from "express";
 import mongoose from "mongoose";
 import passport from "passport";
