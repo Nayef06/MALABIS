@@ -5,6 +5,7 @@ import { createUserValidationSchema, loginValidationSchema } from "../utils/vali
 import passport from "passport";
 import { checkSchema, validationResult } from "express-validator";
 import "../strategies/local-strategy.mjs";
+import { createDefaultClothingItems } from "../utils/defaultClothing.mjs";
 
 const router = Router() 
 
@@ -59,8 +60,22 @@ router.post(
       });
 
       await newUser.save();
+
+      // Create default clothing items for the new user
+      try {
+        const defaultItemIds = await createDefaultClothingItems(newUser._id);
+        
+        // Add the default items to the user's inventory
+        newUser.inventory = defaultItemIds;
+        await newUser.save();
+      } catch (clothingError) {
+        console.error('Error creating default clothing items:', clothingError);
+        // Don't fail the signup if clothing creation fails
+      }
+
       res.sendStatus(201);
     } catch (err) {
+      console.error('Signup error:', err);
       res.sendStatus(500);
     }
   }

@@ -62,7 +62,7 @@ const iconBtnStyle = {
   justifyContent: 'center',
 };
 
-const GREY = '#a0aec0';
+const gray = '#a0aec0';
 
 const AccountPage = () => {
   const navigate = useNavigate();
@@ -173,7 +173,7 @@ const AccountPage = () => {
                 flex: 1,
                 background: editDisplayName ? '#fff' : '#f7f8fa',
                 borderColor: editDisplayName ? '#1b2554' : '#d1d5db',
-                color: editDisplayName ? '#1b2554' : GREY,
+                color: editDisplayName ? '#1b2554' : gray,
                 fontWeight: editDisplayName ? 500 : 400,
                 transition: 'color 0.2s',
               }}
@@ -208,7 +208,7 @@ const AccountPage = () => {
                 flex: 1,
                 background: editPassword ? '#fff' : '#f7f8fa',
                 borderColor: editPassword ? '#1b2554' : '#d1d5db',
-                color: editPassword ? '#1b2554' : GREY,
+                color: editPassword ? '#1b2554' : gray,
                 fontWeight: editPassword ? 500 : 400,
                 transition: 'color 0.2s',
               }}

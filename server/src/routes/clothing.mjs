@@ -23,12 +23,18 @@ const upload = multer({
   },
 });
 
-router.get("/api/clothing", (req, res) => {
+router.get("/api/clothing", async (req, res) => {
   if (!req.user) {
     return res.sendStatus(401); 
   }
 
-  res.json({ inventory: req.user.inventory });
+  try {
+    const user = await User.findById(req.user._id).populate('inventory');
+    res.json({ inventory: user.inventory });
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 }); 
 
 router.post(

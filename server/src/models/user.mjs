@@ -15,11 +15,9 @@ const UserSchema = new mongoose.Schema({
     required: true,
   },
   inventory: {
-    type: [mongoose.Schema.Types.Mixed], 
-    default: ["shirt1", "shirt2", "shirt3",
-      "pants1", "pants2", "pants3",
-      "shoe1", "shoe2", "shoe3"
-    ], 
+    type: [mongoose.Schema.Types.ObjectId], 
+    ref: "ClothingItem",
+    default: [], 
   },
   outfits: [{
     type: mongoose.Schema.Types.ObjectId,

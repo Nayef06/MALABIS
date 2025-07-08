@@ -457,7 +457,7 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
                   { name: 'purple', color: '#b5179e' },
                   { name: 'brown', color: '#dab785' },
                   { name: 'black', color: '#0c090d' },
-                  { name: 'grey', color: '#e6e6ea' },
+                  { name: 'gray', color: '#e6e6ea' },
                   { name: 'white', color: '#f7fff7' }
                 ].map(({ name, color }) => (
                   <div
