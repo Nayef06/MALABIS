@@ -179,12 +179,19 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [formData, setFormData] = useState({
     name: '',
     type: '',
     color: ''
   });
   const [removeBackground, setRemoveBackground] = useState(true); // Background removal is now enabled
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -224,8 +231,8 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
     background: '#fff',
     borderRadius: 24,
     padding: 0,
-    minWidth: 600,
-    maxWidth: 700,
+    minWidth: windowWidth < 768 ? '90vw' : 600,
+    maxWidth: windowWidth < 768 ? '90vw' : 700,
     boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
     textAlign: 'center',
     transform: isAnimating ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(20px)',
@@ -240,13 +247,15 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
       <div style={modalStyle} onClick={e => e.stopPropagation()}>
         <div style={{ 
           display: 'flex', 
-          minHeight: '400px',
+          flexDirection: windowWidth < 768 ? 'column' : 'row',
+          minHeight: windowWidth < 768 ? 'auto' : '400px',
           width: '100%'
         }}>
           <div style={{ 
             flex: 1, 
-            padding: '32px',
-            borderRight: '1px solid #e5e7eb',
+            padding: windowWidth < 768 ? '24px' : '32px',
+            borderRight: windowWidth < 768 ? 'none' : '1px solid #e5e7eb',
+            borderBottom: windowWidth < 768 ? '1px solid #e5e7eb' : 'none',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -351,10 +360,10 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
 
           <div style={{ 
             flex: 1, 
-            padding: '32px',
+            padding: windowWidth < 768 ? '24px' : '32px',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'flex-start'
+            alignItems: windowWidth < 768 ? 'center' : 'flex-start'
           }}>
             <h3 style={{ 
               fontWeight: 700, 
@@ -372,7 +381,8 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
                 fontSize: '14px', 
                 fontWeight: '600', 
                 color: '#374151', 
-                marginBottom: '8px' 
+                marginBottom: '8px',
+                textAlign: windowWidth < 768 ? 'center' : 'left'
               }}>
                 Name
               </label>
@@ -390,7 +400,8 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
                   fontSize: '14px',
                   outline: 'none',
                   background: '#fff',
-                  transition: 'border-color 0.2s ease'
+                  transition: 'border-color 0.2s ease',
+                  textAlign: windowWidth < 768 ? 'center' : 'left'
                 }}
                 onFocus={e => e.target.style.borderColor = '#1b2554'}
                 onBlur={e => e.target.style.borderColor = '#e5e7eb'}
@@ -403,7 +414,8 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
                 fontSize: '14px', 
                 fontWeight: '600', 
                 color: '#374151', 
-                marginBottom: '8px' 
+                marginBottom: '8px',
+                textAlign: windowWidth < 768 ? 'center' : 'left'
               }}>
                 Type
               </label>
@@ -419,18 +431,25 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
                   outline: 'none',
                   background: '#fff',
                   cursor: 'pointer',
-                  transition: 'border-color 0.2s ease'
+                  transition: 'border-color 0.2s ease',
+                  textAlign: windowWidth < 768 ? 'center' : 'left',
+                  appearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 12px center',
+                  backgroundSize: '16px',
+                  paddingRight: '40px'
                 }}
                 onFocus={e => e.target.style.borderColor = '#1b2554'}
                 onBlur={e => e.target.style.borderColor = '#e5e7eb'}
               >
-                <option value="">Select type</option>
-                <option value="shirt">Shirt</option>
-                <option value="pants">Pants</option>
-                <option value="shoes">Shoes</option>
-                <option value="hat">Hat</option>
-                <option value="jacket">Jacket</option>
-                <option value="accessory">Accessory</option>
+                <option value="" style={{ color: '#9ca3af', fontStyle: 'italic' }}>Select type</option>
+                <option value="shirt" style={{ color: '#1b2554', fontWeight: '500' }}>Shirt</option>
+                <option value="pants" style={{ color: '#1b2554', fontWeight: '500' }}>Pants</option>
+                <option value="shoes" style={{ color: '#1b2554', fontWeight: '500' }}>Shoes</option>
+                <option value="hat" style={{ color: '#1b2554', fontWeight: '500' }}>Hat</option>
+                <option value="jacket" style={{ color: '#1b2554', fontWeight: '500' }}>Jacket</option>
+                <option value="accessory" style={{ color: '#1b2554', fontWeight: '500' }}>Accessory</option>
               </select>
             </div>
 
@@ -440,14 +459,16 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
                 fontSize: '14px', 
                 fontWeight: '600', 
                 color: '#374151', 
-                marginBottom: '8px' 
+                marginBottom: '8px',
+                textAlign: windowWidth < 768 ? 'center' : 'left'
               }}>
                 Color
               </label>
               <div style={{ 
                 display: 'flex', 
                 gap: '8px', 
-                flexWrap: 'wrap' 
+                flexWrap: 'wrap',
+                justifyContent: windowWidth < 768 ? 'center' : 'flex-start'
               }}>
                 {[
                   { name: 'red', color: '#fd151b' },
@@ -505,63 +526,67 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
               </div>
             </div>
 
-            <div style={{ marginBottom: '20px', width: '100%' }}>
-              <label style={{ 
-                display: 'block', 
-                fontSize: '14px', 
-                fontWeight: '600', 
-                color: '#374151', 
-                marginBottom: '8px' 
-              }}>
-                Background Removal
-              </label>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                border: '2px solid #e5e7eb',
-                background: '#fff',
-                transition: 'border-color 0.2s ease'
-              }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = '#1b2554'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = '#e5e7eb'}
-              >
-                <div
-                  style={{
-                    width: '62px',
-                    height: '24px',
-                    borderRadius: '12px',
-                    background: removeBackground ? '#1b2554' : '#e5e7eb',
-                    position: 'relative',
-                    transition: 'background 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '2px',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => setRemoveBackground(!removeBackground)}
-                >
-                  <div style={{
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    background: '#fff',
-                    transform: removeBackground ? 'translateX(20px)' : 'translateX(0)',
-                    transition: 'transform 0.2s ease',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                  }} />
-                </div>
-                <span style={{
-                  fontSize: '12px',
-                  color: '#6b7280',
-                  marginLeft: '8px'
+            {windowWidth >= 768 && (
+              <div style={{ marginBottom: '20px', width: '100%' }}>
+                <label style={{ 
+                  display: 'block', 
+                  fontSize: '14px', 
+                  fontWeight: '600', 
+                  color: '#374151', 
+                  marginBottom: '8px',
+                  textAlign: 'left'
                 }}>
-                  Remove background from uploaded images
-                </span>
+                  Background Removal
+                </label>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  border: '2px solid #e5e7eb',
+                  background: '#fff',
+                  transition: 'border-color 0.2s ease',
+                  justifyContent: 'flex-start'
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = '#1b2554'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+                >
+                  <div
+                    style={{
+                      width: '62px',
+                      height: '24px',
+                      borderRadius: '12px',
+                      background: removeBackground ? '#1b2554' : '#e5e7eb',
+                      position: 'relative',
+                      transition: 'background 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '2px',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => setRemoveBackground(!removeBackground)}
+                  >
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      background: '#fff',
+                      transform: removeBackground ? 'translateX(20px)' : 'translateX(0)',
+                      transition: 'transform 0.2s ease',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }} />
+                  </div>
+                  <span style={{
+                    fontSize: '12px',
+                    color: '#6b7280',
+                    marginLeft: '8px'
+                  }}>
+                    Remove background from uploaded images
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
 
             <div style={{ 
               display: 'flex', 

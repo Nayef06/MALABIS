@@ -495,7 +495,7 @@ body, .navbar, .navbar * {
 }
 
 @media (max-width:770px) {
-  html, body, .landing-page, .main-content {
+  .landing-page {
     width: 100vw;
     height: 100vh;
     min-height: 100vh;
@@ -510,7 +510,7 @@ body, .navbar, .navbar * {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  html::-webkit-scrollbar, body::-webkit-scrollbar, .landing-page::-webkit-scrollbar, .main-content::-webkit-scrollbar {
+  .landing-page::-webkit-scrollbar {
     display: none;
   }
   .image-section {
