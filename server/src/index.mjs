@@ -38,7 +38,7 @@ app.use(session({
   resave: false,
   cookie: {
     maxAge: 60000 * 60 * 24,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   },
   store: MongoStore.create({
