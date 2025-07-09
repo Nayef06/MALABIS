@@ -12,6 +12,7 @@ import "./strategies/local-strategy.mjs";
 import cors from "cors";
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy for secure cookies
 
 const allowedOrigins = [
   'https://malabis-frontend.vercel.app',
