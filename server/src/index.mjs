@@ -16,7 +16,8 @@ app.set('trust proxy', 1); // Trust first proxy for secure cookies
 
 const allowedOrigins = [
   'https://malabis-frontend.vercel.app',
-  'http://localhost:5173'
+  'http://localhost:5173',
+  'https://www.malabis.io/'
 ];
 app.use(cors({
   origin: allowedOrigins,
