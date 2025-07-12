@@ -105,7 +105,6 @@ export const defaultClothingItems = {
   ]
 };
 
-// Map category names to database type names
 const categoryToTypeMap = {
   "Hats": "hat",
   "Jackets": "jacket", 

@@ -61,16 +61,13 @@ router.post(
 
       await newUser.save();
 
-      // Create default clothing items for the new user
       try {
         const defaultItemIds = await createDefaultClothingItems(newUser._id);
         
-        // Add the default items to the user's inventory
         newUser.inventory = defaultItemIds;
         await newUser.save();
       } catch (clothingError) {
         console.error('Error creating default clothing items:', clothingError);
-        // Don't fail the signup if clothing creation fails
       }
 
       res.sendStatus(201);

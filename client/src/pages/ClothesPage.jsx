@@ -223,6 +223,7 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    padding: '20px',
     opacity: isAnimating ? 1 : 0,
     transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   };
@@ -233,6 +234,7 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
     padding: 0,
     minWidth: windowWidth < 768 ? '90vw' : 600,
     maxWidth: windowWidth < 768 ? '90vw' : 700,
+    maxHeight: windowWidth < 768 ? '85vh' : '90vh',
     boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
     textAlign: 'center',
     transform: isAnimating ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(20px)',
@@ -249,7 +251,9 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
           display: 'flex', 
           flexDirection: windowWidth < 768 ? 'column' : 'row',
           minHeight: windowWidth < 768 ? 'auto' : '400px',
-          width: '100%'
+          maxHeight: windowWidth < 768 ? '85vh' : '90vh',
+          width: '100%',
+          overflow: 'auto'
         }}>
           <div style={{ 
             flex: 1, 
@@ -259,7 +263,8 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            minHeight: windowWidth < 768 ? 'auto' : '300px'
           }}>
             <h3 style={{ 
               fontWeight: 700, 
@@ -363,7 +368,9 @@ const UploadPopup = ({ open, onClose, onUploadSuccess }) => {
             padding: windowWidth < 768 ? '24px' : '32px',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: windowWidth < 768 ? 'center' : 'flex-start'
+            alignItems: windowWidth < 768 ? 'center' : 'flex-start',
+            minHeight: windowWidth < 768 ? 'auto' : '300px',
+            overflow: 'auto'
           }}>
             <h3 style={{ 
               fontWeight: 700, 
