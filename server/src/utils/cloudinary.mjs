@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import sharp from 'sharp';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -10,8 +11,14 @@ cloudinary.config({
 
 export const uploadToCloudinary = async (file, removeBackground = true) => {
   try {
-    const b64 = Buffer.from(file.buffer).toString('base64');
-    const dataURI = `data:${file.mimetype};base64,${b64}`;
+    const processedImageBuffer = await sharp(file.buffer)
+      // Ensure alpha channel is present -> allows transparent bgs
+      .png({ force: true })
+      .ensureAlpha()
+      .toBuffer();
+    
+    const b64 = processedImageBuffer.toString('base64');
+    const dataURI = `data:image/png;base64,${b64}`;
     
     const uploadOptions = {
       folder: 'malabis-clothing',
