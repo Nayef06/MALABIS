@@ -287,8 +287,7 @@ MIT License - see LICENSE file for details
 ## 🐛 Known Issues
 
 ### Current Limitations
-1. **Background Removal**: Only works with PNG file types. JPG/JPEG files will have a white background.
-2. **Mobile Upload UI**: The clothing upload interface may extend beyond screen boundaries on some mobile devices, particularly smaller phones, making it impossible to click off or click upload.
+1. **Outfit Creator UI** goes off screen for some devices
 
 ### Workarounds
 - For background removal: Convert images to PNG format before uploading

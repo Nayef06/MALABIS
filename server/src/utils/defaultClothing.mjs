@@ -5,7 +5,7 @@ export const defaultClothingItems = {
     {
       "name": "YANKEES CAP",
       "color": "black",
-      "image": "https://www.pngkit.com/png/full/973-9739597_new-york-yankees-logo-curve-cap-new-york.png"
+      "image": "https://images.footlocker.com/is/image/EBFL2/60538219_01?wid=500&hei=500&fmt=png-alpha"
     },
     {
       "name": "BUCKET HAT",
