@@ -262,20 +262,25 @@ function OutfitSlotModal({ open, onClose, onSave }) {
       position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
-      <div style={{
-        background: '#fff',
-        borderRadius: 25,
-        padding: 0,
-        minWidth: 440,
-        minHeight: 580,
-        position: 'relative',
-        boxShadow: '0 8px 32px rgba(27,37,84,0.13)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        overflow: 'hidden',
-        border: '1.5px solid #e3e7ef',
-      }}>
+      <div
+        className="outfit-modal"
+        style={{
+          background: '#fff',
+          borderRadius: 25,
+          padding: 0,
+          minWidth: 320,
+          maxWidth: 400,
+          width: '100%',
+          maxHeight: '91vh',
+          position: 'relative',
+          boxShadow: '0 8px 32px rgba(27,37,84,0.13)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          overflowY: 'auto',
+          border: '1.5px solid #e3e7ef',
+        }}
+      >
         <div style={{
           width: '100%',
           background: 'none',
@@ -381,7 +386,7 @@ function OutfitSlotModal({ open, onClose, onSave }) {
           borderRadius: 22,
           margin: '24px 0 0 0',
           padding: '24px 18px',
-          minHeight: 320,
+          /* minHeight: 320, */
           boxSizing: 'border-box',
           boxShadow: '0 2px 8px rgba(27,37,84,0.06)',
         }}>
@@ -400,8 +405,9 @@ function OutfitSlotModal({ open, onClose, onSave }) {
           onClick={handleSave}
           disabled={slots.every(s => !s)}
           style={{
-            margin: '32px 0 24px 0',
-            padding: '16px 48px',
+            margin: '32px auto 24px auto',
+            padding: '18px 0',
+            width: '90%',
             borderRadius: 16,
             background: slots.every(s => !s) ? '#e5e7eb' : 'linear-gradient(135deg, #1b2554 0%, #232b53 100%)',
             color: slots.every(s => !s) ? '#9ca3af' : '#fff',
@@ -415,6 +421,9 @@ function OutfitSlotModal({ open, onClose, onSave }) {
             transform: slots.every(s => !s) ? 'none' : 'translateY(0)',
             position: 'relative',
             overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
           onMouseOver={e => { 
             if (!slots.every(s => !s)) {

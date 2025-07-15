@@ -235,7 +235,6 @@ NODE_ENV=production
 - **Favorites System**: Mark items as favorites for quick access and special consideration in outfit generation
 
 ### Smart Outfit Generator
-- **Intelligent Suggestions**: Algorithm generates outfit combinations based on your wardrobe
 - **Item Locking**: Lock specific items in place while generating variations for other pieces
 - **Type Filtering**: Generate outfits based on specific clothing types
 - **Accessory Management**: Control the number of accessories in generated outfits
@@ -244,8 +243,6 @@ NODE_ENV=production
 ### User Experience
 - **Responsive Design**: Optimized for all device sizes with mobile-first approach
 - **Smooth Animations**: Polished UI with smooth transitions and loading states
-- **Drag & Drop**: Intuitive file upload with visual feedback
-- **Real-time Updates**: Dynamic UI updates without page refreshes
 - **Error Handling**: Comprehensive error handling with user-friendly messages
 
 ## 🔧 Development
@@ -289,16 +286,3 @@ MIT License - see LICENSE file for details
 ### Current Limitations
 1. **Outfit Creator UI** goes off screen for some devices
 
-### Workarounds
-- For background removal: Convert images to PNG format before uploading
-- For mobile upload issues: Use a larger device for optimal experience
-
-## 🙋‍♂️ Support
-
-- **Issues**: Report bugs or request features via GitHub Issues
-- **Documentation**: Check the code comments for detailed implementation details
-- **Questions**: Open a discussion for general questions about the project
-
----
-
-**MALABIS** - Transform your wardrobe into endless style possibilities! ✨
