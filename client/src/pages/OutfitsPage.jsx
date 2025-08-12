@@ -234,6 +234,7 @@ function OutfitSlotModal({ open, onClose, onSave }) {
       setFitName('');
       setLoading(true);
       apiFetch('/api/clothing/inventory')
+        .then(res => res.json())
         .then(data => {
           console.log('[OutfitSlotModal] clothing items fetched:', data.items);
           setClothes(data.items || []);
