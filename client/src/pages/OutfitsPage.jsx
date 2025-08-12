@@ -181,7 +181,7 @@ const cardStyle = {
   padding: 0,
   minWidth: 288,
   maxWidth: '100%',
-  minHeight: 342,
+  minHeight: 5,
   marginBottom: 0,
   transition: 'box-shadow 0.25s cubic-bezier(.4,2,.6,1), transform 0.22s cubic-bezier(.4,2,.6,1)',
   overflow: 'hidden',
@@ -771,7 +771,7 @@ const OutfitsPage = () => {
 
   return (
     <div className="page-container" style={{ display: 'block', paddingLeft: 32, paddingRight: 16, paddingTop: 100 }}>
-      <h1 style={{ textAlign: 'left', margin: 0, marginBottom: 32 }}>My Outfits</h1>
+  <h1 style={{ textAlign: 'left', margin: 0, marginBottom: 32, color: '#1b2554'}}>My Outfits</h1>
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fill, minmax(288px, 1fr))',
@@ -784,6 +784,7 @@ const OutfitsPage = () => {
             ...cardStyle,
             minWidth: 288,
             minHeight: 342,
+            height: 552,
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
@@ -830,6 +831,7 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
         ...cardStyle,
         minWidth: 288,
         minHeight: 342,
+        height: 552,
         position: 'relative',
         padding: 0,
         overflow: 'visible',
