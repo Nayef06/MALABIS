@@ -109,7 +109,7 @@ MALABIS/
 - **Node.js** (v18+ recommended)
 - **MongoDB Atlas** account or local MongoDB instance
 - **Cloudinary** account for image hosting
-- **Vercel** account for deployment (optional)
+- **Vercel** for deployment (optional)
 
 ### Local Development Setup
 
@@ -263,11 +263,6 @@ npm run dev      # Start development server with nodemon
 npm start        # Start production server
 ```
 
-### Code Structure
-- **Modular Architecture**: Clean separation of concerns with dedicated modules
-- **Component Reusability**: Reusable React components with consistent styling
-- **API Abstraction**: Centralized API client with error handling
-- **Validation**: Comprehensive input validation on both frontend and backend
 
 ## 📄 License
 
@@ -276,13 +271,18 @@ MIT
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create a feature branch (`git checkout -b feature`)
+3. Commit your changes (`git commit -m 'Add feature'`)
+4. Push to the branch (`git push origin feature`)
 5. Open a Pull Request
 
 ## 🐛 Known Issues
+1. None that I know of
+
+## Future Updates
+1. A fit' of the day system/calendar
+2. Custom clothing catagories
 
 ### Current Limitations
-1. **Outfit Creator UI** goes off screen for some devices
+1. **Outfit Creator UI** goes off screen for very few devices
 
