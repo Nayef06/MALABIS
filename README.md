@@ -11,12 +11,6 @@ MALABIS is a full-stack web application that revolutionizes wardrobe management 
 - **Favorites System** – Mark and organize your favorite clothing items
 - **Responsive Design** – Seamless experience across desktop and mobile devices
 
-### Technical Features
-- **Background Removal** – Automatic background removal for clean clothing uploads
-- **Image Optimization** – Automatic resizing and compression for optimal performance
-- **Cloud Storage** – Secure image hosting with Cloudinary integration
-- **Session Management** – Persistent user sessions with MongoDB
-- **Real-time Updates** – Dynamic UI updates without page refreshes
 
 ### User Experience
 - **Modern UI/UX** – Beautiful, intuitive interface with smooth animations
@@ -279,7 +273,7 @@ MIT
 ## 🐛 Known Issues
 1. None that I know of
 
-## Future Updates
+### Future Updates
 1. A fit' of the day system/calendar
 2. Custom clothing catagories
 

@@ -233,6 +233,7 @@ function OutfitSlotModal({ open, onClose, onSave }) {
       setPickerSlot(null);
       setFitName('');
       setLoading(true);
+      document.body.classList.add('modal-open');
       apiFetch('/api/clothing/inventory')
         .then(res => res.json())
         .then(data => {
@@ -240,7 +241,13 @@ function OutfitSlotModal({ open, onClose, onSave }) {
           setClothes(data.items || []);
         })
         .finally(() => setLoading(false));
+    } else {
+      document.body.classList.remove('modal-open');
     }
+
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
   }, [open]);
 
   const handleSlotClick = (idx) => setPickerSlot(idx);
@@ -262,7 +269,7 @@ function OutfitSlotModal({ open, onClose, onSave }) {
   //const accent = '#7b8cff';
   const accent = '#232b53';
   return open ? (
-    <div style={{
+    <div className="modal-overlay" style={{
       position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
@@ -272,6 +279,7 @@ function OutfitSlotModal({ open, onClose, onSave }) {
           background: '#fff',
           borderRadius: 25,
           padding: 0,
+          paddingBottom: 50,
           minWidth: 320,
           maxWidth: 400,
           width: '100%',
@@ -329,7 +337,7 @@ function OutfitSlotModal({ open, onClose, onSave }) {
           paddingBottom: 20
         }}>
           <div style={{ marginBottom: 8 }}>
-            <label style={{
+                          <label style={{
               display: 'block',
               fontWeight: 600,
               fontSize: 16,
@@ -339,37 +347,86 @@ function OutfitSlotModal({ open, onClose, onSave }) {
             }}>
               Outfit Name
             </label>
-            <input
-              type="text"
-              value={fitName}
-              onChange={e => setFitName(e.target.value)}
-              placeholder="Enter a name for your outfit..."
-              style={{
-                width: '100%',
-                padding: '16px 20px',
-                borderRadius: 12,
-                border: '2px solid #e3e7ef',
-                fontSize: 18,
-                fontWeight: 500,
-                color: navy,
-                background: '#fff',
-                outline: 'none',
-                marginBottom: 0,
-                marginTop: 0,
-                boxSizing: 'border-box',
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              }}
-              maxLength={15}
-              onFocus={e => {
-                e.currentTarget.style.borderColor = '#1b2554';
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(27,37,84,0.1)';
-              }}
-              onBlur={e => {
-                e.currentTarget.style.borderColor = '#e3e7ef';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
-              }}
-            />
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <input
+                type="text"
+                value={fitName}
+                onChange={e => setFitName(e.target.value)}
+                placeholder="Enter a name for your outfit..."
+                style={{
+                  flex: 1,
+                  padding: '16px 20px',
+                  borderRadius: 12,
+                  border: '2px solid #e3e7ef',
+                  fontSize: 18,
+                  fontWeight: 500,
+                  color: navy,
+                  background: '#fff',
+                  outline: 'none',
+                  marginBottom: 0,
+                  marginTop: 0,
+                  boxSizing: 'border-box',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                }}
+                maxLength={15}
+                onFocus={e => {
+                  e.currentTarget.style.borderColor = '#1b2554';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(27,37,84,0.1)';
+                }}
+                onBlur={e => {
+                  e.currentTarget.style.borderColor = '#e3e7ef';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+                }}
+              />
+              <button
+                onClick={handleSave}
+                disabled={slots.every(s => !s)}
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: '50%',
+                  background: slots.every(s => !s) ? '#e3e7ef' : '#1b2554',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: 'none',
+                  cursor: slots.every(s => !s) ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  color: 'white',
+                  boxShadow: slots.every(s => !s) ? '0 2px 4px rgba(0,0,0,0.05)' : '0 4px 16px rgba(27,37,84,0.25)',
+                  flexShrink: 0,
+                }}
+                title="Save to My Outfits"
+                onMouseEnter={e => {
+                  if (!slots.every(s => !s)) {
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(27,37,84,0.35)';
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!slots.every(s => !s)) {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(27,37,84,0.25)';
+                  }
+                }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17,21 17,13 7,13 7,21" />
+                  <polyline points="7,3 7,8 15,8" />
+                </svg>
+              </button>
+            </div>
             <div style={{
               fontSize: 14,
               color: '#6b7280',
@@ -405,50 +462,6 @@ function OutfitSlotModal({ open, onClose, onSave }) {
             ))}
           </div>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={slots.every(s => !s)}
-          style={{
-            margin: '32px auto 24px auto',
-            padding: '18px 0',
-            width: '90%',
-            borderRadius: 16,
-            background: slots.every(s => !s) ? '#e5e7eb' : 'linear-gradient(135deg, #1b2554 0%, #232b53 100%)',
-            color: slots.every(s => !s) ? '#9ca3af' : '#fff',
-            fontWeight: 700,
-            fontSize: 18,
-            border: 'none',
-            cursor: slots.every(s => !s) ? 'not-allowed' : 'pointer',
-            opacity: slots.every(s => !s) ? 0.6 : 1,
-            boxShadow: slots.every(s => !s) ? '0 2px 4px rgba(0,0,0,0.05)' : '0 4px 16px rgba(27,37,84,0.25), 0 2px 8px rgba(27,37,84,0.15)',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            transform: slots.every(s => !s) ? 'none' : 'translateY(0)',
-            position: 'relative',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          onMouseOver={e => { 
-            if (!slots.every(s => !s)) {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 8px 24px rgba(27,37,84,0.35), 0 4px 12px rgba(27,37,84,0.2)';
-            }
-          }}
-          onMouseOut={e => { 
-            if (!slots.every(s => !s)) {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 16px rgba(27,37,84,0.25), 0 2px 8px rgba(27,37,84,0.15)';
-            }
-          }}
-          onMouseDown={e => {
-            if (!slots.every(s => !s)) {
-              e.currentTarget.style.transform = 'translateY(0)';
-            }
-          }}
-        >
-          <span style={{ position: 'relative', zIndex: 1 }}>Save Outfit</span>
-        </button>
         {pickerSlot !== null && (
           <div style={{ 
             position: 'fixed', 
@@ -684,7 +697,7 @@ function Slot({ item, onClick, onRemove, large, readOnly, accent }) {
       {item ? (
         <>
           <img src={item.imageLink} alt={item.name} style={{ width: large ? 100 : 56, height: large ? 100 : 56, objectFit: 'contain', borderRadius: 12 }} />
-          {!readOnly && <button onClick={e => { e.stopPropagation(); onRemove(); }} style={{ position: 'absolute', top: 4, right: 4, background: '#fff', border: 'none', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, cursor: 'pointer', boxShadow: '0 1px 4px rgba(27,37,84,0.10)' }}>&times;</button>}
+          {!readOnly && <button onClick={e => { e.stopPropagation(); onRemove(); }} style={{ position: 'absolute', top: 4, right: 4, background: '#1b2554', color: '#fff', border: 'none', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, cursor: 'pointer', boxShadow: '0 1px 4px rgba(27,37,84,0.10)' }}>&times;</button>}
         </>
       ) : (
         <span style={{ color: accent || '#b0b0b0', fontSize: large ? 48 : 28, fontWeight: 700 }}>+</span>
