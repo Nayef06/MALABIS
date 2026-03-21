@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
-import bg from '../assets/bg5.png';
 import { apiFetch } from '../api';
 
 const LoginPage = () => {
@@ -34,37 +33,30 @@ const LoginPage = () => {
   };
 
   return (
-    <div 
-      className="auth-container"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${bg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        minHeight: '100vh'
-      }}
-    >
+    <div className="auth-container">
       <form className="auth-form" onSubmit={handleLogin}>
         <button type="button" className="close-btn" onClick={() => navigate('/')}>×</button>
         <h2>Login</h2>
         {error && <p className="auth-error">{error}</p>}
         <div className="form-group">
-          <label htmlFor="username">Username</label>
+          <label htmlFor="login-username">Username</label>
           <input
             type="text"
-            id="username"
+            id="login-username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            placeholder="Enter your username"
             required
           />
         </div>
         <div className="form-group">
-          <label htmlFor="password">Password</label>
+          <label htmlFor="login-password">Password</label>
           <input
             type="password"
-            id="password"
+            id="login-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
             required
           />
         </div>
@@ -77,4 +69,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;

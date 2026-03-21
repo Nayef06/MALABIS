@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import '../LandingPage.css';
 import './Auth.css';
 import { apiFetch } from '../api';
 
@@ -43,30 +41,35 @@ const DashboardPage = () => {
   };
 
   if (loading) {
-    return <div className="auth-container"><div>Loading...</div></div>;
+    return (
+      <div className="auth-container">
+        <p style={{ color: 'var(--text-secondary)' }}>Loading...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="auth-container"><div>{error}</div></div>;
+    return (
+      <div className="auth-container">
+        <p style={{ color: 'var(--danger)' }}>{error}</p>
+      </div>
+    );
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="auth-container">
-        <div className="auth-form">
-          <h2>Welcome, {user.displayName}</h2>
-          <div className="dashboard-info">
-            <p>Here is your full session data:</p>
-            <pre>{JSON.stringify(user, null, 2)}</pre>
-          </div>
-          <button onClick={handleLogout} className="auth-button">
-            Logout
-          </button>
+    <div className="auth-container">
+      <div className="auth-form">
+        <h2>Welcome, {user.displayName}</h2>
+        <div className="dashboard-info">
+          <p>Here is your full session data:</p>
+          <pre>{JSON.stringify(user, null, 2)}</pre>
         </div>
+        <button onClick={handleLogout} className="auth-button">
+          Logout
+        </button>
       </div>
-    </>
+    </div>
   );
 };
 
-export default DashboardPage; 
+export default DashboardPage;

@@ -1,25 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './LandingPage.css';
-import { Link } from 'react-router-dom';
 import LogoFull from './assets/LogoFull.png';
 import asset from './assets/ewar.png';
-import bg from './assets/bg4.png';
 import icon from './assets/logo.png';
 import { apiFetch } from './api';
 
 const MobileLanding = () => (
   <div className="mobile-landing-custom">
     <div className="mobile-landing-logo">
-      <img src={icon} alt="Malabis Icon" style={{ width: 64, height: 64 }} />
+      <img src={icon} alt="Malabis Icon" style={{ width: 56, height: 56 }} />
     </div>
-    <h2 style={{ color: '#1b2554', fontWeight: 700, fontSize: '1.5rem', margin: '1.2rem 0 0.7rem 0' }}>
+    <h2 style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1.5rem', margin: '1.5rem 0 0.75rem 0', letterSpacing: '-0.01em' }}>
       Welcome to Malabis
     </h2>
-    <p style={{ color: '#5f6f8f', fontSize: '1rem', margin: '0 0 1.2rem 0', lineHeight: 1.5 }}>
-      Your wardrobe, reimagined for mobile.<br />Sign up or log in to get started!
+    <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', margin: '0 0 1.5rem 0', lineHeight: 1.6 }}>
+      Your wardrobe, reimagined.<br />Sign up or log in to get started.
     </p>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', alignItems: 'center' }}>
       <Link to="/signup">
         <button className="get-started-btn">Get Started for Free →</button>
       </Link>
@@ -64,15 +62,10 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <div
-      className="landing-page"
-      style={{
-        backgroundImage: `url(${bg})`,
-      }}
-    >
+    <div className="landing-page">
       <nav className="navbar">
         <div className="navbar-logo">
-          <img src={LogoFull} alt="Logo" />
+          <img src={LogoFull} alt="Malabis" />
         </div>
         <div className="navbar-buttons">
           <Link to="/login">
@@ -83,11 +76,12 @@ const LandingPage = () => {
           </Link>
         </div>
       </nav>
+
       {isMobile ? (
         <MobileLanding />
       ) : (
         <main className="main-content">
-          <div className="text-section">
+          <section className="text-section">
             <div className="mobile-logo-section">
               <img src={icon} alt="Malabis Icon" className="mobile-logo-icon" />
             </div>
@@ -97,7 +91,7 @@ const LandingPage = () => {
             <p>
               Upload every piece you own, keep your wardrobe organized, experiment
               freely, and discover new combinations that elevate your style—all in
-              one seamless space
+              one seamless space.
             </p>
             <div className="action-buttons">
               <Link to="/signup">
@@ -107,7 +101,7 @@ const LandingPage = () => {
                 <button className="creator-btn">I'm Already a Creator</button>
               </Link>
             </div>
-          </div>
+          </section>
           <div className="image-section">
             <img src={asset} alt="Wardrobe" />
           </div>
