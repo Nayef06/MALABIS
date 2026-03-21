@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
+import bg from '../assets/bg5.png';
 import { apiFetch } from '../api';
 
 const SignupPage = () => {
@@ -31,40 +32,46 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="auth-container">
+    <div 
+      className="auth-container"
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${bg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        minHeight: '100vh'
+      }}
+    >
       <form className="auth-form" onSubmit={handleSignup}>
         <button type="button" className="close-btn" onClick={() => navigate('/')}>×</button>
         <h2>Sign Up</h2>
         <div className="form-group">
-          <label htmlFor="signup-username">Username</label>
+          <label htmlFor="username">Username</label>
           <input
             type="text"
-            id="signup-username"
+            id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Choose a username"
             required
           />
         </div>
         <div className="form-group">
-          <label htmlFor="signup-displayName">Display Name</label>
+          <label htmlFor="displayName">Display Name</label>
           <input
             type="text"
-            id="signup-displayName"
+            id="displayName"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="How you'd like to be called"
             required
           />
         </div>
         <div className="form-group">
-          <label htmlFor="signup-password">Password</label>
+          <label htmlFor="password">Password</label>
           <input
             type="password"
-            id="signup-password"
+            id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Create a password"
             required
           />
         </div>

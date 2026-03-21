@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api';
-import './Auth.css';
 
 const EditIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M2 14.5V18h3.5l10-10-3.5-3.5-10 10zM17.7 6.3a1 1 0 0 0 0-1.4l-2.6-2.6a1 1 0 0 0-1.4 0l-1.8 1.8 4 4 1.8-1.8z" fill="var(--text-secondary)"/>
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 14.5V18h3.5l10-10-3.5-3.5-10 10zM17.7 6.3a1 1 0 0 0 0-1.4l-2.6-2.6a1 1 0 0 0-1.4 0l-1.8 1.8 4 4 1.8-1.8z" fill="#1b2554"/>
   </svg>
 );
 const SaveIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5 10l4 4 6-6" stroke="var(--accent)" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 10l4 4 6-6" stroke="#1b2554" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 const CancelIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M6 6l8 8M6 14L14 6" stroke="var(--danger)" strokeWidth="2" strokeLinecap="round"/>
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 6l8 8M6 14L14 6" stroke="#e53e3e" strokeWidth="2" strokeLinecap="round"/>
   </svg>
 );
-
 const Popup = ({ show, type, children }) => (
   <div
     style={{
@@ -32,13 +30,13 @@ const Popup = ({ show, type, children }) => (
       justifyContent: 'center',
       width: 'fit-content',
       minWidth: 160,
-      padding: '0.65rem 1.25rem',
-      background: type === 'success' ? 'var(--success)' : 'var(--danger)',
+      padding: '0.75rem 1.5rem',
+      background: type === 'success' ? '#38a169' : '#e53e3e',
       color: '#fff',
-      borderRadius: 'var(--radius-xl)',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+      borderRadius: 24,
+      boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
       fontWeight: 500,
-      fontSize: '0.875rem',
+      fontSize: '1rem',
       opacity: show ? 1 : 0,
       pointerEvents: 'none',
       zIndex: 9999,
@@ -47,9 +45,9 @@ const Popup = ({ show, type, children }) => (
     }}
   >
     {type === 'success' ? (
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 10l4 4 6-6" stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10l4 4 6-6" stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
     ) : (
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M6 14L14 6" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M6 14L14 6" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
     )}
     {children}
   </div>
@@ -63,9 +61,9 @@ const iconBtnStyle = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  borderRadius: '50%',
-  transition: 'background 0.2s',
 };
+
+const gray = '#a0aec0';
 
 const AccountPage = () => {
   const navigate = useNavigate();
@@ -164,21 +162,21 @@ const AccountPage = () => {
       <div className="auth-form">
         <h2>Account Settings</h2>
         <div className="form-group">
-          <label htmlFor="account-displayName">Display Name</label>
+          <label htmlFor="displayName">Display Name</label>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <input
-              id="account-displayName"
+              id="displayName"
               type="text"
               value={editDisplayName ? newDisplayName : displayName}
               onChange={e => setNewDisplayName(e.target.value)}
               readOnly={!editDisplayName}
               style={{
                 flex: 1,
-                background: editDisplayName ? 'var(--bg-elevated)' : 'var(--bg-base)',
-                borderColor: editDisplayName ? 'var(--accent)' : 'var(--border)',
-                color: editDisplayName ? 'var(--text-primary)' : 'var(--text-muted)',
+                background: editDisplayName ? '#fff' : '#f7f8fa',
+                borderColor: editDisplayName ? '#1b2554' : '#d1d5db',
+                color: editDisplayName ? '#1b2554' : gray,
                 fontWeight: editDisplayName ? 500 : 400,
-                transition: 'all 0.2s',
+                transition: 'color 0.2s',
               }}
             />
             {!editDisplayName ? (
@@ -198,10 +196,10 @@ const AccountPage = () => {
           </div>
         </div>
         <div className="form-group">
-          <label htmlFor="account-password">Password</label>
+          <label htmlFor="password">Password</label>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <input
-              id="account-password"
+              id="password"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -209,11 +207,11 @@ const AccountPage = () => {
               placeholder="••••••••••••••"
               style={{
                 flex: 1,
-                background: editPassword ? 'var(--bg-elevated)' : 'var(--bg-base)',
-                borderColor: editPassword ? 'var(--accent)' : 'var(--border)',
-                color: editPassword ? 'var(--text-primary)' : 'var(--text-muted)',
+                background: editPassword ? '#fff' : '#f7f8fa',
+                borderColor: editPassword ? '#1b2554' : '#d1d5db',
+                color: editPassword ? '#1b2554' : gray,
                 fontWeight: editPassword ? 500 : 400,
-                transition: 'all 0.2s',
+                transition: 'color 0.2s',
               }}
             />
             {!editPassword ? (
@@ -232,10 +230,10 @@ const AccountPage = () => {
             )}
           </div>
         </div>
-        <button onClick={handleLogout} className="auth-button" style={{ marginTop: 20 }}>Logout</button>
+        <button onClick={handleLogout} className="auth-button" style={{ marginTop: 24, background: '#1b2554' }}>Logout</button>
       </div>
     </div>
   );
 };
 
-export default AccountPage;
+export default AccountPage; 

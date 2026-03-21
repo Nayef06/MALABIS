@@ -1,83 +1,13 @@
-/* ── Dark Theme Design Tokens ──────────────────────── */
-:root {
-  --bg-base: #0d0d0f;
-  --bg-surface: #141417;
-  --bg-elevated: #1c1c21;
-  --border: #2a2a32;
-  --border-strong: #3d3d4a;
-  --text-primary: #e8e8ec;
-  --text-secondary: #8888a0;
-  --text-muted: #55556a;
-  --accent: #4a8eff;
-  --accent-dim: rgba(74, 142, 255, 0.12);
-  --accent-hover: #6ba3ff;
-  --danger: #e05252;
-  --danger-dim: rgba(224, 82, 82, 0.12);
-  --success: #4caf7d;
-  --success-dim: rgba(76, 175, 125, 0.12);
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ── Global Reset ─────────────────────────────────── */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html,
 body {
+  margin: 0;
+  padding: 0;
   width: 100%;
   height: 100%;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg-base);
-  color: var(--text-primary);
-  letter-spacing: 0.01em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-/* ── Scrollbar ────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
-}
-
-/* ── Selection ────────────────────────────────────── */
-::selection {
-  background: var(--accent-dim);
-  color: var(--accent);
-}
-
-/* ── Focus Visible ────────────────────────────────── */
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* ── Scroll Lock (used by landing page) ───────────── */
-.no-scroll,
-.no-scroll body,
-.no-scroll html {
-  overflow: hidden !important;
-}
+} 

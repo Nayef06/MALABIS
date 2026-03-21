@@ -1,120 +1,4 @@
-/* ── Outfits Page ──────────────────────────────────── */
-.outfits-page {
-  min-height: 100vh;
-  background: var(--bg-base);
-  padding: 100px 2rem 2rem;
-}
 
-.outfits-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 2rem 0;
-  letter-spacing: -0.02em;
-}
-
-.outfits-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  max-width: 100%;
-}
-
-/* ── Card ─────────────────────────────────────────── */
-.outfit-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  min-width: 260px;
-  min-height: 340px;
-  height: 520px;
-  overflow: hidden;
-  transition: all var(--transition);
-}
-
-.outfit-card:hover {
-  border-color: var(--border-strong);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.outfit-card-new {
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: 2px dashed var(--border-strong);
-  background: var(--bg-surface);
-}
-
-.outfit-card-new:hover {
-  border-color: var(--accent);
-  background: var(--accent-dim);
-}
-
-/* Header */
-.outfit-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px 0 16px;
-  min-height: 44px;
-}
-
-.outfit-card-name {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--text-primary);
-  text-transform: capitalize;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 160px;
-}
-
-.outfit-card-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.outfit-icon-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--bg-elevated);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-  padding: 0;
-}
-
-.outfit-icon-btn:hover:not(:disabled) {
-  background: var(--accent-dim);
-}
-
-/* Slot Area */
-.outfit-slot-area {
-  display: flex;
-  flex-direction: row;
-  gap: 14px;
-  justify-content: center;
-  align-items: stretch;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  margin: 14px;
-  padding: 14px 8px;
-  flex: 1;
-  min-height: 200px;
-}
-
-/* ── Modal ────────────────────────────────────────── */
 body.modal-open {
   overflow: hidden;
   position: fixed;
@@ -127,70 +11,113 @@ body.modal-open {
   -webkit-overflow-scrolling: touch;
 }
 
+.outfit-modal .outfit-slot-area {
+  touch-action: pan-y pinch-zoom;
+  -webkit-overflow-scrolling: touch;
+}
+
 .modal-overlay {
   touch-action: none;
   pointer-events: none;
 }
+
 .modal-overlay > * {
   pointer-events: auto;
 }
 
-/* ── Responsive ─────────────────────────────────── */
 @media (max-width: 768px) {
-  .outfits-page {
-    padding: 80px 1rem 1rem;
+  .page-container {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
   }
-
-  .outfits-title {
-    font-size: 1.75rem;
-    text-align: center;
-  }
-
-  .outfits-grid {
-    justify-items: center;
-  }
-
+  
   .outfit-card {
-    min-width: 260px;
-    max-width: 300px;
+    min-width: 260px !important;
+    max-width: 280px !important;
   }
-
+  
   .outfit-slot-area {
-    padding: 10px 6px;
-    gap: 10px;
+    padding: 12px 8px !important;
+    gap: 12px !important;
   }
-
+  
   .outfit-slot {
     width: 100px !important;
     height: 100px !important;
   }
+  
   .outfit-slot-large {
-    width: 110px !important;
-    height: 110px !important;
+    width: 120px !important;
+    height: 120px !important;
+  }
+  
+  .outfit-slot img {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  
+  .outfit-slot-large img {
+    width: 90px !important;
+    height: 90px !important;
   }
 
   .outfit-modal {
     min-width: 0 !important;
     max-width: 400px !important;
     width: 100% !important;
-    border-radius: var(--radius-md) !important;
+    border-radius: 16px !important;
+    padding: 0 !important;
     max-height: 92vh !important;
     overflow-y: auto !important;
+  }
+  .outfit-modal input {
+    font-size: 15px !important;
+    padding: 12px 10px !important;
   }
 }
 
 @media (max-width: 480px) {
   .outfit-card {
-    min-width: 240px;
-    max-width: 280px;
+    min-width: 240px !important;
+    max-width: 260px !important;
   }
-
+  
+  .outfit-slot-area {
+    padding: 10px 6px !important;
+    gap: 10px !important;
+  }
+  
   .outfit-slot {
+    width: 90px !important;
+    height: 90px !important;
+  }
+  
+  .outfit-slot-large {
+    width: 110px !important;
+    height: 110px !important;
+  }
+  
+  .outfit-slot img {
+    width: 70px !important;
+    height: 70px !important;
+  }
+  
+  .outfit-slot-large img {
     width: 80px !important;
     height: 80px !important;
   }
-  .outfit-slot-large {
-    width: 100px !important;
-    height: 100px !important;
+
+  .outfit-modal {
+    min-width: 0 !important;
+    max-width: 400px !important;
+    width: 100% !important;
+    border-radius: 10px !important;
+    padding: 0 !important;
+    max-height: 96vh !important;
+    overflow-y: auto !important;
   }
-}
+  .outfit-modal input {
+    font-size: 14px !important;
+    padding: 10px 6px !important;
+  }
+} 

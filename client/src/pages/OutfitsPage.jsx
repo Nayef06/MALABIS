@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import '../LandingPage.css';
 import './OutfitsPage.css';
 import { apiFetch } from '../api';
 
@@ -13,82 +14,215 @@ const CATEGORY_LABELS = {
 
 const TrashIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="5" y="8" width="2" height="7" rx="1" fill="currentColor"/>
-    <rect x="9" y="8" width="2" height="7" rx="1" fill="currentColor"/>
-    <rect x="13" y="8" width="2" height="7" rx="1" fill="currentColor"/>
-    <rect x="3" y="5" width="14" height="2" rx="1" fill="currentColor"/>
-    <rect x="7" y="2" width="6" height="2" rx="1" fill="currentColor"/>
+    <rect x="5" y="8" width="2" height="7" rx="1" fill="#e53e3e"/>
+    <rect x="9" y="8" width="2" height="7" rx="1" fill="#e53e3e"/>
+    <rect x="13" y="8" width="2" height="7" rx="1" fill="#e53e3e"/>
+    <rect x="3" y="5" width="14" height="2" rx="1" fill="#e53e3e"/>
+    <rect x="7" y="2" width="6" height="2" rx="1" fill="#e53e3e"/>
   </svg>
 );
-
 const StarIcon = ({ size = 20, filled = false }) => (
-  <svg width={size} height={size} viewBox="0 0 20 20" fill={filled ? 'var(--accent)' : 'none'} stroke="var(--accent)" strokeWidth="1.5" xmlns="http://www.w3.org/2000/svg">
+  <svg width={size} height={size} viewBox="0 0 20 20" fill={filled ? '#1b2554' : 'none'} stroke="#1b2554" strokeWidth="1.5" xmlns="http://www.w3.org/2000/svg">
     <polygon points="10,2 12.59,7.36 18.51,8.09 14,12.26 15.18,18.09 10,15.1 4.82,18.09 6,12.26 1.49,8.09 7.41,7.36" />
   </svg>
 );
-
 const ConfirmPopup = ({ open, onConfirm, onCancel, itemType = 'outfit' }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    if (open) { setIsVisible(true); setIsAnimating(true); }
-    else { setIsAnimating(false); const t = setTimeout(() => setIsVisible(false), 300); return () => clearTimeout(t); }
+    if (open) {
+      setIsVisible(true);
+      setIsAnimating(true);
+    } else {
+      setIsAnimating(false);
+      const timer = setTimeout(() => setIsVisible(false), 300);
+      return () => clearTimeout(timer);
+    }
   }, [open]);
 
   if (!isVisible) return null;
 
+  const backdropStyle = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    background: 'rgba(0,0,0,0.4)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: isAnimating ? 1 : 0,
+    transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  };
+
+  const modalStyle = {
+    background: '#fff',
+    borderRadius: 24,
+    padding: 0,
+    minWidth: 400,
+    maxWidth: 480,
+    boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+    textAlign: 'center',
+    transform: isAnimating ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(20px)',
+    opacity: isAnimating ? 1 : 0,
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    border: '2px solid rgba(27,37,84,0.15)',
+    overflow: 'hidden',
+  };
+
+  const iconStyle = {
+    width: 80,
+    height: 80,
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #ff6b6b, #ee5a52)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '32px auto 24px',
+    boxShadow: '0 8px 24px rgba(238, 90, 82, 0.3)',
+    animation: isAnimating ? 'pulse 2s infinite' : 'none',
+  };
+
+  const buttonStyle = {
+    padding: '12px 24px',
+    borderRadius: 12,
+    border: 'none',
+    fontWeight: 600,
+    fontSize: 16,
+    cursor: 'pointer',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    minWidth: 120,
+  };
+
+  const cancelButtonStyle = {
+    ...buttonStyle,
+    background: '#f8f9fa',
+    color: '#6b7280',
+    border: '2px solid #e5e7eb',
+  };
+
+  const deleteButtonStyle = {
+    ...buttonStyle,
+    background: 'linear-gradient(135deg, #ff6b6b, #ee5a52)',
+    color: '#fff',
+    boxShadow: '0 4px 12px rgba(238, 90, 82, 0.3)',
+  };
+
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-      background: 'rgba(0,0,0,0.6)', zIndex: 1000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      opacity: isAnimating ? 1 : 0, transition: 'opacity 0.3s ease',
-    }} onClick={onCancel}>
-      <div style={{
-        background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)',
-        minWidth: 380, maxWidth: 440, border: '1px solid var(--border)',
-        transform: isAnimating ? 'scale(1)' : 'scale(0.95)',
-        opacity: isAnimating ? 1 : 0, transition: 'all 0.3s ease',
-        textAlign: 'center', overflow: 'hidden',
-      }} onClick={e => e.stopPropagation()}>
-        <div style={{
-          width: 64, height: 64, borderRadius: '50%', background: 'var(--danger-dim)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '28px auto 20px',
-        }}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M6 6l8 8M6 14L14 6" stroke="var(--danger)" strokeWidth="2.5" strokeLinecap="round"/></svg>
+    <div style={backdropStyle} onClick={onCancel}>
+      <div style={modalStyle} onClick={e => e.stopPropagation()}>
+        <div style={iconStyle}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.9 1 3 1.9 3 3V21C3 22.1 3.9 23 5 23H19C20.1 23 21 22.1 21 21V9ZM19 9H14V4H5V21H19V9Z" fill="white"/>
+          </svg>
         </div>
-        <div style={{ padding: '0 28px 28px' }}>
-          <h3 style={{ fontWeight: 700, fontSize: 20, color: 'var(--text-primary)', margin: '0 0 8px 0' }}>
+        
+        <div style={{ padding: '0 32px 32px' }}>
+          <h3 style={{ 
+            fontWeight: 700, 
+            fontSize: 24, 
+            color: '#1b2554', 
+            margin: '0 0 12px 0',
+            letterSpacing: '-0.5px'
+          }}>
             Delete this {itemType}?
           </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.5, margin: '0 0 24px 0' }}>
-            This action cannot be undone.
+          
+          <p style={{ 
+            color: '#6b7280', 
+            fontSize: 16, 
+            lineHeight: 1.5,
+            margin: '0 0 32px 0'
+          }}>
+            This action cannot be undone. The {itemType} will be permanently removed from your collection.
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button onClick={onCancel} style={{
-              padding: '10px 20px', borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border)', background: 'var(--bg-elevated)',
-              color: 'var(--text-secondary)', fontWeight: 600, fontSize: 14,
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}>Cancel</button>
-            <button onClick={onConfirm} style={{
-              padding: '10px 20px', borderRadius: 'var(--radius-sm)',
-              border: 'none', background: 'var(--danger)',
-              color: '#fff', fontWeight: 600, fontSize: 14,
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}>Delete</button>
+          
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+            <button 
+              onClick={onCancel} 
+              style={cancelButtonStyle}
+              onMouseEnter={e => e.currentTarget.style.background = '#f1f3f4'}
+              onMouseLeave={e => e.currentTarget.style.background = '#f8f9fa'}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={onConfirm} 
+              style={deleteButtonStyle}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              Delete
+            </button>
           </div>
         </div>
       </div>
+      
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+      `}</style>
     </div>
   );
 };
 
+const cardStyle = {
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  background: '#fff',
+  borderRadius: 25,
+  boxShadow: '0 2px 16px rgba(27,37,84,0.08)',
+  padding: 0,
+  minWidth: 288,
+  maxWidth: '100%',
+  minHeight: 5,
+  marginBottom: 0,
+  transition: 'box-shadow 0.25s cubic-bezier(.4,2,.6,1), transform 0.22s cubic-bezier(.4,2,.6,1)',
+  overflow: 'hidden',
+};
+const iconBtnStyle = {
+  width: 40,
+  height: 40,
+  borderRadius: '50%',
+  background: '#f4f6fa',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: 'none',
+  cursor: 'pointer',
+  transition: 'background 0.18s, transform 0.18s',
+  boxShadow: '0 1px 4px rgba(27,37,84,0.06)',
+  padding: 0,
+};
+const iconBtnDeleteHover = {
+  background: '#ffe5e5',
+  transform: 'scale(1.15)',
+};
+const iconBtnDeleteDisabled = {
+  background: '#f4f6fa',
+  cursor: 'not-allowed',
+  opacity: 0.5,
+  pointerEvents: 'none',
+};
+const iconRowStyle = {
+  display: 'flex',
+  gap: 16,
+  alignItems: 'center',
+  position: 'absolute',
+  top: 18,
+  right: 18,
+  zIndex: 2,
+};
+
 function OutfitSlotModal({ open, onClose, onSave }) {
   const [slots, setSlots] = useState(Array(8).fill(null));
-  const [pickerSlot, setPickerSlot] = useState(null);
+  const [pickerSlot, setPickerSlot] = useState(null); 
   const [clothes, setClothes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fitName, setFitName] = useState('');
@@ -102,12 +236,18 @@ function OutfitSlotModal({ open, onClose, onSave }) {
       document.body.classList.add('modal-open');
       apiFetch('/api/clothing/inventory')
         .then(res => res.json())
-        .then(data => setClothes(data.items || []))
+        .then(data => {
+          console.log('[OutfitSlotModal] clothing items fetched:', data.items);
+          setClothes(data.items || []);
+        })
         .finally(() => setLoading(false));
     } else {
       document.body.classList.remove('modal-open');
     }
-    return () => document.body.classList.remove('modal-open');
+
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
   }, [open]);
 
   const handleSlotClick = (idx) => setPickerSlot(idx);
@@ -122,167 +262,404 @@ function OutfitSlotModal({ open, onClose, onSave }) {
     onSave({ name: fitName || 'New Outfit', clothingItems });
   };
 
+  const navy = '#1b2554';
+  const navyLight = '#232b53';
+  const slotAreaBg = '#fff';
+  const slotAreaBorder = '1.5px solid #e3e7ef';
+  //const accent = '#7b8cff';
+  const accent = '#232b53';
   return open ? (
     <div className="modal-overlay" style={{
-      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-      background: 'rgba(0,0,0,0.5)', zIndex: 1000,
+      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
-      <div className="outfit-modal" style={{
-        background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)',
-        padding: 0, paddingBottom: 40, minWidth: 320, maxWidth: 400, width: '100%',
-        maxHeight: '91vh', position: 'relative',
-        border: '1px solid var(--border)',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto',
-      }}>
-        {/* Header */}
+      <div
+        className="outfit-modal"
+        style={{
+          background: '#fff',
+          borderRadius: 25,
+          padding: 0,
+          paddingBottom: 50,
+          minWidth: 320,
+          maxWidth: 400,
+          width: '100%',
+          maxHeight: '91vh',
+          position: 'relative',
+          boxShadow: '0 8px 32px rgba(27,37,84,0.13)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          overflowY: 'auto',
+          border: '1.5px solid #e3e7ef',
+        }}
+      >
         <div style={{
-          width: '100%', padding: '24px 28px 10px 28px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          width: '100%',
+          background: 'none',
+          padding: '28px 36px 10px 36px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}>
-          <div style={{ fontWeight: 700, fontSize: 22, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>Create Outfit</div>
-          <button onClick={onClose} style={{
-            background: 'none', border: 'none', fontSize: 24, color: 'var(--text-muted)',
-            cursor: 'pointer', borderRadius: '50%', width: 36, height: 36,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'background 0.18s',
-          }}
-          onMouseOver={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
-          onMouseOut={e => e.currentTarget.style.background = 'none'}
-          aria-label="Close">&times;</button>
+          <div style={{ fontWeight: 700, fontSize: 26, color: navy, letterSpacing: 1 }}>Create Outfit</div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: 28,
+              color: '#232b53',
+              cursor: 'pointer',
+              borderRadius: '50%',
+              width: 38,
+              height: 38,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 0.18s',
+            }}
+            onMouseOver={e => e.currentTarget.style.background = '#f4f6fa'}
+            onMouseOut={e => e.currentTarget.style.background = 'none'}
+            aria-label="Close"
+          >
+            &times;
+          </button>
         </div>
-
-        {/* Name input */}
-        <div style={{
-          width: '100%', padding: '0 28px', marginTop: 12, marginBottom: 12,
-          background: 'var(--bg-elevated)', borderTop: '1px solid var(--border)',
-          borderBottom: '1px solid var(--border)', paddingTop: 16, paddingBottom: 16,
+        <div style={{ 
+          width: '100%', 
+          padding: '0 36px', 
+          marginTop: 16, 
+          marginBottom: 16,
+          background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+          borderTop: '1px solid #e5e7eb',
+          borderBottom: '1px solid #e5e7eb',
+          paddingTop: 20,
+          paddingBottom: 20
         }}>
-          <label style={{ display: 'block', fontWeight: 600, fontSize: 14, color: 'var(--text-secondary)', marginBottom: 8 }}>Outfit Name</label>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <input type="text" value={fitName} onChange={e => setFitName(e.target.value)}
-              placeholder="Enter a name..." maxLength={15}
-              style={{
-                flex: 1, padding: '12px 16px', borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border)', fontSize: 16, fontWeight: 500,
-                color: 'var(--text-primary)', background: 'var(--bg-surface)',
-                outline: 'none', transition: 'all 0.2s', fontFamily: 'inherit',
-              }}
-              onFocus={e => { e.currentTarget.style.borderColor = 'var(--accent)'; }}
-              onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
-            />
-            <button onClick={handleSave} disabled={slots.every(s => !s)}
-              style={{
-                width: 38, height: 38, borderRadius: '50%',
-                background: slots.every(s => !s) ? 'var(--border)' : 'var(--accent)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                border: 'none', cursor: slots.every(s => !s) ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s', color: 'white', flexShrink: 0,
-              }} title="Save to My Outfits">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                <polyline points="17,21 17,13 7,13 7,21" />
-                <polyline points="7,3 7,8 15,8" />
-              </svg>
-            </button>
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4, display: 'flex', justifyContent: 'space-between' }}>
-            <span>Give your outfit a name</span>
-            <span>{fitName.length}/15</span>
-          </div>
-        </div>
-
-        {/* Slots */}
-        <div style={{
-          display: 'flex', flexDirection: 'row', gap: 24, justifyContent: 'center', alignItems: 'center',
-          background: 'var(--bg-elevated)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)', margin: '20px 0 0 0', padding: '20px 14px',
-        }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20, justifyContent: 'center' }}>
-            {[0,1,2].map(idx => (
-              <Slot key={idx} item={slots[idx]} onClick={() => handleSlotClick(idx)} onRemove={() => handleRemove(idx)} large accent="var(--accent)" />
-            ))}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, justifyContent: 'space-between' }}>
-            {[3,4,5,6,7].map(idx => (
-              <Slot key={idx} item={slots[idx]} onClick={() => handleSlotClick(idx)} onRemove={() => handleRemove(idx)} accent="var(--accent)" />
-            ))}
-          </div>
-        </div>
-
-        {/* Clothing Picker */}
-        {pickerSlot !== null && (
-          <div style={{
-            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-            background: 'rgba(0,0,0,0.5)', zIndex: 1200,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-          }}>
+          <div style={{ marginBottom: 8 }}>
+                          <label style={{
+              display: 'block',
+              fontWeight: 600,
+              fontSize: 16,
+              color: '#1b2554',
+              marginBottom: 8,
+              letterSpacing: '-0.3px'
+            }}>
+              Outfit Name
+            </label>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <input
+                type="text"
+                value={fitName}
+                onChange={e => setFitName(e.target.value)}
+                placeholder="Enter a name for your outfit..."
+                style={{
+                  flex: 1,
+                  padding: '16px 20px',
+                  borderRadius: 12,
+                  border: '2px solid #e3e7ef',
+                  fontSize: 18,
+                  fontWeight: 500,
+                  color: navy,
+                  background: '#fff',
+                  outline: 'none',
+                  marginBottom: 0,
+                  marginTop: 0,
+                  boxSizing: 'border-box',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                }}
+                maxLength={15}
+                onFocus={e => {
+                  e.currentTarget.style.borderColor = '#1b2554';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(27,37,84,0.1)';
+                }}
+                onBlur={e => {
+                  e.currentTarget.style.borderColor = '#e3e7ef';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+                }}
+              />
+              <button
+                onClick={handleSave}
+                disabled={slots.every(s => !s)}
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: '50%',
+                  background: slots.every(s => !s) ? '#e3e7ef' : '#1b2554',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: 'none',
+                  cursor: slots.every(s => !s) ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  color: 'white',
+                  boxShadow: slots.every(s => !s) ? '0 2px 4px rgba(0,0,0,0.05)' : '0 4px 16px rgba(27,37,84,0.25)',
+                  flexShrink: 0,
+                }}
+                title="Save to My Outfits"
+                onMouseEnter={e => {
+                  if (!slots.every(s => !s)) {
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(27,37,84,0.35)';
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!slots.every(s => !s)) {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(27,37,84,0.25)';
+                  }
+                }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17,21 17,13 7,13 7,21" />
+                  <polyline points="7,3 7,8 15,8" />
+                </svg>
+              </button>
+            </div>
             <div style={{
-              background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)',
-              border: '1px solid var(--border)',
-              width: '90%', maxWidth: 700, maxHeight: '90vh',
-              display: 'flex', flexDirection: 'column', overflow: 'hidden',
+              fontSize: 14,
+              color: '#6b7280',
+              marginTop: 6,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span>Give your outfit a memorable name</span>
+              <span>{fitName.length}/15</span>
+            </div>
+          </div>
+        </div>
+        <div style={{
+          display: 'flex', flexDirection: 'row', gap: 32, justifyContent: 'center', alignItems: 'center',
+          background: slotAreaBg,
+          border: slotAreaBorder,
+          borderRadius: 22,
+          margin: '24px 0 0 0',
+          padding: '24px 18px',
+          /* minHeight: 320, */
+          boxSizing: 'border-box',
+          boxShadow: '0 2px 8px rgba(27,37,84,0.06)',
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, justifyContent: 'center' }}>
+            {[0,1,2].map(idx => (
+              <Slot key={idx} item={slots[idx]} onClick={() => handleSlotClick(idx)} onRemove={() => handleRemove(idx)} large accent={accent} />
+            ))}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18, justifyContent: 'space-between' }}>
+            {[3,4,5,6,7].map(idx => (
+              <Slot key={idx} item={slots[idx]} onClick={() => handleSlotClick(idx)} onRemove={() => handleRemove(idx)} accent={accent} />
+            ))}
+          </div>
+        </div>
+        {pickerSlot !== null && (
+          <div style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            width: '100vw', 
+            height: '100vh', 
+            background: 'rgba(0,0,0,0.4)', 
+            zIndex: 1200,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}>
+            <div style={{ 
+              background: '#fff', 
+              borderRadius: 24, 
+              boxShadow: '0 20px 60px rgba(0,0,0,0.25)', 
+              padding: 0, 
+              zIndex: 1201, 
+              width: '90%',
+              maxWidth: 800,
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              border: '2px solid rgba(27,37,84,0.15)',
+              overflow: 'hidden'
             }}>
               <div style={{
-                padding: '20px 24px', borderBottom: '1px solid var(--border)',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: 'var(--bg-elevated)',
+                padding: '24px 32px 16px 32px',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)'
               }}>
-                <div style={{ fontWeight: 700, fontSize: 20, color: 'var(--text-primary)' }}>Pick a clothing item</div>
-                <button onClick={() => setPickerSlot(null)} style={{
-                  background: 'none', border: 'none', fontSize: 20, color: 'var(--text-muted)',
-                  cursor: 'pointer', borderRadius: '50%', width: 36, height: 36,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                >&times;</button>
+                <div style={{ 
+                  fontWeight: 700, 
+                  fontSize: 24, 
+                  color: '#1b2554',
+                  letterSpacing: '-0.5px'
+                }}>
+                  Pick a clothing item
+                </div>
+                <button 
+                  onClick={() => setPickerSlot(null)} 
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    fontSize: 24,
+                    color: '#6b7280',
+                    cursor: 'pointer', 
+                    borderRadius: '50%',
+                    width: 40,
+                    height: 40,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  &times;
+                </button>
               </div>
 
-              <div style={{ padding: '20px 24px', flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ 
+                padding: '24px 32px 32px 32px',
+                flex: 1,
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
                 {loading ? (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: 'var(--text-secondary)' }}>Loading...</div>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    height: '200px',
+                    fontSize: 18,
+                    color: '#6b7280'
+                  }}>
+                    Loading your clothing items...
+                  </div>
                 ) : (
-                  <div style={{ maxHeight: 'calc(90vh - 200px)', overflowY: 'auto', padding: '4px 0' }}>
-                    {(() => {
-                      const grouped = clothes.reduce((acc, item) => { if (!acc[item.type]) acc[item.type] = []; acc[item.type].push(item); return acc; }, {});
-                      return Object.keys(CATEGORY_LABELS).map(type => (
-                        grouped[type] && grouped[type].length > 0 && (
-                          <div key={type} style={{ marginBottom: 24 }}>
-                            <h3 style={{ fontWeight: 700, fontSize: 16, color: 'var(--text-primary)', margin: '0 0 14px 0' }}>{CATEGORY_LABELS[type]}</h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 14 }}>
-                              {grouped[type].map(item => (
-                                <div key={item._id} style={{
-                                  border: '1px solid var(--border)', borderRadius: 'var(--radius-md)',
-                                  padding: '12px 10px', cursor: 'pointer', textAlign: 'center',
-                                  background: 'var(--bg-elevated)', transition: 'all 0.2s',
-                                }}
-                                onClick={() => handleClothingPick(item)}
-                                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                                >
-                                  <div style={{
-                                    width: '100%', height: 70, borderRadius: 'var(--radius-sm)',
-                                    background: 'var(--bg-surface)', display: 'flex',
-                                    alignItems: 'center', justifyContent: 'center', marginBottom: 8, overflow: 'hidden',
-                                  }}>
-                                    <img src={item.imageLink} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6 }} />
+                  <>
+                    <div style={{ 
+                      maxHeight: 'calc(90vh - 200px)',
+                      overflowY: 'auto',
+                      padding: '8px 0'
+                    }}>
+                      {(() => {
+                        const grouped = clothes.reduce((acc, item) => {
+                          if (!acc[item.type]) acc[item.type] = [];
+                          acc[item.type].push(item);
+                          return acc;
+                        }, {});
+
+                        return Object.keys(CATEGORY_LABELS).map(type => (
+                          grouped[type] && grouped[type].length > 0 && (
+                            <div key={type} style={{ marginBottom: 32 }}>
+                              <h3 style={{
+                                fontWeight: 700,
+                                fontSize: 20,
+                                color: '#1b2554',
+                                margin: '0 0 20px 0',
+                                padding: '0 4px',
+                                letterSpacing: '-0.5px'
+                              }}>
+                                {CATEGORY_LABELS[type]}
+                              </h3>
+                              <div style={{ 
+                                display: 'grid', 
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                                gap: 20
+                              }}>
+                                {grouped[type].map(item => (
+                                  <div 
+                                    key={item._id} 
+                                    style={{ 
+                                      border: '2px solid #e5e7eb',
+                                      borderRadius: 16,
+                                      padding: '16px 12px',
+                                      cursor: 'pointer', 
+                                      textAlign: 'center', 
+                                      background: '#fff',
+                                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                                    }}
+                                    onClick={() => handleClothingPick(item)}
+                                    onMouseEnter={e => {
+                                      e.currentTarget.style.transform = 'translateY(-4px)';
+                                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
+                                      e.currentTarget.style.borderColor = '#1b2554';
+                                    }}
+                                    onMouseLeave={e => {
+                                      e.currentTarget.style.transform = 'translateY(0)';
+                                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)';
+                                      e.currentTarget.style.borderColor = '#e5e7eb';
+                                    }}
+                                  >
+                                    <div style={{
+                                      width: '100%',
+                                      height: '80px',
+                                      borderRadius: 12,
+                                      background: '#f8fafc',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      marginBottom: '12px',
+                                      overflow: 'hidden'
+                                    }}>
+                                      <img 
+                                        src={item.imageLink} 
+                                        alt={item.name} 
+                                        style={{ 
+                                          width: '100%', 
+                                          height: '100%', 
+                                          objectFit: 'cover',
+                                          borderRadius: 8
+                                        }} 
+                                      />
+                                    </div>
+                                    <div style={{ 
+                                      fontSize: 14, 
+                                      fontWeight: 600,
+                                      color: '#1b2554',
+                                      lineHeight: 1.3,
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap'
+                                    }}>
+                                      {item.name}
+                                    </div>
                                   </div>
-                                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</div>
-                                </div>
-                              ))}
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        )
-                      ));
-                    })()}
+                          )
+                        ));
+                      })()}
+                    </div>
+                    
                     {clothes.length === 0 && (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: 'var(--text-secondary)', textAlign: 'center' }}>
-                        No clothing items found. Add some items first!
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '200px',
+                        fontSize: 18,
+                        color: '#6b7280',
+                        textAlign: 'center'
+                      }}>
+                        No clothing items found. Add some items to your inventory first!
                       </div>
                     )}
-                  </div>
+                  </>
                 )}
               </div>
             </div>
@@ -294,31 +671,36 @@ function OutfitSlotModal({ open, onClose, onSave }) {
 }
 
 function Slot({ item, onClick, onRemove, large, readOnly, accent }) {
-  const size = large ? 120 : 70;
+  const emptyBg = '#f8fafc';
+  const filledBg = '#fff';
+  const border = '1.5px solid #e3e7ef';
+  const size = large ? 140 : 80;
   return (
-    <div className={`outfit-slot ${large ? 'outfit-slot-large' : ''}`}
-      onClick={readOnly ? undefined : onClick}
+    <div 
+      className={`outfit-slot ${large ? 'outfit-slot-large' : ''}`}
+      onClick={readOnly ? undefined : onClick} 
       style={{
-        width: size, height: size,
-        background: item ? 'var(--bg-surface)' : 'var(--bg-elevated)',
-        borderRadius: 'var(--radius-md)', border: `1px solid var(--border)`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative', cursor: readOnly ? 'default' : 'pointer',
-        overflow: 'hidden', transition: 'background 0.18s',
+        width: size,
+        height: size,
+        background: item ? filledBg : emptyBg,
+        borderRadius: 24,
+        marginRight: 0,
+        marginLeft: 0,
+        marginBottom: 0,
+        marginTop: 0,
+        boxShadow: '0 2px 8px rgba(27,37,84,0.10)',
+        border: border,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', cursor: readOnly ? 'default' : 'pointer', overflow: 'hidden',
+        transition: 'background 0.18s',
       }}
     >
       {item ? (
         <>
-          <img src={item.imageLink} alt={item.name} style={{ width: large ? 90 : 50, height: large ? 90 : 50, objectFit: 'contain', borderRadius: 10 }} />
-          {!readOnly && <button onClick={e => { e.stopPropagation(); onRemove(); }} style={{
-            position: 'absolute', top: 3, right: 3, background: 'none',
-            color: 'var(--text-muted)', border: 'none', borderRadius: '50%',
-            width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 13, cursor: 'pointer',
-          }}>&times;</button>}
+          <img src={item.imageLink} alt={item.name} style={{ width: large ? 100 : 56, height: large ? 100 : 56, objectFit: 'contain', borderRadius: 12 }} />
+          {!readOnly && <button onClick={e => { e.stopPropagation(); onRemove(); }} style={{ position: 'absolute', top: 4, right: 4, background: '#ffffff00', color: '#1b2554', border: 'none', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, cursor: 'pointer', boxShadow: '0 1px 4px rgba(27,37,84,0.10)' }}>&times;</button>}
         </>
       ) : (
-        <span style={{ color: accent || 'var(--text-muted)', fontSize: large ? 40 : 24, fontWeight: 700 }}>+</span>
+        <span style={{ color: accent || '#b0b0b0', fontSize: large ? 48 : 28, fontWeight: 700 }}>+</span>
       )}
     </div>
   );
@@ -328,7 +710,6 @@ const OutfitsPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [outfits, setOutfits] = useState([]);
   const [confirmId, setConfirmId] = useState(null);
-
   const fetchOutfits = async () => {
     try {
       const res = await apiFetch('/api/outfits');
@@ -337,7 +718,10 @@ const OutfitsPage = () => {
       const sorted = (data.outfits || []).slice().sort((a, b) => {
         const favDiff = (b.isFavorited ? 1 : 0) - (a.isFavorited ? 1 : 0);
         if (favDiff !== 0) return favDiff;
-        return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
+        
+        const nameA = (a.name || 'Untitled').toLowerCase();
+        const nameB = (b.name || 'Untitled').toLowerCase();
+        return nameA.localeCompare(nameB);
       });
       setOutfits(sorted);
     } catch (err) {
@@ -368,7 +752,10 @@ const OutfitsPage = () => {
       return updated.sort((a, b) => {
         const favDiff = (b.isFavorited ? 1 : 0) - (a.isFavorited ? 1 : 0);
         if (favDiff !== 0) return favDiff;
-        return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
+        
+        const nameA = (a.name || 'Untitled').toLowerCase();
+        const nameB = (b.name || 'Untitled').toLowerCase();
+        return nameA.localeCompare(nameB);
       });
     });
     try {
@@ -382,7 +769,9 @@ const OutfitsPage = () => {
     }
   };
 
-  const handleDelete = async (id) => setConfirmId(id);
+  const handleDelete = async (id) => {
+    setConfirmId(id);
+  };
   const confirmDelete = async () => {
     try {
       await apiFetch(`/api/outfits/${confirmId}`, { method: 'DELETE' });
@@ -394,14 +783,33 @@ const OutfitsPage = () => {
   };
 
   return (
-    <div className="outfits-page">
-      <h1 className="outfits-title">My Outfits</h1>
-      <div className="outfits-grid">
-        {/* Create New Card */}
-        <div className="outfit-card outfit-card-new" onClick={() => setShowModal(true)} aria-label="Create Outfit">
-          <span style={{ fontSize: 48, color: 'var(--text-muted)', fontWeight: 300 }}>+</span>
+    <div className="page-container" style={{ display: 'block', paddingLeft: 32, paddingRight: 16, paddingTop: 100 }}>
+  <h1 style={{ textAlign: 'left', margin: 0, marginBottom: 32, color: '#1b2554'}}>My Outfits</h1>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fill, minmax(288px, 1fr))',
+        gap: 24,
+        maxWidth: '100%'
+      }}>
+        <div
+          onClick={() => setShowModal(true)}
+          style={{
+            ...cardStyle,
+            minWidth: 288,
+            minHeight: 342,
+            height: 552,
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#b0b0b0',
+            fontSize: 64,
+            border: '2px dashed #b0b0b0',
+            background: '#fff',
+          }}
+          aria-label="Create Outfit"
+        >
+          +
         </div>
-
         {outfits.map((outfit, i) => (
           <OutfitCard key={outfit._id || i} outfit={outfit} onFavorite={handleFavorite} onDelete={handleDelete} />
         ))}
@@ -414,37 +822,82 @@ const OutfitsPage = () => {
 
 function OutfitCard({ outfit, onFavorite, onDelete }) {
   const slots = Array(8).fill(null);
-  (outfit.clothingItems || []).forEach((item, idx) => { if (idx < 8) slots[idx] = item; });
+  (outfit.clothingItems || []).forEach((item, idx) => {
+    if (idx < 8) slots[idx] = item;
+  });
   const largeSlots = [0,1,2].map(idx => slots[idx]).filter(Boolean);
   const smallSlots = [3,4,5,6,7].map(idx => slots[idx]).filter(Boolean);
+  const slotAreaBg = '#f4f6fa';
+  const slotAreaBorder = '1.5px solid #e3e7ef';
+  const [delHover, setDelHover] = useState(false);
   const delDisabled = !!outfit.isFavorited;
-
+  const [cardHover, setCardHover] = useState(false);
+  const cardHoverStyle = cardHover ? {
+    boxShadow: '0 8px 32px rgba(27,37,84,0.13)',
+    transform: 'translateY(-6px) scale(1.03)',
+    zIndex: 2,
+  } : {};
   return (
-    <div className="outfit-card">
-      {/* Header */}
-      <div className="outfit-card-header">
-        <div className="outfit-card-name">{outfit.name || 'Untitled'}</div>
-        <div className="outfit-card-actions">
-          <button className="outfit-icon-btn" onClick={() => onFavorite(outfit)} aria-label="Favorite"
-            style={{ background: outfit.isFavorited ? 'var(--accent-dim)' : 'var(--bg-elevated)' }}>
-            <StarIcon size={22} filled={!!outfit.isFavorited} />
+    <div
+      className="outfit-card"
+      style={{
+        ...cardStyle,
+        minWidth: 288,
+        minHeight: 342,
+        height: 552,
+        position: 'relative',
+        padding: 0,
+        overflow: 'visible',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'box-shadow 0.25s cubic-bezier(.4,2,.6,1), transform 0.22s cubic-bezier(.4,2,.6,1)',
+        ...cardHoverStyle,
+      }}
+      onMouseEnter={() => setCardHover(true)}
+      onMouseLeave={() => setCardHover(false)}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 18px 0 18px', minHeight: 48 }}>
+        <div style={{ fontWeight: 700, fontSize: 20, color: '#1b2554', textTransform: 'capitalize', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>
+          {outfit.name || 'Untitled'}
+        </div>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <button 
+            style={{ ...iconBtnStyle, background: outfit.isFavorited ? '#e6eaff' : '#f4f6fa' }} 
+            onClick={() => onFavorite(outfit)} 
+            aria-label="Favorite"
+            title="Star"
+          >
+            <StarIcon size={25} filled={!!outfit.isFavorited} />
           </button>
-          <button className="outfit-icon-btn" onClick={() => !delDisabled && onDelete(outfit._id)}
-            disabled={delDisabled} aria-label="Delete"
+          <button
             style={{
-              color: delDisabled ? 'var(--text-muted)' : 'var(--danger)',
-              opacity: delDisabled ? 0.4 : 1,
-              cursor: delDisabled ? 'not-allowed' : 'pointer',
-            }}>
-            <TrashIcon size={22} />
+              ...iconBtnStyle,
+              ...(delDisabled ? iconBtnDeleteDisabled : (delHover ? iconBtnDeleteHover : {})),
+            }}
+            onClick={() => !delDisabled && onDelete(outfit._id)}
+            aria-label="Delete"
+            disabled={delDisabled}
+            onMouseEnter={() => setDelHover(true)}
+            onMouseLeave={() => setDelHover(false)}
+          >
+            <TrashIcon />
           </button>
         </div>
       </div>
-
-      {/* Slot Area */}
-      <div className="outfit-slot-area">
+      <div className="outfit-slot-area" style={{
+        display: 'flex', flexDirection: 'row', gap: 18, justifyContent: 'center', alignItems: 'stretch',
+        background: slotAreaBg,
+        border: slotAreaBorder,
+        borderRadius: 22,
+        margin: '18px',
+        padding: '18px 10px',
+        flex: 1,
+        minHeight: 220,
+        boxSizing: 'border-box',
+        boxShadow: '0 2px 8px rgba(27,37,84,0.06)',
+      }}>
         {largeSlots.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'stretch', justifyContent: largeSlots.length > 1 ? 'space-between' : 'center', gap: largeSlots.length > 1 ? 0 : 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'stretch', justifyContent: largeSlots.length > 1 ? 'space-between' : 'center', gap: largeSlots.length > 1 ? 0 : 10 }}>
             {largeSlots.map((item, idx) => (
               <div key={idx} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Slot item={item} large readOnly />
@@ -453,7 +906,7 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
           </div>
         )}
         {smallSlots.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'stretch', justifyContent: smallSlots.length > 1 ? 'space-between' : 'center', gap: smallSlots.length > 1 ? 0 : 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'stretch', justifyContent: smallSlots.length > 1 ? 'space-between' : 'center', gap: smallSlots.length > 1 ? 0 : 10 }}>
             {smallSlots.map((item, idx) => (
               <div key={idx} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Slot item={item} readOnly />
@@ -466,4 +919,4 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
   );
 }
 
-export default OutfitsPage;
+export default OutfitsPage; 
