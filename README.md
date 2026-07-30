@@ -269,14 +269,3 @@ MIT
 3. Commit your changes (`git commit -m 'Add feature'`)
 4. Push to the branch (`git push origin feature`)
 5. Open a Pull Request
-
-## 🐛 Known Issues
-1. None that I know of
-
-### Future Updates
-1. A fit' of the day system/calendar
-2. Custom clothing catagories
-
-### Current Limitations
-1. **Outfit Creator UI** goes off screen for very few devices
-
