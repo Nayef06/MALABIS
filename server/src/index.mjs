@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
-dotenv.config({ path: './.env' });
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+dotenv.config({ path: fileURLToPath(new URL("../.env", import.meta.url)) });
 
 import routes from '../api/index.mjs';
 import express from "express";
@@ -25,9 +27,12 @@ app.use(cors({
   credentials: true
 }));
 
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+if (!process.env.MONGODB_URI) {
+  throw new Error("MONGODB_URI is required. Add it to server/.env.");
+}
+
+await mongoose.connect(process.env.MONGODB_URI);
+console.log("Connected to MongoDB");
 
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
@@ -50,5 +55,15 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(routes);
+
+const isMainModule = process.argv[1]
+  && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isMainModule) {
+  const port = Number(process.env.PORT) || 3000;
+  app.listen(port, () => {
+    console.log(`API server listening on http://localhost:${port}`);
+  });
+}
 
 export default app;
