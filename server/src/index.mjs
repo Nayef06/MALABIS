@@ -1,6 +1,11 @@
 import dotenv from "dotenv";
+import { existsSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+const localEnvPath = fileURLToPath(new URL("../.env.local", import.meta.url));
+if (existsSync(localEnvPath)) {
+  dotenv.config({ path: localEnvPath });
+}
 dotenv.config({ path: fileURLToPath(new URL("../.env", import.meta.url)) });
 
 import routes from '../api/index.mjs';
@@ -53,6 +58,14 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.get('/api/health', (_req, res) => {
+  const databaseConnected = mongoose.connection.readyState === 1;
+  res.status(databaseConnected ? 200 : 503).json({
+    status: databaseConnected ? 'ok' : 'unavailable',
+    database: databaseConnected ? 'connected' : 'disconnected',
+  });
+});
 
 app.use(routes);
 

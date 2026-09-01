@@ -122,13 +122,23 @@ MALABIS/
    cd ../server && npm install
    ```
 
-3. **Environment Configuration**
+3. **Start the local database**
+
+   With Docker Desktop running, start MongoDB from the project root:
+
+   ```bash
+   docker compose up -d mongodb
+   ```
+
+   Data is persisted in the `mongodb_data` Docker volume.
+
+4. **Environment Configuration**
 
    Create a `.env` file in the `/server` directory:
 
    ```env
    # Database
-   MONGODB_URI=your_mongodb_connection_string
+   MONGODB_URI=mongodb://127.0.0.1:27017/malabis
    
    # Session Management
    SESSION_SECRET=your_session_secret_key
@@ -144,7 +154,10 @@ MALABIS/
    NODE_ENV=development
    ```
 
-4. **Start the development servers**
+   You can also put local overrides in `server/.env.local`; they take precedence
+   over `server/.env` and are ignored by Git.
+
+5. **Start the development servers**
    ```bash
    # Start backend server
    cd server
@@ -155,9 +168,10 @@ MALABIS/
    npm run dev
    ```
 
-5. **Access the application**
+6. **Access the application**
    - **Frontend**: http://localhost:5173
    - **Backend API**: http://localhost:3000
+   - **Database health**: http://localhost:3000/api/health
 
 ## 📱 Application Pages
 
