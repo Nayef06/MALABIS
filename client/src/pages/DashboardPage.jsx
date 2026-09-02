@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import '../LandingPage.css';
 import './Auth.css';
 import { apiFetch } from '../api';
+import { clearDataCache } from '../dataCache';
 
 const DashboardPage = () => {
   const [user, setUser] = useState(null);
@@ -36,6 +37,7 @@ const DashboardPage = () => {
   const handleLogout = async () => {
     try {
       await apiFetch('/api/auth/logout', { method: 'POST' });
+      clearDataCache();
       navigate('/login');
     } catch (err) {
       console.error('Failed to log out', err);
@@ -69,4 +71,4 @@ const DashboardPage = () => {
   );
 };
 
-export default DashboardPage; 
+export default DashboardPage;

@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import '../LandingPage.css';
 import './OutfitsPage.css';
 import { apiFetch } from '../api';
+import {
+  addOutfit,
+  getInventory,
+  getOutfits,
+  removeOutfit,
+  updateOutfit,
+} from '../dataCache';
 
 const CATEGORY_LABELS = {
   shirt: 'Shirts',
@@ -234,12 +241,8 @@ function OutfitSlotModal({ open, onClose, onSave }) {
       setFitName('');
       setLoading(true);
       document.body.classList.add('modal-open');
-      apiFetch('/api/clothing/inventory')
-        .then(res => res.json())
-        .then(data => {
-          console.log('[OutfitSlotModal] clothing items fetched:', data.items);
-          setClothes(data.items || []);
-        })
+      getInventory()
+        .then(setClothes)
         .finally(() => setLoading(false));
     } else {
       document.body.classList.remove('modal-open');
@@ -710,12 +713,9 @@ const OutfitsPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [outfits, setOutfits] = useState([]);
   const [confirmId, setConfirmId] = useState(null);
-  const fetchOutfits = async () => {
+  const loadOutfits = async () => {
     try {
-      const res = await apiFetch('/api/outfits');
-      if (!res.ok) throw new Error('Failed to fetch outfits');
-      const data = await res.json();
-      const sorted = (data.outfits || []).slice().sort((a, b) => {
+      const sorted = (await getOutfits()).slice().sort((a, b) => {
         const favDiff = (b.isFavorited ? 1 : 0) - (a.isFavorited ? 1 : 0);
         if (favDiff !== 0) return favDiff;
         
@@ -728,7 +728,7 @@ const OutfitsPage = () => {
       setOutfits([]);
     }
   };
-  useEffect(() => { fetchOutfits(); }, []);
+  useEffect(() => { loadOutfits(); }, []);
 
   const handleSaveOutfit = async ({ name, clothingItems }) => {
     try {
@@ -738,8 +738,13 @@ const OutfitsPage = () => {
         body: JSON.stringify({ name, clothingItems }),
       });
       if (!res.ok) throw new Error('Failed to save outfit');
+      const data = await res.json();
+      const savedOutfit = addOutfit(data.outfit);
+      setOutfits(outfits => [...outfits, savedOutfit].sort((a, b) => {
+        const favDiff = Number(!!b.isFavorited) - Number(!!a.isFavorited);
+        return favDiff || (a.name || 'Untitled').localeCompare(b.name || 'Untitled');
+      }));
       setShowModal(false);
-      fetchOutfits();
     } catch (err) {
       alert('Could not save outfit.');
     }
@@ -759,13 +764,17 @@ const OutfitsPage = () => {
       });
     });
     try {
-      await apiFetch(`/api/outfits/${outfit._id}/favorite`, {
+      const response = await apiFetch(`/api/outfits/${outfit._id}/favorite`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isFavorited: newFav }),
       });
+      if (!response.ok) throw new Error('Failed to update favorite');
+      updateOutfit(outfit._id, { isFavorited: newFav });
     } catch (err) {
-      fetchOutfits();
+      setOutfits(outfits => outfits.map(o => (
+        o._id === outfit._id ? { ...o, isFavorited: !newFav } : o
+      )));
     }
   };
 
@@ -774,8 +783,10 @@ const OutfitsPage = () => {
   };
   const confirmDelete = async () => {
     try {
-      await apiFetch(`/api/outfits/${confirmId}`, { method: 'DELETE' });
-      setOutfits(outfits => outfits.filter(o => o._id !== confirmId));
+      const response = await apiFetch(`/api/outfits/${confirmId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete outfit');
+      const cachedOutfits = removeOutfit(confirmId);
+      setOutfits(cachedOutfits || (outfits => outfits.filter(o => o._id !== confirmId)));
       setConfirmId(null);
     } catch (err) {
       setConfirmId(null);
@@ -919,4 +930,4 @@ function OutfitCard({ outfit, onFavorite, onDelete }) {
   );
 }
 
-export default OutfitsPage; 
+export default OutfitsPage;

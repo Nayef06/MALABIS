@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api';
+import { clearDataCache } from '../dataCache';
+import packageJson from '../../package.json';
 
 const EditIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -151,13 +153,14 @@ const AccountPage = () => {
   const handleLogout = async () => {
     try {
       await apiFetch('/api/auth/logout', { method: 'POST' });
+      clearDataCache();
       navigate('/login');
     } catch (err) {
     }
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container" style={{ position: 'relative', minHeight: '100vh' }}>
       <Popup show={popup.show} type={popup.type}>{popup.message}</Popup>
       <div className="auth-form">
         <h2>Account Settings</h2>
@@ -232,8 +235,11 @@ const AccountPage = () => {
         </div>
         <button onClick={handleLogout} className="auth-button" style={{ marginTop: 24, background: '#1b2554' }}>Logout</button>
       </div>
+      <div style={{ position: 'absolute', bottom: 16, color: '#a0aec0', fontSize: 13 }}>
+        v{packageJson.version}
+      </div>
     </div>
   );
 };
 
-export default AccountPage; 
+export default AccountPage;

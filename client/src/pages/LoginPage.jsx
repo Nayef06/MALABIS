@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
 import bg from '../assets/bg5.png';
 import { apiFetch } from '../api';
+import { clearDataCache } from '../dataCache';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -23,6 +24,7 @@ const LoginPage = () => {
       });
 
       if (response.ok) {
+        clearDataCache();
         navigate('/clothes');
       } else {
         setError('Invalid username or password. Please try again.');
@@ -77,4 +79,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;

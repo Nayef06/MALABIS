@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../LandingPage.css';
 import './GeneratorPage.css';
 import { apiFetch } from '../api';
+import { addOutfit, getInventory } from '../dataCache';
 
 const CLOTHING_TYPES = [
   { id: 'shirt', label: 'Shirt', icon: '👕' },
@@ -787,11 +788,7 @@ const GeneratorPage = () => {
   useEffect(() => {
     const fetchInventory = async () => {
       try {
-        const response = await apiFetch('/api/clothing/inventory');
-        if (response.ok) {
-          const data = await response.json();
-          setInventory(data.items || []);
-        }
+        setInventory(await getInventory());
       } catch (error) {
         console.error('Failed to fetch inventory:', error);
       }
@@ -882,6 +879,8 @@ const GeneratorPage = () => {
         }),
       });
       if (response.ok) {
+        const data = await response.json();
+        addOutfit(data.outfit);
         setPopupMessage('Outfit saved successfully!');
         setPopupType('success');
         setShowPopup(true);
@@ -1046,4 +1045,4 @@ const GeneratorPage = () => {
   );
 };
 
-export default GeneratorPage; 
+export default GeneratorPage;
