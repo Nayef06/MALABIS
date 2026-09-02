@@ -17,6 +17,7 @@ import session from "express-session";
 import MongoStore from "connect-mongo";
 import "./strategies/local-strategy.mjs";
 import cors from "cors";
+import { initializeRedis, redisStatus } from "./utils/redis.mjs";
 
 const app = express();
 app.set('trust proxy', 1);
@@ -38,6 +39,7 @@ if (!process.env.MONGODB_URI) {
 
 await mongoose.connect(process.env.MONGODB_URI);
 console.log("Connected to MongoDB");
+await initializeRedis();
 
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
@@ -64,6 +66,7 @@ app.get('/api/health', (_req, res) => {
   res.status(databaseConnected ? 200 : 503).json({
     status: databaseConnected ? 'ok' : 'unavailable',
     database: databaseConnected ? 'connected' : 'disconnected',
+    redis: redisStatus(),
   });
 });
 

@@ -6,6 +6,11 @@ import { checkSchema, validationResult } from "express-validator";
 import { User } from "../models/user.mjs";
 import multer from "multer";
 import { uploadToCloudinary } from "../utils/cloudinary.mjs";
+import {
+  getUserInventory,
+  invalidateInventory,
+  invalidateUserData,
+} from "../services/userData.mjs";
 
 const router = Router()
 
@@ -29,8 +34,9 @@ router.get("/api/clothing", async (req, res) => {
   }
 
   try {
-    const user = await User.findById(req.user._id).populate('inventory');
-    res.json({ inventory: user.inventory });
+    const { data, cacheHit } = await getUserInventory(req.user._id);
+    res.set("X-Cache", cacheHit ? "HIT" : "MISS");
+    res.json({ inventory: data });
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
@@ -64,6 +70,7 @@ router.post(
       const user = await User.findById(req.user._id);
       user.inventory.push(savedItem._id);
       await user.save();
+      await invalidateInventory(req.user._id);
 
       res.status(201).json({ item: savedItem });
     } catch (err) {
@@ -78,8 +85,9 @@ router.get("/api/clothing/inventory", async (req, res) => {
     return res.sendStatus(401);
   }
   try {
-    const items = await ClothingItem.find({ _id: { $in: req.user.inventory } });
-    res.json({ items });
+    const { data, cacheHit } = await getUserInventory(req.user._id);
+    res.set("X-Cache", cacheHit ? "HIT" : "MISS");
+    res.json({ items: data });
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
@@ -97,6 +105,7 @@ router.delete("/api/clothing/:id", async (req, res) => {
     user.inventory = user.inventory.filter(id => String(id) !== itemId);
     await user.save();
     await ClothingItem.findByIdAndDelete(itemId);
+    await invalidateUserData(req.user._id);
     res.sendStatus(204);
   } catch (err) {
     console.error(err);
@@ -117,6 +126,7 @@ router.patch("/api/clothing/:id/favorite", async (req, res) => {
     if (!item) return res.sendStatus(404);
     item.isFavorited = !!isFavorited;
     await item.save();
+    await invalidateUserData(req.user._id);
     res.json({ item });
   } catch (err) {
     console.error(err);
@@ -154,4 +164,4 @@ router.post("/api/clothing/upload", upload.single('image'), async (req, res) => 
   }
 });
 
-export default router 
+export default router

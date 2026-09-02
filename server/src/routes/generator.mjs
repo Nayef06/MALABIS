@@ -1,6 +1,5 @@
 import { Router } from "express";
-import { ClothingItem } from "../models/clothingItem.mjs";
-import { User } from "../models/user.mjs";
+import { getUserInventory } from "../services/userData.mjs";
 
 const router = Router();
 
@@ -14,8 +13,7 @@ router.post("/api/generator/generate", async (req, res) => {
   }
 
   try {
-    const user = await User.findById(req.user._id);
-    const inventory = await ClothingItem.find({ _id: { $in: user.inventory } });
+    const { data: inventory } = await getUserInventory(req.user._id);
     
     const itemsByType = inventory.reduce((acc, item) => {
       if (!acc[item.type]) acc[item.type] = [];
@@ -85,4 +83,4 @@ router.post("/api/generator/generate", async (req, res) => {
   }
 });
 
-export default router; 
+export default router;

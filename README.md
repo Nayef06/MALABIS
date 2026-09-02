@@ -30,6 +30,7 @@ MALABIS is a full-stack web application that revolutionizes wardrobe management 
 ### Backend
 - **Node.js + Express** – RESTful API server with middleware
 - **MongoDB + Mongoose** – NoSQL database with ODM
+- **Redis** – Read-through caching for wardrobes and saved outfits
 - **Passport.js** – Authentication middleware with local strategy
 - **Cloudinary** – Cloud image storage and transformation
 - **Multer** – File upload handling
@@ -127,10 +128,10 @@ MALABIS/
    With Docker Desktop running, start MongoDB from the project root:
 
    ```bash
-   docker compose up -d mongodb
+   docker compose up -d mongodb redis
    ```
 
-   Data is persisted in the `mongodb_data` Docker volume.
+   Data is persisted in the `mongodb_data` and `redis_data` Docker volumes.
 
 4. **Environment Configuration**
 
@@ -139,6 +140,8 @@ MALABIS/
    ```env
    # Database
    MONGODB_URI=mongodb://127.0.0.1:27017/malabis
+   REDIS_URL=redis://127.0.0.1:6379
+   CACHE_TTL_SECONDS=300
    
    # Session Management
    SESSION_SECRET=your_session_secret_key
@@ -226,6 +229,8 @@ MALABIS/
 ### Environment Variables for Production
 ```env
 MONGODB_URI=your_production_mongodb_uri
+REDIS_URL=your_production_redis_url
+CACHE_TTL_SECONDS=300
 SESSION_SECRET=your_production_session_secret
 COOKIE_SECRET=your_production_cookie_secret
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
