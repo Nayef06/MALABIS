@@ -26,7 +26,12 @@ router.post(
 );
 
 router.get("/api/auth/status", (req, res) => {
-  return req.user ? res.send(req.user) : res.sendStatus(401);
+  if (!req.user) return res.sendStatus(401);
+  return res.json({
+    _id: req.user._id,
+    username: req.user.username,
+    displayName: req.user.displayName,
+  });
 });
 
 router.post("/api/auth/logout", (req, res) => {

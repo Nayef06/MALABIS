@@ -1,82 +1,37 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './Auth.css';
-import bg from '../assets/bg5.png';
+import AuthShell from '../components/AuthShell';
+import { Icon } from '../components/Icons';
 import { apiFetch } from '../api';
 import { clearDataCache } from '../dataCache';
+import './Auth.css';
 
-const LoginPage = () => {
+export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError(''); 
+  const handleSubmit = async (event) => {
+    event.preventDefault(); setError(''); setSubmitting(true);
     try {
-      const response = await apiFetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (response.ok) {
-        clearDataCache();
-        navigate('/clothes');
-      } else {
-        setError('Invalid username or password. Please try again.');
-      }
-    } catch (error) {
-      setError('An error occurred during login. Please try again later.');
-      console.error('An error occurred during login:', error);
-    }
+      const response = await apiFetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+      if (!response.ok) throw new Error('That username and password did not match.');
+      clearDataCache(); navigate('/clothes');
+    } catch (err) { setError(err.message || 'We could not open your wardrobe just now.'); }
+    finally { setSubmitting(false); }
   };
 
   return (
-    <div 
-      className="auth-container"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${bg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        minHeight: '100vh'
-      }}
-    >
-      <form className="auth-form" onSubmit={handleLogin}>
-        <button type="button" className="close-btn" onClick={() => navigate('/')}>×</button>
-        <h2>Login</h2>
-        {error && <p className="auth-error">{error}</p>}
-        <div className="form-group">
-          <label htmlFor="username">Username</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" className="auth-button">Login</button>
-        <p className="auth-switch">
-          Don't have an account? <Link to="/signup">Sign up</Link>
-        </p>
+    <AuthShell eyebrow="Welcome back" title="Come on in." note="Your clothes have been right where you left them.">
+      <form className="auth-fields" onSubmit={handleSubmit}>
+        {error && <p className="form-error" role="alert">{error}</p>}
+        <div className="field"><label htmlFor="username">Username</label><input className="input" id="username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" required /></div>
+        <div className="field"><label htmlFor="password">Password</label><input className="input" id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required /></div>
+        <button className="button button--rose button--wide" disabled={submitting}>{submitting ? 'Opening…' : <>Open my closet <Icon name="arrow" size={17}/></>}</button>
+        <p className="auth-switch">New here? <Link to="/signup">Make a wardrobe</Link></p>
       </form>
-    </div>
+    </AuthShell>
   );
-};
-
-export default LoginPage;
+}

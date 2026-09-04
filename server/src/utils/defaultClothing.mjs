@@ -61,7 +61,7 @@ export const defaultClothingItems = {
     {
       "name": "BAGGY B",
       "color": "black",
-      "image": "https://noeaudesigners.com/cdn/shop/files/noeau-baggy-fit-denim-jeans-black-pant-mens-clothing-476.webp?v=1715062345"
+      "image": "https://parkeofficial.com/cdn/shop/files/background_removal_TUFIR3YzMXJCNFUjMSM2Y2FmMjhhNTNhMzRiYzBiNTFlMTQ3ZGQxNmEyZTRmMCMxNTAwIyNUUkFOU0ZPUk1BVElPTl9SRVFVRVNU.png?v=1776094022"
     },
     {
       "name": "NIKE TECH",

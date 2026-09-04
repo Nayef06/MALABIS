@@ -13,6 +13,7 @@ function readStoredCache() {
 const cache = {
   inventory: null,
   outfits: null,
+  profile: null,
   ...readStoredCache(),
 };
 
@@ -90,6 +91,41 @@ export function getOutfits() {
   return loadOnce('outfits', '/api/outfits', 'outfits');
 }
 
+function safeProfile(profile = {}) {
+  return {
+    _id: profile._id || '',
+    username: profile.username || '',
+    displayName: profile.displayName || '',
+  };
+}
+
+export function getProfile() {
+  if (cache.profile && typeof cache.profile === 'object' && !Array.isArray(cache.profile)) {
+    cache.profile = safeProfile(cache.profile);
+    return Promise.resolve(cache.profile);
+  }
+  if (pending.profile) return pending.profile;
+
+  pending.profile = apiFetch('/api/auth/status')
+    .then(async response => {
+      if (!response.ok) throw new Error('Failed to load profile');
+      cache.profile = safeProfile(await response.json());
+      persist();
+      return cache.profile;
+    })
+    .finally(() => {
+      delete pending.profile;
+    });
+
+  return pending.profile;
+}
+
+export function updateProfile(changes) {
+  cache.profile = safeProfile({ ...(cache.profile || {}), ...changes });
+  persist();
+  return cache.profile;
+}
+
 export function addOutfit(outfit) {
   const inventoryById = new Map((cache.inventory || []).map(item => [item._id, item]));
   const hydrated = {
@@ -115,8 +151,10 @@ export function removeOutfit(outfitId) {
 export function clearDataCache() {
   cache.inventory = null;
   cache.outfits = null;
+  cache.profile = null;
   delete pending.inventory;
   delete pending.outfits;
+  delete pending.profile;
   try {
     sessionStorage.removeItem(STORAGE_KEY);
   } catch {

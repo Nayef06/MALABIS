@@ -1,74 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import '../LandingPage.css';
-import './Auth.css';
-import { apiFetch } from '../api';
-import { clearDataCache } from '../dataCache';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Icon } from '../components/Icons';
+import { getProfile } from '../dataCache';
+import './AccountPage.css';
 
-const DashboardPage = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchStatus = async () => {
-      try {
-        const response = await apiFetch('/api/auth/status');
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data);
-        } else {
-          setError('Not authenticated. Redirecting to login...');
-          setTimeout(() => navigate('/login'), 2000);
-        }
-      } catch (err) {
-        setError('An error occurred while fetching the status.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStatus();
-  }, [navigate]);
-
-  const handleLogout = async () => {
-    try {
-      await apiFetch('/api/auth/logout', { method: 'POST' });
-      clearDataCache();
-      navigate('/login');
-    } catch (err) {
-      console.error('Failed to log out', err);
-    }
-  };
-
-  if (loading) {
-    return <div className="auth-container"><div>Loading...</div></div>;
-  }
-
-  if (error) {
-    return <div className="auth-container"><div>{error}</div></div>;
-  }
-
-  return (
-    <>
-      <Navbar />
-      <div className="auth-container">
-        <div className="auth-form">
-          <h2>Welcome, {user.displayName}</h2>
-          <div className="dashboard-info">
-            <p>Here is your full session data:</p>
-            <pre>{JSON.stringify(user, null, 2)}</pre>
-          </div>
-          <button onClick={handleLogout} className="auth-button">
-            Logout
-          </button>
-        </div>
-      </div>
-    </>
-  );
-};
-
-export default DashboardPage;
+export default function DashboardPage(){
+  const [user,setUser]=useState(null);const [loading,setLoading]=useState(true);const navigate=useNavigate();
+  useEffect(()=>{getProfile().then(setUser).catch(()=>navigate('/login')).finally(()=>setLoading(false))},[navigate]);
+  if(loading)return <div className="utility-loading">Waking up your wardrobe…</div>;
+  return <div className="page welcome-page"><section className="welcome-note"><p className="eyebrow">A note on your door</p><h1>Hello, {user?.displayName||'you'}.</h1><p>Your small fashion world is ready when you are. Start with what you own, or let chance make the first move.</p><div className="button-row"><Link className="button button--rose" to="/clothes"><Icon name="hanger"/>Open my closet</Link><Link className="button button--paper" to="/generator"><Icon name="sparkle"/>Make a look</Link></div><span className="welcome-note__tape"/></section></div>
+}

@@ -1,87 +1,37 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './Auth.css';
-import bg from '../assets/bg5.png';
+import AuthShell from '../components/AuthShell';
+import { Icon } from '../components/Icons';
 import { apiFetch } from '../api';
+import './Auth.css';
 
-const SignupPage = () => {
-  const [username, setUsername] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [password, setPassword] = useState('');
+export default function SignupPage() {
+  const [form, setForm] = useState({ username: '', displayName: '', password: '' });
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+  const update = (key) => (event) => setForm((value) => ({ ...value, [key]: event.target.value }));
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault(); setError(''); setSubmitting(true);
     try {
-      const response = await apiFetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, displayName, password }),
-      });
-
-      if (response.ok) {
-        navigate('/login');
-      } else {
-        console.error('Signup failed');
-      }
-    } catch (error) {
-      console.error('An error occurred during signup:', error);
-    }
+      const response = await apiFetch('/api/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || 'We could not make that account. Try a different username.'); }
+      navigate('/login');
+    } catch (err) { setError(err.message); }
+    finally { setSubmitting(false); }
   };
 
   return (
-    <div 
-      className="auth-container"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${bg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        minHeight: '100vh'
-      }}
-    >
-      <form className="auth-form" onSubmit={handleSignup}>
-        <button type="button" className="close-btn" onClick={() => navigate('/')}>×</button>
-        <h2>Sign Up</h2>
-        <div className="form-group">
-          <label htmlFor="username">Username</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="displayName">Display Name</label>
-          <input
-            type="text"
-            id="displayName"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" className="auth-button">Sign Up</button>
-        <p className="auth-switch">
-          Already have an account? <Link to="/login">Login</Link>
-        </p>
+    <AuthShell eyebrow="A room of your own" title="Make it yours." note="Start with a few details. We’ll leave plenty of space for your style.">
+      <form className="auth-fields" onSubmit={handleSubmit}>
+        {error && <p className="form-error" role="alert">{error}</p>}
+        <div className="field"><label htmlFor="displayName">What should we call you?</label><input className="input" id="displayName" value={form.displayName} onChange={update('displayName')} autoComplete="name" minLength="3" required /></div>
+        <div className="field"><label htmlFor="username">Username</label><input className="input" id="username" value={form.username} onChange={update('username')} autoComplete="username" required /></div>
+        <div className="field"><label htmlFor="password">Password</label><input className="input" id="password" type="password" value={form.password} onChange={update('password')} autoComplete="new-password" minLength="8" required /><small>At least 8 characters</small></div>
+        <button className="button button--rose button--wide" disabled={submitting}>{submitting ? 'Making space…' : <>Begin my closet <Icon name="arrow" size={17}/></>}</button>
+        <p className="auth-switch">Already have a corner here? <Link to="/login">Log in</Link></p>
       </form>
-    </div>
+    </AuthShell>
   );
-};
-
-export default SignupPage;
+}
