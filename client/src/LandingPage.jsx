@@ -14,7 +14,7 @@ const WardrobeScene = () => (
       <path className="scene-line" d="M350 129v431M153 220h394M177 197h151M372 197h151"/><path className="scene-line scene-line--thin" d="M170 579h360M210 602v-42M490 602v-42"/>
       <g className="hanging hanging--shirt">
         <path className="hanger-line" d="m200 190 39-25 39 25M239 165c-11-6-3-21 7-18 6 2 7 8 4 12"/>
-        <path className="garment-fill garment-fill--rose" d="m198 197 25-15c5 9 27 9 32 0l25 15-13 31-12-5v111h-64V223l-12 5-13-31 32-15"/><path className="garment-stitch" d="M214 314c15 5 27 5 42 0"/>
+        <path className="garment-fill garment-fill--rose" d="M223 182c5 9 27 9 32 0l32 15 13 31-17 5-12-10v111h-64V223l-12 10-17-5 13-31Z"/><path className="garment-stitch" d="M218 314c15 5 27 5 42 0"/>
       </g>
       <g className="hanging hanging--jacket">
         <path className="hanger-line" d="m390 190 39-25 39 25M429 165c-11-6-3-21 7-18 6 2 7 8 4 12"/>
@@ -24,7 +24,7 @@ const WardrobeScene = () => (
       <g className="shoe-pair"><path className="garment-fill garment-fill--cream" d="M391 474c18 4 30-6 34-27l26 17c15 10 35 12 44 20 7 6 6 19-3 24H391c-13 0-14-21 0-34Z"/><path className="garment-stitch" d="M393 493h98M436 463l-13 25"/><path className="garment-fill garment-fill--cream" d="M385 517c19 4 30-5 34-24l22 14c17 11 39 12 48 20 7 6 6 18-3 23H385c-13 0-14-20 0-33Z"/></g>
       <circle className="scene-knob" cx="339" cy="388" r="5"/><circle className="scene-knob" cx="361" cy="388" r="5"/>
     </svg>
-    <p className="wardrobe-scene__note">today’s little possibility <span>↗</span></p><div className="wardrobe-scene__label">look no. 01</div>
+    <p className="wardrobe-scene__note">today’s outfit <span>↘</span></p><div className="wardrobe-scene__label">look no. 01</div>
   </div>
 );
 
