@@ -2,7 +2,7 @@
 
 MALABIS is a full-stack web application that revolutionizes wardrobe management through intelligent outfit generation. Upload your clothes, organize them systematically, and discover new outfit combinations that elevate your personal style.
 
-## 🚀 Features
+## Features
 
 ### Core Functionality
 - **Smart Wardrobe Management** – Upload, categorize, and organize your clothing items with automatic background removal
@@ -19,7 +19,7 @@ MALABIS is a full-stack web application that revolutionizes wardrobe management 
 - **Smart Categorization** – Automatic clothing type detection and organization
 - **Color Management** – Track and filter items by color
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - **React 18** – Modern React with hooks and functional components
@@ -44,7 +44,7 @@ MALABIS is a full-stack web application that revolutionizes wardrobe management 
 - **MongoDB Atlas** – Cloud database hosting
 - **Cloudinary** – Cloud image hosting and CDN
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 MALABIS/
@@ -97,7 +97,7 @@ MALABIS/
 └── README.md
 ```
 
-## 🧰 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -176,7 +176,7 @@ MALABIS/
    - **Backend API**: http://localhost:3000
    - **Database health**: http://localhost:3000/api/health
 
-## 📱 Application Pages
+## Application Pages
 
 ### Public Pages
 - **`/`** – Landing page with signup/login options
@@ -190,7 +190,7 @@ MALABIS/
 - **`/generator`** – Smart outfit generation
 - **`/account`** – User profile and settings
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Authentication
 - `POST /api/auth/signup` – User registration
@@ -213,7 +213,7 @@ MALABIS/
 - `POST /api/generator` – Generate outfit suggestions
 - `GET /api/generator/inventory` – Get user's clothing inventory
 
-## 🚀 Deployment
+## Deployment
 
 ### Frontend Deployment (Vercel)
 1. Connect your GitHub repository to Vercel
@@ -239,7 +239,7 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 NODE_ENV=production
 ```
 
-## 🎨 Key Features in Detail
+## Key Features in Detail
 
 ### Smart Wardrobe Management
 - **Automatic Background Removal**: Upload clothing items with automatic background removal for clean, professional-looking images
@@ -258,7 +258,7 @@ NODE_ENV=production
 - **Smooth Animations**: Polished UI with smooth transitions and loading states
 - **Error Handling**: Comprehensive error handling with user-friendly messages
 
-## 🔧 Development
+## Development
 
 ### Available Scripts
 
@@ -275,16 +275,3 @@ npm run lint     # Run ESLint
 npm run dev      # Start development server with nodemon
 npm start        # Start production server
 ```
-
-
-## 📄 License
-
-MIT 
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature`)
-3. Commit your changes (`git commit -m 'Add feature'`)
-4. Push to the branch (`git push origin feature`)
-5. Open a Pull Request
