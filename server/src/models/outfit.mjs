@@ -4,6 +4,7 @@ const OutfitSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    trim: true,
   },
   clothingItems: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -16,4 +17,4 @@ const OutfitSchema = new mongoose.Schema({
   },
 });
 
-export const Outfit = mongoose.model("Outfit", OutfitSchema); 
+export const Outfit = mongoose.model("Outfit", OutfitSchema);

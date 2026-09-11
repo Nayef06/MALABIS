@@ -10,8 +10,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const findUser = await User.findById(id);
-    if (!findUser) throw new Error("user not found");
-    done(null, findUser);
+    done(null, findUser || false);
   } catch (error) {
     done(error, null);
   }
@@ -21,17 +20,19 @@ passport.use(
   new Strategy(async (username, password, done) => {
     try {
       const findUser = await User.findOne({ username: username.toLowerCase() });
-      if (!findUser) throw new Error("user not found");
-
-      if (!comparePassword(password, findUser.password)) {
-        throw new Error("Bad Password");
+      if (!findUser) {
+        return done(null, false, { message: "Invalid username or password." });
       }
 
-      done(null, findUser);
+      if (!comparePassword(password, findUser.password)) {
+        return done(null, false, { message: "Invalid username or password." });
+      }
+
+      return done(null, findUser);
     } catch (err) {
-      done(err, null);
+      return done(err, null);
     }
   })
 );
 
-export default passport; 
+export default passport;

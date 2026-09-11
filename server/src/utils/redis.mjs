@@ -43,6 +43,7 @@ export async function initializeRedis() {
     .catch((error) => {
       // Redis is an optimization. Keep the API available if it is down.
       console.error("Redis unavailable; continuing without cache:", error.message);
+      client = undefined;
       return null;
     })
     .finally(() => {

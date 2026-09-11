@@ -1,167 +1,172 @@
 import { Router } from "express";
-import "../strategies/local-strategy.mjs";
 import { ClothingItem } from "../models/clothingItem.mjs";
-import { clothingItemValidationSchema } from "../utils/validationSchemas.mjs";
-import { checkSchema, validationResult } from "express-validator";
+import { Outfit } from "../models/outfit.mjs";
+import {
+  clothingItemValidationSchema,
+  favoriteValidationSchema,
+  resourceIdValidationSchema,
+} from "../utils/validationSchemas.mjs";
+import { checkSchema } from "express-validator";
 import { User } from "../models/user.mjs";
 import multer from "multer";
 import { uploadToCloudinary } from "../utils/cloudinary.mjs";
+import {
+  asyncHandler,
+  requireAuthentication,
+  validateRequest,
+} from "../utils/helpers.mjs";
 import {
   getUserInventory,
   invalidateInventory,
   invalidateUserData,
 } from "../services/userData.mjs";
 
-const router = Router()
+const router = Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 5 * 1024 * 1024, 
+    fileSize: 5 * 1024 * 1024,
   },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed'), false);
-    }
+  fileFilter: (_req, file, callback) => {
+    const isImage = file.mimetype?.startsWith("image/");
+    callback(isImage ? null : new Error("Only image files are allowed"), isImage);
   },
 });
 
-router.get("/api/clothing", async (req, res) => {
-  if (!req.user) {
-    return res.sendStatus(401); 
-  }
+async function sendInventory(req, res) {
+  const { data, cacheHit } = await getUserInventory(req.user._id);
+  res.set("X-Cache", cacheHit ? "HIT" : "MISS");
+  return data;
+}
 
-  try {
-    const { data, cacheHit } = await getUserInventory(req.user._id);
-    res.set("X-Cache", cacheHit ? "HIT" : "MISS");
-    res.json({ inventory: data });
-  } catch (err) {
-    console.error(err);
-    res.sendStatus(500);
-  }
-}); 
+router.get(
+  "/api/clothing",
+  requireAuthentication,
+  asyncHandler(async (req, res) => {
+    const inventory = await sendInventory(req, res);
+    res.json({ inventory });
+  }),
+);
 
 router.post(
   "/api/clothing",
+  requireAuthentication,
   checkSchema(clothingItemValidationSchema),
-  async (req, res) => {
-    if (!req.user) {
-      return res.sendStatus(401);
-    }
-   
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+  validateRequest,
+  asyncHandler(async (req, res) => {
+    const newItem = new ClothingItem({
+      type: req.body.type,
+      color: req.body.color,
+      name: req.body.name,
+      imageLink: req.body.imageLink,
+    });
 
+    let savedItem;
     try {
-      const newItem = new ClothingItem({
-        type: req.body.type,
-        color: req.body.color,
-        name: req.body.name,
-        imageLink: req.body.imageLink,
-        id: req.body.id,
-      });
+      savedItem = await newItem.save();
 
-      const savedItem = await newItem.save();
+      const owner = await User.findByIdAndUpdate(
+        req.user._id,
+        { $push: { inventory: savedItem._id } },
+      );
+      if (!owner) {
+        await ClothingItem.findByIdAndDelete(savedItem._id);
+        return res.status(401).json({ error: "Authentication required." });
+      }
 
-      const user = await User.findById(req.user._id);
-      user.inventory.push(savedItem._id);
-      await user.save();
       await invalidateInventory(req.user._id);
-
-      res.status(201).json({ item: savedItem });
+      return res.status(201).json({ item: savedItem });
     } catch (err) {
-      console.error(err);
-      res.sendStatus(500);
+      if (savedItem) {
+        await ClothingItem.findByIdAndDelete(savedItem._id).catch(() => {});
+      }
+      throw err;
     }
-  }
+  }),
 );
 
-router.get("/api/clothing/inventory", async (req, res) => {
-  if (!req.user) {
-    return res.sendStatus(401);
-  }
-  try {
-    const { data, cacheHit } = await getUserInventory(req.user._id);
-    res.set("X-Cache", cacheHit ? "HIT" : "MISS");
-    res.json({ items: data });
-  } catch (err) {
-    console.error(err);
-    res.sendStatus(500);
-  }
-});
+router.get(
+  "/api/clothing/inventory",
+  requireAuthentication,
+  asyncHandler(async (req, res) => {
+    const inventory = await sendInventory(req, res);
+    res.json({ items: inventory });
+  }),
+);
 
-router.delete("/api/clothing/:id", async (req, res) => {
-  if (!req.user) return res.sendStatus(401);
-  const itemId = req.params.id;
-  try {
-    const user = await User.findById(req.user._id);
-    if (!user.inventory.map(String).includes(itemId)) {
-      return res.status(403).json({ error: 'Not authorized to delete this item.' });
+router.delete(
+  "/api/clothing/:id",
+  requireAuthentication,
+  checkSchema(resourceIdValidationSchema),
+  validateRequest,
+  asyncHandler(async (req, res) => {
+    const itemId = req.params.id;
+    const owner = await User.findOneAndUpdate(
+      { _id: req.user._id, inventory: itemId },
+      { $pull: { inventory: itemId } },
+    );
+    if (!owner) {
+      return res.status(403).json({ error: "Not authorized to delete this item." });
     }
-    user.inventory = user.inventory.filter(id => String(id) !== itemId);
-    await user.save();
-    await ClothingItem.findByIdAndDelete(itemId);
+
+    await Promise.all([
+      ClothingItem.findByIdAndDelete(itemId),
+      Outfit.updateMany(
+        { _id: { $in: owner.outfits } },
+        { $pull: { clothingItems: itemId } },
+      ),
+    ]);
     await invalidateUserData(req.user._id);
-    res.sendStatus(204);
-  } catch (err) {
-    console.error(err);
-    res.sendStatus(500);
-  }
-});
+    return res.sendStatus(204);
+  }),
+);
 
-router.patch("/api/clothing/:id/favorite", async (req, res) => {
-  if (!req.user) return res.sendStatus(401);
-  const itemId = req.params.id;
-  const { isFavorited } = req.body;
-  try {
-    const user = await User.findById(req.user._id);
-    if (!user.inventory.map(String).includes(itemId)) {
-      return res.status(403).json({ error: 'Not authorized to favorite this item.' });
+router.patch(
+  "/api/clothing/:id/favorite",
+  requireAuthentication,
+  checkSchema(favoriteValidationSchema),
+  validateRequest,
+  asyncHandler(async (req, res) => {
+    const itemId = req.params.id;
+    const ownsItem = await User.exists({ _id: req.user._id, inventory: itemId });
+    if (!ownsItem) {
+      return res.status(403).json({ error: "Not authorized to favorite this item." });
     }
+
     const item = await ClothingItem.findById(itemId);
     if (!item) return res.sendStatus(404);
-    item.isFavorited = !!isFavorited;
+    item.isFavorited = req.body.isFavorited;
     await item.save();
     await invalidateUserData(req.user._id);
-    res.json({ item });
-  } catch (err) {
-    console.error(err);
-    res.sendStatus(500);
-  }
-});
+    return res.json({ item });
+  }),
+);
 
-
-router.post("/api/clothing/upload", upload.single('image'), async (req, res) => {
-  if (!req.user) {
-    return res.sendStatus(401);
-  }
-
-  if (!req.file) {
-    return res.status(400).json({ error: 'No image file provided' });
-  }
-
-  const shouldRemoveBackground = req.body.removeBackground === 'true';
-
-  try {
-    const uploadResult = await uploadToCloudinary(req.file, shouldRemoveBackground);
-    
-    if (!uploadResult.success) {
-      return res.status(500).json({ error: uploadResult.error || 'Failed to upload image' });
+router.post(
+  "/api/clothing/upload",
+  requireAuthentication,
+  upload.single("image"),
+  asyncHandler(async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No image file provided" });
     }
 
-    res.json({ 
-      success: true, 
-      imageUrl: uploadResult.url,
-      publicId: uploadResult.publicId
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ error: 'Failed to upload image' });
-  }
-});
+    const shouldRemoveBackground = req.body.removeBackground === "true";
+    const uploadResult = await uploadToCloudinary(req.file, shouldRemoveBackground);
 
-export default router
+    if (!uploadResult.success) {
+      return res.status(502).json({
+        error: uploadResult.error || "Failed to upload image",
+      });
+    }
+
+    return res.json({
+      success: true,
+      imageUrl: uploadResult.url,
+      publicId: uploadResult.publicId,
+    });
+  }),
+);
+
+export default router;

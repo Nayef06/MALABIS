@@ -8,7 +8,9 @@
   },
   "scripts": {
     "start": "node src/index.mjs",
-    "dev": "nodemon src/index.mjs"
+    "dev": "nodemon src/index.mjs",
+    "test": "node --test --test-concurrency=1",
+    "test:coverage": "node --test --test-concurrency=1 --experimental-test-coverage"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

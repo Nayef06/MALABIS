@@ -5,10 +5,13 @@ const UserSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.String,
     required: true,
     unique: true,
+    lowercase: true,
+    trim: true,
   },
   displayName: {
     type: mongoose.Schema.Types.String,
     required: true,
+    trim: true,
   },
   password: {
     type: mongoose.Schema.Types.String,
@@ -26,4 +29,4 @@ const UserSchema = new mongoose.Schema({
   }],
 });
 
-export const User = mongoose.model("User", UserSchema); 
+export const User = mongoose.model("User", UserSchema);

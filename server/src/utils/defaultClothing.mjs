@@ -114,35 +114,17 @@ const categoryToTypeMap = {
   "Accessories": "accessory"
 };
 
-/**
- * Creates default clothing items for a new user
- * @param {string} userId - The user's ID
- * @returns {Promise<Array>} Array of created clothing item IDs
- */
-export async function createDefaultClothingItems(userId) {
-  const createdItemIds = [];
-  
-  try {
-    for (const [category, items] of Object.entries(defaultClothingItems)) {
-      const type = categoryToTypeMap[category];
-      
-      for (const item of items) {
-        const clothingItem = new ClothingItem({
-          type: type,
-          color: item.color,
-          name: item.name,
-          imageLink: item.image,
-          isFavorited: false,
-        });
-        
-        const savedItem = await clothingItem.save();
-        createdItemIds.push(savedItem._id);
-      }
-    }
-    
-    return createdItemIds;
-  } catch (error) {
-    console.error('Error creating default clothing items:', error);
-    throw error;
-  }
-} 
+export async function createDefaultClothingItems() {
+  const items = Object.entries(defaultClothingItems).flatMap(
+    ([category, categoryItems]) => categoryItems.map((item) => ({
+      type: categoryToTypeMap[category],
+      color: item.color,
+      name: item.name,
+      imageLink: item.image,
+      isFavorited: false,
+    })),
+  );
+
+  const createdItems = await ClothingItem.insertMany(items);
+  return createdItems.map((item) => item._id);
+}

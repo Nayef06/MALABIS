@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const allowedColors = [
+export const CLOTHING_COLORS = [
   "red",
   "blue",
   "green",
@@ -13,20 +13,30 @@ const allowedColors = [
   "brown"
 ];
 
+export const CLOTHING_TYPES = [
+  "shirt",
+  "pants",
+  "shoes",
+  "hat",
+  "jacket",
+  "accessory",
+];
+
 const ClothingItemSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ["shirt", "pants", "shoes", "hat", "jacket", "accessory"],
+    enum: CLOTHING_TYPES,
   },
   color: {
     type: String,
     required: true,
-    enum: allowedColors,
+    enum: CLOTHING_COLORS,
   },
   name: {
     type: String,
     required: true,
+    trim: true,
   },
   imageLink: {
     type: String,
@@ -38,4 +48,4 @@ const ClothingItemSchema = new mongoose.Schema({
   },
 });
 
-export const ClothingItem = mongoose.model("ClothingItem", ClothingItemSchema); 
+export const ClothingItem = mongoose.model("ClothingItem", ClothingItemSchema);
