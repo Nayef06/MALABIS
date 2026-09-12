@@ -48,53 +48,73 @@ MALABIS is a full-stack web application that revolutionizes wardrobe management 
 
 ```
 MALABIS/
+├── compose.yaml            # Local MongoDB and Redis services
 ├── client/                 # React frontend
+│   ├── public/             # Static assets
 │   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   │   └── Navbar.jsx  # Navigation component
-│   │   ├── pages/          # Main application pages
-│   │   │   ├── Auth.css    # Authentication styles
-│   │   │   ├── LoginPage.jsx
-│   │   │   ├── SignupPage.jsx
-│   │   │   ├── DashboardPage.jsx
+│   │   ├── assets/         # Frontend assets
+│   │   ├── components/     # Shared UI, navigation, auth, and outfit components
+│   │   │   ├── AuthShell.jsx
+│   │   │   ├── Brand.jsx
+│   │   │   ├── Icons.jsx
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── OutfitCanvas.jsx
+│   │   │   └── UI.jsx
+│   │   ├── pages/          # Main application pages and page-specific styles
+│   │   │   ├── AccountPage.jsx
+│   │   │   ├── AccountPage.css
+│   │   │   ├── Auth.css
 │   │   │   ├── ClothesPage.jsx
-│   │   │   ├── OutfitsPage.jsx
+│   │   │   ├── ClothesPage.css
+│   │   │   ├── DashboardPage.jsx
 │   │   │   ├── GeneratorPage.jsx
-│   │   │   └── AccountPage.jsx
-│   │   ├── assets/         # Images and static files
-│   │   ├── api.js          # API client configuration
+│   │   │   ├── GeneratorPage.css
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── OutfitsPage.jsx
+│   │   │   ├── OutfitsPage.css
+│   │   │   └── SignupPage.jsx
+│   │   ├── api.js          # API client
+│   │   ├── App.css         # Application styles
 │   │   ├── App.jsx         # Root component with routing
+│   │   ├── dataCache.js    # Client-side data cache
+│   │   ├── index.css       # Global styles
+│   │   ├── LandingPage.css # Landing page styles
 │   │   ├── LandingPage.jsx # Landing page component
 │   │   └── main.jsx        # Application entry point
-│   ├── public/             # Static assets
-│   ├── package.json        # Frontend dependencies
-│   └── vercel.json         # Vercel deployment config
+│   ├── index.html           # Vite HTML entry point
+│   ├── package.json         # Frontend dependencies
+│   ├── vercel.json          # Vercel deployment config
+│   └── vite.config.js       # Vite configuration
 ├── server/                 # Express backend
+│   ├── api/                # Vercel serverless functions
+│   │   ├── handler.mjs     # Main API handler
+│   │   └── index.mjs       # Serverless entry point
 │   ├── src/
 │   │   ├── models/         # Database models
-│   │   │   ├── user.mjs
 │   │   │   ├── clothingItem.mjs
-│   │   │   └── outfit.mjs
+│   │   │   ├── outfit.mjs
+│   │   │   └── user.mjs
 │   │   ├── routes/         # API route handlers
 │   │   │   ├── auth.mjs
 │   │   │   ├── clothing.mjs
-│   │   │   ├── outfits.mjs
-│   │   │   └── generator.mjs
+│   │   │   ├── generator.mjs
+│   │   │   └── outfits.mjs
+│   │   ├── services/       # Backend services
+│   │   │   └── userData.mjs
 │   │   ├── strategies/     # Passport authentication
 │   │   │   └── local-strategy.mjs
-│   │   ├── utils/          # Helper functions
+│   │   ├── utils/          # Backend helpers and integrations
 │   │   │   ├── cloudinary.mjs
-│   │   │   ├── removeBackground.mjs
 │   │   │   ├── defaultClothing.mjs
-│   │   │   ├── validationSchemas.mjs
-│   │   │   └── helpers.mjs
+│   │   │   ├── helpers.mjs
+│   │   │   ├── redis.mjs
+│   │   │   └── validationSchemas.mjs
 │   │   └── index.mjs       # Server entry point
-│   ├── api/                # Vercel serverless functions
-│   │   ├── handler.mjs     # Main API handler
-│   │   └── index.mjs       # Route aggregation
 │   ├── package.json        # Backend dependencies
+│   ├── test/               # Backend tests
+│   │   └── backend.test.mjs
 │   └── vercel.json         # Vercel deployment config
-└── README.md
+└── README.md               # Project documentation
 ```
 
 ## Getting Started
