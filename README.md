@@ -1,297 +1,220 @@
-# MALABIS - Smart Wardrobe Organizer & Outfit Generator
+# MALABIS
 
-MALABIS is a full-stack web application that revolutionizes wardrobe management through intelligent outfit generation. Upload your clothes, organize them systematically, and discover new outfit combinations that elevate your personal style.
+MALABIS is a full-stack wardrobe organizer and outfit builder. Users can upload and categorize clothing, save and favorite looks, and generate outfit combinations from the items in their closet.
 
 ## Features
 
-### Core Functionality
-- **Smart Wardrobe Management** – Upload, categorize, and organize your clothing items with automatic background removal
-- **Intelligent Outfit Generator** – Get smart outfit suggestions based on your wardrobe
-- **Advanced Item Locking** – Lock specific items in outfit generation for personalized combinations
-- **Favorites System** – Mark and organize your favorite clothing items
-- **Responsive Design** – Seamless experience across desktop and mobile devices
+- Session-based signup, login, logout, and profile management
+- Wardrobe organization by clothing type and color
+- Image uploads through Cloudinary, with optional background removal
+- Favorite clothing and outfit filters
+- A drag-and-drop outfit canvas for arranging, resizing, rotating, and layering pieces
+- Outfit generation by selected clothing types, locked items, and accessory count
+- Responsive React interface for desktop and mobile
+- Optional Redis caching for wardrobe and outfit reads
 
+## Tech stack
 
-### User Experience
-- **Modern UI/UX** – Beautiful, intuitive interface with smooth animations
-- **Mobile-First Design** – Optimized for mobile devices with responsive layouts
-- **Drag & Drop Upload** – Easy file upload with visual feedback
-- **Smart Categorization** – Automatic clothing type detection and organization
-- **Color Management** – Track and filter items by color
+- **Client:** React 18, React Router 6, Vite, CSS
+- **API:** Node.js 18+, Express, Passport, express-session
+- **Data:** MongoDB, Mongoose, optional Redis cache
+- **Images:** Multer, Sharp, Cloudinary
+- **Deployment:** Vercel configurations for separate client and server projects
 
-## Tech Stack
+## Project structure
 
-### Frontend
-- **React 18** – Modern React with hooks and functional components
-- **React Router DOM v6** – Client-side routing with nested routes
-- **Vite** – Lightning-fast build tool and development server
-- **CSS3** – Custom styling with responsive design and animations
-
-### Backend
-- **Node.js + Express** – RESTful API server with middleware
-- **MongoDB + Mongoose** – NoSQL database with ODM
-- **Redis** – Read-through caching for wardrobes and saved outfits
-- **Passport.js** – Authentication middleware with local strategy
-- **Cloudinary** – Cloud image storage and transformation
-- **Multer** – File upload handling
-- **Sharp** – Image processing and optimization
-- **bcrypt** – Secure password hashing
-- **Express Session** – Session management with MongoDB store
-- **Express Validator** – Input validation and sanitization
-
-### Deployment
-- **Vercel** – Frontend and backend deployment
-- **MongoDB Atlas** – Cloud database hosting
-- **Cloudinary** – Cloud image hosting and CDN
-
-## Project Structure
-
-```
-MALABIS/
-├── compose.yaml            # Local MongoDB and Redis services
-├── client/                 # React frontend
-│   ├── public/             # Static assets
-│   ├── src/
-│   │   ├── assets/         # Frontend assets
-│   │   ├── components/     # Shared UI, navigation, auth, and outfit components
-│   │   │   ├── AuthShell.jsx
-│   │   │   ├── Brand.jsx
-│   │   │   ├── Icons.jsx
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── OutfitCanvas.jsx
-│   │   │   └── UI.jsx
-│   │   ├── pages/          # Main application pages and page-specific styles
-│   │   │   ├── AccountPage.jsx
-│   │   │   ├── AccountPage.css
-│   │   │   ├── Auth.css
-│   │   │   ├── ClothesPage.jsx
-│   │   │   ├── ClothesPage.css
-│   │   │   ├── DashboardPage.jsx
-│   │   │   ├── GeneratorPage.jsx
-│   │   │   ├── GeneratorPage.css
-│   │   │   ├── LoginPage.jsx
-│   │   │   ├── OutfitsPage.jsx
-│   │   │   ├── OutfitsPage.css
-│   │   │   └── SignupPage.jsx
-│   │   ├── api.js          # API client
-│   │   ├── App.css         # Application styles
-│   │   ├── App.jsx         # Root component with routing
-│   │   ├── dataCache.js    # Client-side data cache
-│   │   ├── index.css       # Global styles
-│   │   ├── LandingPage.css # Landing page styles
-│   │   ├── LandingPage.jsx # Landing page component
-│   │   └── main.jsx        # Application entry point
-│   ├── index.html           # Vite HTML entry point
-│   ├── package.json         # Frontend dependencies
-│   ├── vercel.json          # Vercel deployment config
-│   └── vite.config.js       # Vite configuration
-├── server/                 # Express backend
-│   ├── api/                # Vercel serverless functions
-│   │   ├── handler.mjs     # Main API handler
-│   │   └── index.mjs       # Serverless entry point
-│   ├── src/
-│   │   ├── models/         # Database models
-│   │   │   ├── clothingItem.mjs
-│   │   │   ├── outfit.mjs
-│   │   │   └── user.mjs
-│   │   ├── routes/         # API route handlers
-│   │   │   ├── auth.mjs
-│   │   │   ├── clothing.mjs
-│   │   │   ├── generator.mjs
-│   │   │   └── outfits.mjs
-│   │   ├── services/       # Backend services
-│   │   │   └── userData.mjs
-│   │   ├── strategies/     # Passport authentication
-│   │   │   └── local-strategy.mjs
-│   │   ├── utils/          # Backend helpers and integrations
-│   │   │   ├── cloudinary.mjs
-│   │   │   ├── defaultClothing.mjs
-│   │   │   ├── helpers.mjs
-│   │   │   ├── redis.mjs
-│   │   │   └── validationSchemas.mjs
-│   │   └── index.mjs       # Server entry point
-│   ├── package.json        # Backend dependencies
-│   ├── test/               # Backend tests
-│   │   └── backend.test.mjs
-│   └── vercel.json         # Vercel deployment config
-└── README.md               # Project documentation
+```text
+malabis/
+|-- client/                 # React/Vite application
+|   |-- public/             # Static assets
+|   `-- src/
+|       |-- components/     # Shared UI and outfit canvas
+|       |-- pages/          # Application pages
+|       |-- api.js          # Credentialed API client
+|       |-- dataCache.js    # In-browser data cache
+|       `-- App.jsx         # Client routes
+|-- server/                 # Express API
+|   |-- api/                # Vercel serverless entry points
+|   |-- src/
+|   |   |-- models/         # Mongoose models
+|   |   |-- routes/         # API endpoints
+|   |   |-- services/       # User data and cache operations
+|   |   |-- strategies/     # Passport local strategy
+|   |   `-- utils/          # Validation, Redis, and Cloudinary helpers
+|   `-- test/               # Node.js backend tests
+|-- compose.yaml            # Local MongoDB and Redis services
+`-- README.md
 ```
 
-## Getting Started
+## Local development
 
 ### Prerequisites
 
-- **Node.js** (v18+ recommended)
-- **MongoDB Atlas** account or local MongoDB instance
-- **Cloudinary** account for image hosting
-- **Vercel** for deployment (optional)
+- Node.js 18 or newer
+- npm
+- MongoDB, either local or hosted
+- Docker Desktop if you want to use the included MongoDB and Redis services
+- A Cloudinary account only if you need clothing image uploads
 
-### Local Development Setup
+### 1. Clone and install
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd MALABIS
-   ```
+```bash
+git clone https://github.com/Nayef06/malabis.git
+cd malabis
 
-2. **Install dependencies**
-   ```bash
-   # Frontend dependencies
-   cd client && npm install
-   
-   # Backend dependencies
-   cd ../server && npm install
-   ```
+cd client
+npm ci
+cd ../server
+npm ci
+cd ..
+```
 
-3. **Start the local database**
+### 2. Start local services
 
-   With Docker Desktop running, start MongoDB from the project root:
+With Docker Desktop running, start MongoDB and Redis from the repository root:
 
-   ```bash
-   docker compose up -d mongodb redis
-   ```
+```bash
+docker compose up -d mongodb redis
+```
 
-   Data is persisted in the `mongodb_data` and `redis_data` Docker volumes.
+MongoDB data and Redis data are persisted in the `mongodb_data` and `redis_data` Docker volumes. Redis is optional; if `REDIS_URL` is not set or Redis is unavailable, the API continues without caching.
 
-4. **Environment Configuration**
+### 3. Configure environment variables
 
-   Create a `.env` file in the `/server` directory:
+Copy the checked-in examples:
 
-   ```env
-   # Database
-   MONGODB_URI=mongodb://127.0.0.1:27017/malabis
-   REDIS_URL=redis://127.0.0.1:6379
-   CACHE_TTL_SECONDS=300
-   
-   # Session Management
-   SESSION_SECRET=your_session_secret_key
-   COOKIE_SECRET=your_cookie_secret_key
-   
-   # Cloudinary Configuration
-   CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-   CLOUDINARY_API_KEY=your_cloudinary_api_key
-   CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-   
-   # Server Configuration
-   PORT=3000
-   NODE_ENV=development
-   ```
+```bash
+cp server/.env.example server/.env
+cp client/.env.example client/.env
+```
 
-   You can also put local overrides in `server/.env.local`; they take precedence
-   over `server/.env` and are ignored by Git.
+On PowerShell:
 
-5. **Start the development servers**
-   ```bash
-   # Start backend server
-   cd server
-   npm run dev
-   
-   # Start frontend development server (in new terminal)
-   cd client
-   npm run dev
-   ```
+```powershell
+Copy-Item server/.env.example server/.env
+Copy-Item client/.env.example client/.env
+```
 
-6. **Access the application**
-   - **Frontend**: http://localhost:5173
-   - **Backend API**: http://localhost:3000
-   - **Database health**: http://localhost:3000/api/health
+Server settings:
 
-## Application Pages
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `MONGODB_URI` | Yes | MongoDB connection string |
+| `SESSION_SECRET` | Yes | Secret used to sign sessions |
+| `COOKIE_SECRET` | No | Secret used by `cookie-parser` |
+| `REDIS_URL` | No | Redis connection string; enables caching |
+| `CACHE_TTL_SECONDS` | No | Cache TTL; defaults to 300 seconds |
+| `CLOUDINARY_CLOUD_NAME` | For uploads | Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | For uploads | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | For uploads | Cloudinary API secret |
+| `CLIENT_ORIGINS` | No | Additional comma-separated CORS origins |
+| `PORT` | No | API port; defaults to 3000 |
+| `NODE_ENV` | No | Use `production` in production |
 
-### Public Pages
-- **`/`** – Landing page with signup/login options
-- **`/login`** – User authentication
-- **`/signup`** – New user registration
+The server loads `server/.env.local` first and then fills missing values from `server/.env`. Both files are ignored by Git.
 
-### Protected Pages (Requires Authentication)
-- **`/dashboard`** – Main dashboard overview
-- **`/clothes`** – Wardrobe management and item upload
-- **`/outfits`** – Saved outfit collections
-- **`/generator`** – Smart outfit generation
-- **`/account`** – User profile and settings
+For local development, leave `VITE_API_BASE_URL` empty; Vite proxies `/api` requests to `http://localhost:3000`. In a production client build, set it to the public API origin when the API is hosted separately.
 
-## API Endpoints
+### 4. Run the app
+
+In one terminal:
+
+```bash
+cd server
+npm run dev
+```
+
+In another terminal:
+
+```bash
+cd client
+npm run dev
+```
+
+Open:
+
+- Client: <http://localhost:5173>
+- API: <http://localhost:3000>
+- Health check: <http://localhost:3000/api/health>
+
+The health endpoint returns MongoDB connectivity and Redis status. It responds with `503` when MongoDB is disconnected.
+
+## Application routes
+
+- `/` - Landing page
+- `/login` - Login
+- `/signup` - Account creation
+- `/dashboard` - Wardrobe overview
+- `/clothes` - Clothing management
+- `/outfits` - Saved outfits and manual outfit builder
+- `/generator` - Generated outfit combinations
+- `/account` - Profile settings
+
+## API overview
+
+All wardrobe, outfit, generator, and profile endpoints require an authenticated session.
 
 ### Authentication
-- `POST /api/auth/signup` – User registration
-- `POST /api/auth/login` – User login
-- `POST /api/auth/logout` – User logout
-- `GET /api/auth/status` – Check authentication status
 
-### Clothing Management
-- `GET /api/clothing` – Retrieve user's clothing items
-- `POST /api/clothing` – Upload new clothing item
-- `DELETE /api/clothing/:id` – Remove clothing item
-- `PUT /api/clothing/:id/favorite` – Toggle favorite status
+- `POST /api/auth/signup`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/status`
+- `POST /api/auth/update-profile`
 
-### Outfit Management
-- `GET /api/outfits` – Get user's saved outfits
-- `POST /api/outfits` – Save new outfit
-- `DELETE /api/outfits/:id` – Remove saved outfit
+### Clothing
 
-### Outfit Generation
-- `POST /api/generator` – Generate outfit suggestions
-- `GET /api/generator/inventory` – Get user's clothing inventory
+- `GET /api/clothing`
+- `GET /api/clothing/inventory`
+- `POST /api/clothing`
+- `POST /api/clothing/upload`
+- `PATCH /api/clothing/:id/favorite`
+- `DELETE /api/clothing/:id`
+
+Uploads use the multipart field `image`, accept image MIME types, and are limited to 5 MB. The optional multipart field `removeBackground` controls Cloudinary background removal.
+
+### Outfits
+
+- `GET /api/outfits`
+- `POST /api/outfits`
+- `PATCH /api/outfits/:id/favorite`
+- `DELETE /api/outfits/:id`
+
+### Generator
+
+- `POST /api/generator/generate`
+
+The generator accepts selected clothing types, optional locked inventory item IDs, and an accessory count from 0 through 5.
+
+## Scripts
+
+Run these commands from the relevant package directory.
+
+### Client (`client/`)
+
+```bash
+npm run dev       # Start the Vite development server
+npm run build     # Create a production build in dist/
+npm run preview   # Preview the production build
+npm run lint      # Run ESLint
+```
+
+### Server (`server/`)
+
+```bash
+npm run dev            # Start the API with nodemon
+npm start              # Start the API with Node.js
+npm test               # Run backend tests serially
+npm run test:coverage  # Run backend tests with coverage
+```
 
 ## Deployment
 
-### Frontend Deployment (Vercel)
-1. Connect your GitHub repository to Vercel
-2. Set build command: `npm run build`
-3. Set output directory: `dist`
-4. Configure environment variables in Vercel dashboard
+The repository includes separate Vercel configurations in `client/vercel.json` and `server/vercel.json`.
 
-### Backend Deployment (Vercel)
-1. Deploy the `server` directory as a separate Vercel project
-2. Configure environment variables in Vercel dashboard
-3. Set the main function to `api/handler.mjs`
+1. Create a Vercel project with `client` as its root directory. Configure `VITE_API_BASE_URL` if the API is on another origin.
+2. Create a second Vercel project with `server` as its root directory.
+3. Add the server environment variables in Vercel. Production requires `MONGODB_URI` and `SESSION_SECRET`; image uploads also require the three Cloudinary variables.
+4. If the deployed client origin is not one of the server's built-in allowed origins, add it to `CLIENT_ORIGINS`.
 
-### Environment Variables for Production
-```env
-MONGODB_URI=your_production_mongodb_uri
-REDIS_URL=your_production_redis_url
-CACHE_TTL_SECONDS=300
-SESSION_SECRET=your_production_session_secret
-COOKIE_SECRET=your_production_cookie_secret
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-NODE_ENV=production
-```
-
-## Key Features in Detail
-
-### Smart Wardrobe Management
-- **Automatic Background Removal**: Upload clothing items with automatic background removal for clean, professional-looking images
-- **Smart Categorization**: Items are automatically categorized by type (shirts, pants, shoes, etc.)
-- **Color Tracking**: Each item's color is tracked and can be used for outfit generation
-- **Favorites System**: Mark items as favorites for quick access and special consideration in outfit generation
-
-### Smart Outfit Generator
-- **Item Locking**: Lock specific items in place while generating variations for other pieces
-- **Type Filtering**: Generate outfits based on specific clothing types
-- **Accessory Management**: Control the number of accessories in generated outfits
-- **Real-time Generation**: Instant outfit suggestions with smooth animations
-
-### User Experience
-- **Responsive Design**: Optimized for all device sizes with mobile-first approach
-- **Smooth Animations**: Polished UI with smooth transitions and loading states
-- **Error Handling**: Comprehensive error handling with user-friendly messages
-
-## Development
-
-### Available Scripts
-
-**Frontend (client/)**
-```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run preview  # Preview production build
-npm run lint     # Run ESLint
-```
-
-**Backend (server/)**
-```bash
-npm run dev      # Start development server with nodemon
-npm start        # Start production server
-```
+Never commit `.env` files or production credentials.
