@@ -14,6 +14,9 @@ import {
 import passport from "passport";
 import { checkSchema } from "express-validator";
 import { createDefaultClothingItems } from "../utils/defaultClothing.mjs";
+import { ClothingItem } from "../models/clothingItem.mjs";
+import { Outfit } from "../models/outfit.mjs";
+import { invalidateUserData } from "../services/userData.mjs";
 
 const router = Router();
 
@@ -108,6 +111,34 @@ router.post(
     }
 
     return res.sendStatus(200);
+  }),
+);
+
+router.delete(
+  "/api/auth/account",
+  requireAuthentication,
+  asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const user = await User.findById(userId).select("inventory outfits").lean();
+    if (!user) {
+      return res.status(401).json({ error: "Authentication required." });
+    }
+
+    await Promise.all([
+      ClothingItem.deleteMany({ _id: { $in: user.inventory } }),
+      Outfit.deleteMany({ _id: { $in: user.outfits } }),
+      invalidateUserData(userId),
+    ]);
+    await User.findByIdAndDelete(userId);
+
+    return req.logout((logoutError) => {
+      if (logoutError) return res.status(204).end();
+      return req.session.destroy((sessionError) => {
+        if (sessionError) return res.status(204).end();
+        res.clearCookie("malabis.sid");
+        return res.sendStatus(204);
+      });
+    });
   }),
 );
 

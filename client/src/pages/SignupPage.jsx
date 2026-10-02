@@ -30,6 +30,7 @@ export default function SignupPage() {
         <div className="field"><label htmlFor="username">Username</label><input className="input" id="username" value={form.username} onChange={update('username')} autoComplete="username" required /></div>
         <div className="field"><label htmlFor="password">Password</label><input className="input" id="password" type="password" value={form.password} onChange={update('password')} autoComplete="new-password" minLength="8" required /><small>At least 8 characters</small></div>
         <button className="button button--rose button--wide" disabled={submitting}>{submitting ? 'Making space…' : <>Begin my closet <Icon name="arrow" size={17}/></>}</button>
+        <p className="auth-consent">By creating an account, you agree to the <Link to="/terms">Terms of Service</Link> and acknowledge the <Link to="/privacy">Privacy Policy</Link>.</p>
         <p className="auth-switch">Already have a corner here? <Link to="/login">Log in</Link></p>
       </form>
     </AuthShell>

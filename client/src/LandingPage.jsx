@@ -44,7 +44,7 @@ export default function LandingPage() {
         </section>
         <section className="landing__visual"><DoodleStar className="landing__star"/><WardrobeScene /></section>
       </main>
-      <footer className="landing__footer"><span>malabis / my clothes, my room, my little fashion world</span><span>est. for slow mornings</span></footer>
+      <footer className="landing__footer"><span>malabis / my clothes, my room, my little fashion world</span><nav aria-label="Legal"><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/cookie-settings">Cookies</Link></nav></footer>
     </div>
   );
 }
