@@ -3,6 +3,7 @@ import OutfitCanvas, { placeItems } from '../components/OutfitCanvas';
 import { Icon } from '../components/Icons';
 import { ConfirmDialog, EmptyState, Modal, Toast } from '../components/UI';
 import { apiFetch } from '../api';
+import { exportOutfit } from '../exportOutfit';
 import { addOutfit, getInventory, getOutfits, removeOutfit, updateOutfit } from '../dataCache';
 import './OutfitsPage.css';
 
@@ -33,9 +34,20 @@ function Builder({ open,onClose,onSaved }) {
 
 function Look({ outfit,index,onFavorite,onDelete }) {
   const pieces=useMemo(()=>placeItems(outfit.clothingItems||[]),[outfit.clothingItems]);
+  const [exporting,setExporting]=useState(false);
+  const [exportError,setExportError]=useState('');
+  const download=async()=>{
+    if(exporting)return;
+    setExporting(true);setExportError('');
+    try{await exportOutfit(pieces,outfit.name||'Untitled look')}
+    catch(error){setExportError(error.message||'This look could not be exported. Try again.')}
+    finally{setExporting(false)}
+  };
   return <article className={`look look--${index%4}`}>
     <div className="look__tape"/><OutfitCanvas pieces={pieces} setPieces={()=>{}} editable={false}/>
     <footer className="look__caption"><div><span>look no. {String(index+1).padStart(2,'0')}</span><h2>{outfit.name||'Untitled look'}</h2></div><div className="look__actions"><button className={`heart-button ${outfit.isFavorited?'is-loved':''}`} onClick={()=>onFavorite(outfit)} aria-label={outfit.isFavorited?'Remove from favorites':'Add to favorites'}><Icon name="heart" size={20}/></button><button disabled={outfit.isFavorited} onClick={()=>onDelete(outfit._id)} title={outfit.isFavorited?'Unfavorite before removing':'Remove look'} aria-label="Remove look"><Icon name="trash" size={18}/></button></div></footer>
+    <button type="button" className="look__export" onClick={download} disabled={exporting||!pieces.length} aria-busy={exporting}><Icon name="image" size={16}/>{exporting?'Exporting…':'Export as image'}</button>
+    {exportError&&<p className="look__export-error form-error" role="alert">{exportError}</p>}
   </article>;
 }
 
