@@ -1,50 +1,118 @@
-import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+﻿import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { apiFetch } from './api';
 import Brand from './components/Brand';
 import { DoodleStar, Icon } from './components/Icons';
 import './LandingPage.css';
 
-const WardrobeScene = () => (
-  <div className="wardrobe-scene" aria-label="An illustrated open wardrobe with a favorite outfit">
-    <span className="tape tape--one" /><span className="tape tape--two" />
-    <svg className="wardrobe-scene__drawing" viewBox="0 0 700 680" role="img">
-      <path className="scene-rug" d="M98 586c78-49 390-55 489 2 76 44-21 83-231 83-197 0-330-40-258-85Z"/>
-      <path className="scene-wood" d="M115 92h470v510H115z"/><path className="scene-inside" d="M153 128h394v432H153z"/>
-      <path className="scene-line" d="M350 129v431M153 220h394M177 197h151M372 197h151"/><path className="scene-line scene-line--thin" d="M170 579h360M210 602v-42M490 602v-42"/>
-      <g className="hanging hanging--shirt">
-        <path className="hanger-line" d="m200 190 39-25 39 25M239 165c-11-6-3-21 7-18 6 2 7 8 4 12"/>
-        <path className="garment-fill garment-fill--rose" d="M223 182c5 9 27 9 32 0l32 15 13 31-17 5-12-10v111h-64V223l-12 10-17-5 13-31Z"/><path className="garment-stitch" d="M218 314c15 5 27 5 42 0"/>
-      </g>
-      <g className="hanging hanging--jacket">
-        <path className="hanger-line" d="m390 190 39-25 39 25M429 165c-11-6-3-21 7-18 6 2 7 8 4 12"/>
-        <path className="garment-fill garment-fill--blue" d="m385 196 28-14 16 16 16-16 28 14 17 57-23 8-8-24v111h-60V237l-8 24-23-8 17-57"/><path className="garment-stitch" d="m429 198 0 150M404 315l25-8 25 8"/>
-      </g>
-      <g className="folded-stack"><path className="garment-fill garment-fill--butter" d="M185 405c35-9 78-8 111 1l-5 34H190l-5-35Z"/><path className="garment-fill garment-fill--pistachio" d="M192 444h96l6 35h-108l6-35Z"/><path className="garment-fill garment-fill--lavender" d="M181 482h118l-3 41H184l-3-41Z"/></g>
-      <g className="shoe-pair"><path className="garment-fill garment-fill--cream" d="M391 474c18 4 30-6 34-27l26 17c15 10 35 12 44 20 7 6 6 19-3 24H391c-13 0-14-21 0-34Z"/><path className="garment-stitch" d="M393 493h98M436 463l-13 25"/><path className="garment-fill garment-fill--cream" d="M385 517c19 4 30-5 34-24l22 14c17 11 39 12 48 20 7 6 6 18-3 23H385c-13 0-14-20 0-33Z"/></g>
-      <circle className="scene-knob" cx="339" cy="388" r="5"/><circle className="scene-knob" cx="361" cy="388" r="5"/>
-    </svg>
-    <p className="wardrobe-scene__note">today’s outfit <span>↘</span></p><div className="wardrobe-scene__label">look no. 01</div>
-  </div>
-);
+const pieces = {
+  sweatshirt: { name: 'Everyday taupe tee', category: 'Tops' },
+  tee: { name: 'The classic black tee', category: 'Tops' },
+  jeans: { name: 'Favorite blue jeans', category: 'Bottoms' },
+  sneakers: { name: 'White sneakers', category: 'Shoes' },
+  sunglasses: { name: 'Black sunglasses', category: 'Accessories' },
+  cap: { name: 'Weekend cap', category: 'Accessories' },
+};
+const looks = [
+  { title: 'The everyday favorite', mood: 'Easy, familiar, a little put-together.', top: 'sweatshirt', accessory: 'sunglasses', colors: ['#8d8173', '#648199', '#f4f0e8'] },
+  { title: 'Off-duty essentials', mood: 'A coffee run. A long walk. Your kind of day.', top: 'tee', accessory: 'cap', colors: ['#333330', '#648199', '#f4f0e8'] },
+  { title: 'A slower Sunday', mood: 'A few favorite pieces. One easy outfit.', top: 'sweatshirt', accessory: 'cap', colors: ['#8d8173', '#648199', '#30302f'] },
+];
+
+function PieceImage({ piece, className = '', decorative = false }) {
+  return <img className={className} src={`/images/${piece}.webp`} alt={decorative ? '' : pieces[piece].name} draggable="false" />;
+}
+
+function OutfitPreview() {
+  const [lookIndex, setLookIndex] = useState(0);
+  const [savedLooks, setSavedLooks] = useState([]);
+  const look = looks[lookIndex];
+  const saved = savedLooks.includes(lookIndex);
+  const toggleSaved = () => setSavedLooks((current) => saved ? current.filter((item) => item !== lookIndex) : [...current, lookIndex]);
+  return (
+    <div className="outfit-preview" id="try-an-outfit">
+      <div className="outfit-preview__note">a little outfit inspiration <span aria-hidden="true">↘</span></div>
+      <div className="outfit-preview__paper">
+        <span className="outfit-preview__tape" aria-hidden="true" />
+        <div className="outfit-preview__header"><span><Icon name="hanger" size={19} /> The outfit studio</span><span className="sample-label">Interactive preview</span></div>
+        <div className="outfit-preview__workspace">
+          <aside className="preview-closet" aria-label="Sample wardrobe">
+            <span className="preview-closet__label">Your pieces</span>
+            {['sweatshirt', 'tee', 'jeans', 'sneakers'].map((piece) => <div className={`preview-closet__item ${look.top === piece ? 'is-selected' : ''}`} key={piece}><PieceImage piece={piece} decorative /><span>{pieces[piece].category}</span></div>)}
+            <span className="preview-closet__count">6 sample pieces</span>
+          </aside>
+          <div className="preview-board">
+            <div className="preview-board__heading"><span>LET’S GET DRESSED</span><span>0{lookIndex + 1} / 03</span></div>
+            <div className="preview-board__clothes" key={lookIndex}>
+              <PieceImage piece={look.top} className={`preview-garment preview-garment--top preview-garment--${look.top}`} />
+              <PieceImage piece="jeans" className="preview-garment preview-garment--bottom" />
+              <PieceImage piece="sneakers" className="preview-garment preview-garment--shoes" />
+              <PieceImage piece={look.accessory} className={`preview-garment preview-garment--accessory preview-garment--${look.accessory}`} />
+              <span className="preview-board__scribble">better together</span>
+            </div>
+            <div className="preview-board__caption">
+              <div aria-live="polite" aria-atomic="true"><h3>{look.title}</h3><p>{look.mood}</p></div>
+              <div className="preview-swatches" aria-hidden="true">{look.colors.map((color) => <span key={color} style={{ background: color }} />)}</div>
+            </div>
+          </div>
+        </div>
+        <div className="outfit-preview__controls">
+          <button className="preview-shuffle" onClick={() => setLookIndex((current) => (current + 1) % looks.length)}><Icon name="rotate" size={17} /> Try another outfit</button>
+          <button className={`preview-save ${saved ? 'is-saved' : ''}`} onClick={toggleSaved} aria-pressed={saved}><Icon name="heart" size={17} /><span>{saved ? 'Saved in preview' : 'Save this look'}</span></button>
+        </div>
+      </div>
+      <div className="preview-footnote"><Icon name="check" size={14} /><span>Sample clothes, real possibilities. Try it above.</span></div>
+    </div>
+  );
+}
 
 export default function LandingPage() {
-  const navigate = useNavigate();
-  useEffect(() => { apiFetch('/api/auth/status').then((response) => response.ok && navigate('/clothes')).catch(() => {}); }, [navigate]);
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    apiFetch('/api/auth/status', { signal: controller.signal }).then((response) => setSignedIn(response.ok)).catch(() => {});
+    return () => controller.abort();
+  }, []);
+  const wardrobeLink = signedIn ? '/clothes' : '/signup';
   return (
     <div className="landing">
-      <header className="landing__nav"><Brand /><div className="landing__nav-actions"><Link to="/login">Log in</Link><Link className="button button--rose" to="/signup">Begin your closet</Link></div></header>
-      <main className="landing__main">
-        <section className="landing__intro">
-          <p className="eyebrow">Your wardrobe, somewhere lovely</p>
-          <h1>A quiet little world<br/>for the clothes you <em>love.</em></h1>
-          <p className="landing__lede">Keep every piece close, play with new combinations, and make getting dressed feel like you again.</p>
-          <div className="landing__cta-row"><Link className="button button--rose" to="/signup">Open your wardrobe <Icon name="arrow" size={17}/></Link><span className="hand-note">free to make it yours</span></div>
-          <div className="landing__keepsakes"><span><Icon name="hanger" size={17}/> collect</span><span><Icon name="sparkle" size={17}/> compose</span><span><Icon name="heart" size={17}/> remember</span></div>
+      <a className="landing__skip" href="#main-content">Skip to content</a>
+      <header className="landing__nav">
+        <Link to="/" aria-label="Malabis home"><Brand /></Link>
+        <nav className="landing__section-nav" aria-label="Explore Malabis"><a href="#how-it-works">How it works</a><a href="#your-wardrobe">Made for your clothes</a></nav>
+        <div className="landing__nav-actions"><Link to={signedIn ? '/clothes' : '/login'}>{signedIn ? 'My wardrobe' : 'Log in'}</Link><Link className="button button--rose" to={wardrobeLink}>{signedIn ? 'Open wardrobe' : 'Start your wardrobe'}<Icon name="arrow" size={16} /></Link></div>
+      </header>
+      <main id="main-content">
+        <section className="landing__hero" aria-labelledby="hero-title">
+          <div className="landing__intro">
+            <p className="landing__eyebrow"><span /> YOUR DIGITAL WARDROBE</p>
+            <h1 id="hero-title">Your clothes.<br />A fresh way<br />to <em>get dressed.</em></h1>
+            <p className="landing__lede">Turn the clothes you own into outfits you love. Organize your wardrobe, try new combinations, and find your next look — all in one place.</p>
+            <div className="landing__cta-row"><Link className="button button--rose" to={wardrobeLink}>{signedIn ? 'Open my wardrobe' : 'Build my wardrobe'}<Icon name="arrow" size={18} /></Link><a className="landing__demo-link" href="#try-an-outfit">Try an outfit <span aria-hidden="true">↗</span></a></div>
+            <p className="landing__hero-note">Less “nothing to wear.” More you.</p>
+            <div className="landing__benefits"><span><Icon name="hanger" size={18} /> Your own clothes</span><span><Icon name="sparkle" size={18} /> New combinations</span><span><Icon name="heart" size={18} /> Favorite looks</span></div>
+          </div>
+          <div className="landing__visual"><DoodleStar className="landing__star" /><OutfitPreview /><span className="landing__visual-label">YOUR CLOSET, REIMAGINED.</span></div>
         </section>
-        <section className="landing__visual"><DoodleStar className="landing__star"/><WardrobeScene /></section>
+        <section className="landing__how" id="how-it-works" aria-labelledby="how-title">
+          <div className="landing__section-heading"><div><p className="landing__eyebrow">A LITTLE LESS GUESSWORK</p><h2 id="how-title">From your closet to your next outfit.</h2></div><span className="landing__hand-note">as easy as one, two, three</span></div>
+          <div className="landing__steps">
+            <article><div className="landing__step-top"><span>01</span><Icon name="image" size={25} /></div><h3>Bring your wardrobe in.</h3><p>Upload photos of your clothes and organize them by type and color. See what you have, all together.</p><span className="landing__step-label">A home for every piece</span></article>
+            <article><div className="landing__step-top"><span>02</span><Icon name="sparkle" size={25} /></div><h3>Find a combination you love.</h3><p>Build a look yourself or generate an outfit from your wardrobe. Keep a favorite piece and try something new around it.</p><span className="landing__step-label">Your clothes, new possibilities</span></article>
+            <article><div className="landing__step-top"><span>03</span><Icon name="heart" size={25} /></div><h3>Save it. Wear it. Repeat.</h3><p>Keep your favorite outfits in your own lookbook, ready for the next time you wonder what to wear.</p><span className="landing__step-label">Good outfits, remembered</span></article>
+          </div>
+        </section>
+        <section className="landing__wardrobe" id="your-wardrobe" aria-labelledby="wardrobe-title">
+          <div className="wardrobe-collection" aria-label="A sample digital wardrobe">
+            <div className="wardrobe-collection__heading"><span><Icon name="hanger" size={20} /> A few closet favorites</span><span>THE EVERYDAY EDIT</span></div>
+            <div className="wardrobe-collection__grid">{['sweatshirt', 'jeans', 'sneakers'].map((piece, index) => <div className="wardrobe-piece" key={piece}><div><span className="wardrobe-piece__number">0{index + 1}</span><PieceImage piece={piece} /><Icon name="heart" size={15} /></div><p>{pieces[piece].name}</p><span>{pieces[piece].category}</span></div>)}</div>
+            <p className="wardrobe-collection__note">The start of so many good outfits.</p>
+          </div>
+          <div className="landing__wardrobe-copy"><p className="landing__eyebrow">ALREADY YOURS. NEWLY INSPIRED.</p><h2 id="wardrobe-title">There’s more in your<br />wardrobe than you think.</h2><p>That tee you always reach for. Those jeans you forgot about. Bring them into the same space and see your clothes in a new light.</p><Link to={wardrobeLink} className="landing__text-link">Make room for your wardrobe <Icon name="arrow" size={18} /></Link></div>
+        </section>
+        <section className="landing__closing"><DoodleStar /><p className="landing__eyebrow">YOUR NEXT LOOK IS ALREADY IN YOUR CLOSET</p><h2>Let’s put it together.</h2><p>Start with a few pieces. Find a whole new way to wear them.</p><Link className="button button--rose" to={wardrobeLink}>{signedIn ? 'Open my wardrobe' : 'Create my digital wardrobe'}<Icon name="arrow" size={17} /></Link></section>
       </main>
-      <footer className="landing__footer"><span>malabis / my clothes, my room, my little fashion world</span><nav aria-label="Legal"><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/cookie-settings">Cookies</Link></nav></footer>
+      <footer className="landing__footer"><div><Brand /><span>Your clothes. Your combinations. Your style.</span></div><nav aria-label="Legal"><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/cookie-settings">Cookies</Link></nav><span className="landing__copyright">© {new Date().getFullYear()} Malabis</span></footer>
     </div>
   );
 }
