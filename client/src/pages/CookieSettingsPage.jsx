@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import LegalShell from '../components/LegalShell';
 import { defaultCookiePreferences, getCookiePreferences, saveCookiePreferences } from '../cookiePreferences';
 import './LegalPage.css';
@@ -17,11 +18,12 @@ export default function CookieSettingsPage() {
 
   return (
     <LegalShell>
-      <main className="legal-page cookie-page">
+      <main id="legal-main" className="legal-page cookie-page" tabIndex={-1}>
         <header className="legal-hero">
           <p className="eyebrow">Your browser, your choice</p>
           <h1>Cookie settings</h1>
           <p>Choose which optional categories Malabis may use. Your selection is saved only in this browser.</p>
+          <p className="cookie-policy-link">Read the <Link to="/cookies">Cookie Policy</Link> for storage names, purposes, and lifetimes.</p>
         </header>
         <section className="cookie-paper" aria-label="Cookie preferences">
           <div className="cookie-choice">
@@ -29,12 +31,12 @@ export default function CookieSettingsPage() {
             <span className="cookie-required">Always on</span>
           </div>
           <label className="cookie-choice">
-            <div><h2>Analytics</h2><p>Allows privacy-conscious measurement to help us understand which features are useful. No analytics cookie is currently set.</p></div>
+            <div><h2>Analytics</h2><p>Records your choice for optional browser measurement. No optional analytics tracker is currently active. This does not control operational reports based on existing account records.</p></div>
             <input type="checkbox" checked={preferences.analytics} onChange={() => toggle('analytics')} />
             <span className="toggle" aria-hidden="true" />
           </label>
           <label className="cookie-choice">
-            <div><h2>Personalization</h2><p>Allows optional browser-based preferences beyond the settings required to operate your wardrobe.</p></div>
+            <div><h2>Personalization</h2><p>Records your choice for optional browser preferences beyond core wardrobe features. No separate optional personalization technology is currently active.</p></div>
             <input type="checkbox" checked={preferences.personalization} onChange={() => toggle('personalization')} />
             <span className="toggle" aria-hidden="true" />
           </label>

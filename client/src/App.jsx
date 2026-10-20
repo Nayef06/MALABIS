@@ -33,6 +33,8 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/terms" element={<LegalPage type="terms" />} />
         <Route path="/privacy" element={<LegalPage type="privacy" />} />
+        <Route path="/cookies" element={<LegalPage type="cookies" />} />
+        <Route path="/cookie-policy" element={<Navigate to="/cookies" replace />} />
         <Route path="/cookie-settings" element={<CookieSettingsPage />} />
         <Route element={<WardrobeShell />}>
           <Route path="/dashboard" element={<DashboardPage />} />

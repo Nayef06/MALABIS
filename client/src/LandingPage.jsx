@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from './api';
 import Brand from './components/Brand';
@@ -112,7 +112,7 @@ export default function LandingPage() {
         </section>
         <section className="landing__closing"><DoodleStar /><p className="landing__eyebrow">YOUR NEXT LOOK IS ALREADY IN YOUR CLOSET</p><h2>Let’s put it together.</h2><p>Start with a few pieces. Find a whole new way to wear them.</p><Link className="button button--rose" to={wardrobeLink}>{signedIn ? 'Open my wardrobe' : 'Create my digital wardrobe'}<Icon name="arrow" size={17} /></Link></section>
       </main>
-      <footer className="landing__footer"><div><Brand /><span>Your clothes. Your combinations. Your style.</span></div><nav aria-label="Legal"><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/cookie-settings">Cookies</Link></nav><span className="landing__copyright">© {new Date().getFullYear()} Malabis</span></footer>
+      <footer className="landing__footer"><div><Brand /><span>Your clothes. Your combinations. Your style.</span></div><nav aria-label="Legal"><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/cookies">Cookies</Link><Link to="/cookie-settings">Cookie settings</Link></nav><span className="landing__copyright">© {new Date().getFullYear()} Malabis</span></footer>
     </div>
   );
 }

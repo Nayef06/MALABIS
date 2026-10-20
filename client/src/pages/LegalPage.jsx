@@ -1,59 +1,85 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import LegalShell from '../components/LegalShell';
+import { Icon } from '../components/Icons';
+import { LEGAL_EMAIL, policies, POLICY_DATE } from './legalPolicies';
 import './LegalPage.css';
-
-const policies = {
-  terms: {
-    eyebrow: 'The house rules',
-    title: 'Terms of Service',
-    intro: 'These terms explain the simple agreement between you and Malabis when you use the wardrobe service.',
-    sections: [
-      ['Using Malabis', 'You may use Malabis to organize clothing, create outfits, and manage your personal wardrobe. You must provide accurate account information, keep your password private, and use the service only in a lawful way.'],
-      ['Your account', 'You are responsible for activity under your account. You may update your profile or permanently delete your account from My corner. We may suspend access when needed to protect the service, other people, or comply with law.'],
-      ['Your content', 'You keep ownership of the names, images, clothing details, and outfits you add. You give Malabis permission to store, process, and display that content only as needed to operate and improve the service. Do not upload content you do not have the right to use.'],
-      ['Acceptable use', 'Do not misuse the service, attempt unauthorized access, disrupt its operation, upload malicious material, scrape it at unreasonable scale, or use it to violate another person’s rights.'],
-      ['Service changes', 'Malabis may add, change, or remove features and may experience interruptions. We aim to keep the service useful and available, but it is provided “as is” without a promise that it will always be uninterrupted or error-free.'],
-      ['Liability', 'To the extent permitted by law, Malabis is not liable for indirect, incidental, special, or consequential losses arising from use of the service. Nothing in these terms limits rights or liabilities that cannot legally be limited.'],
-      ['Changes to these terms', 'We may update these terms as the service evolves. The effective date below will change when we make a material revision. Continuing to use Malabis after an update means you accept the revised terms.'],
-    ],
-  },
-  privacy: {
-    eyebrow: 'What stays in your wardrobe',
-    title: 'Privacy Policy',
-    intro: 'This policy describes what Malabis collects, why it is used, and the choices you have over your information.',
-    sections: [
-      ['Information you provide', 'We collect your username, display name, and password in hashed form. We also store the clothing details, image links, favorites, and outfits you choose to add. If you upload an image, it is processed by our image-hosting provider so it can appear in your wardrobe.'],
-      ['How we use information', 'We use this information to create and secure your account, show your wardrobe, save your outfits, provide requested features, troubleshoot problems, and maintain the service. We do not sell your personal information.'],
-      ['Cookies and browser storage', 'Malabis uses a required session cookie to keep you signed in. The browser also stores a short-lived wardrobe cache for performance and saves your cookie choices locally. Optional analytics and personalization categories remain off unless you enable them.'],
-      ['Sharing and service providers', 'Information may be processed by hosting, database, caching, and image-hosting providers that help run Malabis. We may also disclose information when required by law, to protect rights and safety, or as part of a business transfer.'],
-      ['Retention and deletion', 'We keep account information while your account is active and as needed for legitimate operational or legal purposes. You can permanently delete your account and its wardrobe records from My corner. Limited backup or security records may persist temporarily before routine deletion.'],
-      ['Security', 'We use reasonable technical and organizational measures, including hashed passwords and protected session cookies. No online service can guarantee absolute security, so use a unique password and protect your sign-in details.'],
-      ['Your choices', 'You can change your display name and password, manage optional cookie preferences, log out, or delete your account. Depending on where you live, you may also have legal rights to access, correct, or delete personal information.'],
-      ['Children', 'Malabis is not directed to children under 13, and we do not knowingly collect personal information from children under 13.'],
-      ['Policy updates', 'We may revise this policy when the service or applicable requirements change. Material updates will be reflected by a new effective date.'],
-    ],
-  },
-};
 
 export default function LegalPage({ type }) {
   const policy = policies[type];
+  const [activeSection, setActiveSection] = useState(policy.sections[0].id);
+  const [contentsOpen, setContentsOpen] = useState(false);
+  const relatedType = type === 'terms' ? 'privacy' : type === 'privacy' ? 'cookies' : 'privacy';
+
+  useEffect(() => {
+    const previousTitle = document.title;
+    const description = document.querySelector('meta[name="description"]');
+    const previousDescription = description?.content;
+    document.title = `${policy.title} | Malabis`;
+    if (description) description.content = policy.intro;
+    setActiveSection(policy.sections[0].id);
+    setContentsOpen(false);
+
+    const frame = requestAnimationFrame(() => {
+      const target = policy.sections.find((section) => `#${section.id}` === window.location.hash);
+      if (target) document.getElementById(target.id)?.scrollIntoView();
+      else window.scrollTo(0, 0);
+    });
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.filter((entry) => entry.isIntersecting);
+      if (visible.length) setActiveSection(visible[0].target.id);
+    }, { rootMargin: '-10% 0px -65% 0px' });
+    policy.sections.forEach(({ id }) => {
+      const section = document.getElementById(id);
+      if (section) observer.observe(section);
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      document.title = previousTitle;
+      if (description) description.content = previousDescription;
+    };
+  }, [policy]);
+
   return (
     <LegalShell>
-      <main className="legal-page">
-        <header className="legal-hero">
-          <p className="eyebrow">{policy.eyebrow}</p>
+      <main id="legal-main" className="legal-page" tabIndex={-1}>
+        <header className="legal-hero" id="legal-top">
+          <p className="eyebrow">Malabis / Legal</p>
           <h1>{policy.title}</h1>
-          <p>{policy.intro}</p>
-          <small>Effective October 1, 2026</small>
+          <p className="legal-intro">{policy.intro}</p>
+          <div className="legal-meta">
+            <span><span className="legal-status-dot" aria-hidden="true" />Effective <time dateTime="2026-10-19">{POLICY_DATE}</time></span>
+            <span>Operated by Nayef · California, USA</span>
+            <button type="button" onClick={() => window.print()}>Print / save PDF <Icon name="save" size={15} /></button>
+          </div>
         </header>
-        <article className="legal-paper">
-          {policy.sections.map(([title, copy], index) => (
-            <section key={title}>
-              <span>{String(index + 1).padStart(2, '0')}</span>
-              <div><h2>{title}</h2><p>{copy}</p></div>
-            </section>
-          ))}
-        </article>
+
+        <section className="legal-overview" aria-labelledby="legal-overview-title">
+          <div className="legal-overview__heading"><Icon name={type === 'privacy' ? 'lock' : type === 'cookies' ? 'cookie' : 'layers'} size={18} /><h2 id="legal-overview-title">At a glance</h2><span>A quick guide. Full details below.</span></div>
+          <div className="legal-overview__grid">{policy.summary.map(([title, copy]) => <div key={title}><h3>{title}</h3><p>{copy}</p></div>)}</div>
+        </section>
+
+        <div className="legal-layout">
+          <aside className="legal-sidebar">
+            <div className="legal-toc">
+              <div className="legal-toc__heading"><h2 id="legal-contents-title">On this page</h2><span>{policy.sections.length} sections</span></div>
+              <button className="legal-toc__toggle" type="button" aria-expanded={contentsOpen} aria-controls="legal-contents" onClick={() => setContentsOpen(!contentsOpen)}>On this page <span>{contentsOpen ? '−' : '+'}</span></button>
+              <nav id="legal-contents" aria-labelledby="legal-contents-title" className={contentsOpen ? 'is-open' : ''}>
+                <ol>{policy.sections.map(({ id, title }, index) => <li key={id}><a href={`#${id}`} aria-current={activeSection === id ? 'location' : undefined} onClick={() => { setActiveSection(id); setContentsOpen(false); }}><span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>{title}</a></li>)}</ol>
+              </nav>
+            </div>
+            <div className="legal-help"><p>Questions about {type === 'privacy' ? 'your data' : type === 'cookies' ? 'cookies' : 'these terms'}?</p><a href={`mailto:${LEGAL_EMAIL}`}>Contact Nayef <Icon name="arrow" size={16} /></a><small>{LEGAL_EMAIL}</small></div>
+          </aside>
+
+          <div className="legal-document">
+            <article className="legal-paper" aria-label={policy.title}>
+              {policy.sections.map(({ id, title, body }, index) => <section className="legal-section" id={id} key={`${type}-${id}`} aria-labelledby={`${id}-title`}><span className="legal-section__number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><div><h2 id={`${id}-title`}>{title}</h2><div className="legal-section__body">{body}</div></div></section>)}
+            </article>
+            <div className="legal-document__end"><span>Last updated {POLICY_DATE}</span><a href="#legal-top">Back to top ↑</a></div>
+            <Link className="legal-related" to={`/${relatedType}`}><div><span>Continue reading</span><h2>{policies[relatedType].title}</h2><p>{relatedType === 'cookies' ? 'See what is stored in your browser and why.' : 'Understand how your information is handled.'}</p></div><Icon name="arrow" size={24} /></Link>
+          </div>
+        </div>
       </main>
     </LegalShell>
   );
