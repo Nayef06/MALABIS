@@ -9,7 +9,7 @@ import {
 import { checkSchema } from "express-validator";
 import { User } from "../models/user.mjs";
 import multer from "multer";
-import { uploadToCloudinary } from "../utils/cloudinary.mjs";
+import { deleteCloudinaryImages, uploadToCloudinary } from "../utils/cloudinary.mjs";
 import {
   asyncHandler,
   requireAuthentication,
@@ -159,6 +159,24 @@ router.post(
       return res.status(502).json({
         error: uploadResult.error || "Failed to upload image",
       });
+    }
+
+    try {
+      const owner = await User.findOneAndUpdate({
+        _id: req.user._id,
+        deletingAccount: { $ne: true },
+      }, {
+        $addToSet: { uploadedImageIds: uploadResult.publicId },
+      });
+      if (!owner) {
+        await deleteCloudinaryImages([uploadResult.publicId]);
+        return res.status(401).json({ error: "Authentication required." });
+      }
+    } catch (error) {
+      await deleteCloudinaryImages([uploadResult.publicId]).catch((cleanupError) => {
+        console.error("Could not clean up untracked image:", cleanupError);
+      });
+      throw error;
     }
 
     return res.json({

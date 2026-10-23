@@ -50,6 +50,18 @@ function plain(document) {
   return document?.toObject ? document.toObject() : document;
 }
 
+function matchesClothingItem(item, query = {}) {
+  if (query.isFavorited !== undefined && item.isFavorited !== query.isFavorited) {
+    return false;
+  }
+  if (query.$nor?.some((clause) => (
+    Object.entries(clause).every(([key, value]) => item[key] === value)
+  ))) {
+    return false;
+  }
+  return true;
+}
+
 function populatedUser(document, populate) {
   if (!document) return null;
 
@@ -93,7 +105,13 @@ class FakeQuery {
   }
 
   lean() {
-    return Promise.resolve(populatedUser(this.getValue(), this.populateValue));
+    const value = this.getValue();
+    if (Array.isArray(value)) {
+      return Promise.resolve(
+        value.map((entry) => populatedUser(entry, this.populateValue)),
+      );
+    }
+    return Promise.resolve(populatedUser(value, this.populateValue));
   }
 
   then(resolve, reject) {
@@ -104,6 +122,9 @@ class FakeQuery {
 function applyUserUpdate(user, update) {
   if (update.$push?.inventory) user.inventory.push(update.$push.inventory);
   if (update.$push?.outfits) user.outfits.push(update.$push.outfits);
+  if (update.$addToSet?.uploadedImageIds && !user.uploadedImageIds.includes(update.$addToSet.uploadedImageIds)) {
+    user.uploadedImageIds.push(update.$addToSet.uploadedImageIds);
+  }
   if (update.$pull?.inventory) {
     user.inventory = user.inventory.filter(
       (id) => asId(id) !== asId(update.$pull.inventory),
@@ -118,7 +139,7 @@ function applyUserUpdate(user, update) {
   const directUpdate = Object.fromEntries(
     Object.entries(update).filter(([key]) => !key.startsWith("$")),
   );
-  user.set(directUpdate);
+  user.set({ ...update.$set, ...directUpdate });
 }
 
 function installModelDoubles() {
@@ -141,6 +162,7 @@ function installModelDoubles() {
       && (!query.outfits || includesId(user.outfits, query.outfits))
     )) ?? null;
   }));
+  replace(User, "find", () => new FakeQuery(() => [...users.values()]));
   replace(User, "exists", async (query) => {
     const user = users.get(asId(query._id));
     if (!user) return null;
@@ -155,14 +177,48 @@ function installModelDoubles() {
     users.set(asId(user), user);
     return user;
   });
+  replace(User, "findByIdAndDelete", async (id) => {
+    const user = users.get(asId(id)) ?? null;
+    users.delete(asId(id));
+    return user;
+  });
   replace(User, "findOneAndUpdate", async (query, update) => {
     const user = users.get(asId(query._id));
     if (!user) return null;
+    if (query.deletingAccount?.$ne === true && user.deletingAccount) return null;
+    if (query.$or && user.deletingAccount
+      && !(user.deletionStartedAt < query.$or[1].deletionStartedAt.$lt)) return null;
     if (query.inventory && !includesId(user.inventory, query.inventory)) return null;
     if (query.outfits && !includesId(user.outfits, query.outfits)) return null;
     applyUserUpdate(user, update);
     users.set(asId(user), user);
     return user;
+  });
+  replace(User, "countDocuments", async (query = {}) => (
+    [...users.values()].filter((user) => {
+      if (query["outfits.0"]?.$exists && !user.outfits.length) return false;
+      if (query.inventory?.$in) {
+        const matchingIds = new Set(query.inventory.$in.map(asId));
+        if (!user.inventory.some((id) => matchingIds.has(asId(id)))) return false;
+      }
+      return true;
+    }).length
+  ));
+  replace(User, "aggregate", async () => {
+    const values = [...users.values()];
+    if (!values.length) return [];
+    return [{
+      _id: null,
+      piecesInClosets: values.reduce((total, user) => total + user.inventory.length, 0),
+      uploadedPiecesInClosets: values.reduce(
+        (total, user) => total + Math.max(user.inventory.length - 18, 0),
+        0,
+      ),
+      outfitsInLookbooks: values.reduce((total, user) => total + user.outfits.length, 0),
+      usersWithPieces: values.filter((user) => user.inventory.length > 0).length,
+      usersWithOutfits: values.filter((user) => user.outfits.length > 0).length,
+      usersWithUploads: values.filter((user) => user.inventory.length > 18).length,
+    }];
   });
 
   replace(ClothingItem.prototype, "save", async function saveClothingItem() {
@@ -176,6 +232,28 @@ function installModelDoubles() {
     }
     return documents;
   });
+  replace(ClothingItem, "countDocuments", async (query = {}) => (
+    [...clothingItems.values()].filter((item) => matchesClothingItem(item, query)).length
+  ));
+  replace(ClothingItem, "distinct", async (property, query = {}) => (
+    [...clothingItems.values()]
+      .filter((item) => matchesClothingItem(item, query))
+      .map((item) => item[property])
+  ));
+  replace(ClothingItem, "aggregate", async (pipeline) => {
+    const match = pipeline.find((stage) => stage.$match)?.$match ?? {};
+    const groupKey = pipeline.find((stage) => stage.$group)?.$group?._id;
+    const property = groupKey === "$color" ? "color" : "type";
+    const counts = new Map();
+    for (const item of [...clothingItems.values()].filter(
+      (entry) => matchesClothingItem(entry, match),
+    )) {
+      counts.set(item[property], (counts.get(item[property]) || 0) + 1);
+    }
+    return [...counts.entries()]
+      .map(([_id, count]) => ({ _id, count }))
+      .sort((left, right) => right.count - left.count || left._id.localeCompare(right._id));
+  });
   replace(ClothingItem, "findById", async (id) => (
     clothingItems.get(asId(id)) ?? null
   ));
@@ -184,16 +262,49 @@ function installModelDoubles() {
     clothingItems.delete(asId(id));
     return item;
   });
+  replace(ClothingItem, "deleteMany", async (query) => {
+    const matchingIds = new Set((query._id?.$in ?? []).map(asId));
+    let deletedCount = 0;
+    for (const id of matchingIds) {
+      if (clothingItems.delete(id)) deletedCount += 1;
+    }
+    return { deletedCount };
+  });
 
   replace(Outfit.prototype, "save", async function saveOutfit() {
     outfits.set(asId(this), this);
     return this;
+  });
+  replace(Outfit, "countDocuments", async (query = {}) => (
+    [...outfits.values()].filter((outfit) => (
+      query.isFavorited === undefined || outfit.isFavorited === query.isFavorited
+    )).length
+  ));
+  replace(Outfit, "aggregate", async () => {
+    const values = [...outfits.values()];
+    if (!values.length) return [];
+    const sizes = values.map((outfit) => outfit.clothingItems.length);
+    return [{
+      _id: null,
+      piecesUsedInOutfits: sizes.reduce((total, size) => total + size, 0),
+      simple: sizes.filter((size) => size <= 2).length,
+      everyday: sizes.filter((size) => size >= 3 && size <= 4).length,
+      layered: sizes.filter((size) => size >= 5).length,
+    }];
   });
   replace(Outfit, "findById", async (id) => outfits.get(asId(id)) ?? null);
   replace(Outfit, "findByIdAndDelete", async (id) => {
     const outfit = outfits.get(asId(id)) ?? null;
     outfits.delete(asId(id));
     return outfit;
+  });
+  replace(Outfit, "deleteMany", async (query) => {
+    const matchingIds = new Set((query._id?.$in ?? []).map(asId));
+    let deletedCount = 0;
+    for (const id of matchingIds) {
+      if (outfits.delete(id)) deletedCount += 1;
+    }
+    return { deletedCount };
   });
   replace(Outfit, "updateMany", async (query, update) => {
     const matchingIds = new Set((query._id?.$in ?? []).map(asId));
@@ -425,6 +536,10 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   assert.equal(response.status, 401);
   assert.deepEqual(response.data, { error: "Authentication required." });
 
+  response = await request("/api/analytics");
+  assert.equal(response.status, 401);
+  assert.deepEqual(response.data, { error: "Authentication required." });
+
   response = await request("/api/not-a-route", {
     headers: { origin: "https://www.malabis.io" },
   });
@@ -467,6 +582,10 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   assert.equal(response.data.username, "alice");
   assert.equal(response.data.displayName, "Alice Doe");
 
+  response = await request("/api/analytics", { cookie: aliceCookie });
+  assert.equal(response.status, 403);
+  assert.deepEqual(response.data, { error: "Analytics access denied." });
+
   response = await request("/api/auth/update-profile", {
     method: "POST",
     cookie: aliceCookie,
@@ -490,6 +609,45 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
 
   response = await request("/api/auth/status", { cookie: aliceCookie });
   assert.equal(response.data.displayName, "Alice Updated");
+
+  response = await signUp("NaYeF", "A different display name");
+  assert.equal(response.status, 201);
+  const nayefLogin = await logIn("NAYEF");
+  assert.equal(nayefLogin.status, 200);
+  const nayefCookie = nayefLogin.cookie;
+  const itemCountBeforeAnalytics = clothingItems.size;
+  const outfitCountBeforeAnalytics = outfits.size;
+
+  response = await request("/api/analytics", { cookie: nayefCookie });
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "private, no-store");
+  assert.deepEqual(response.data.summary, {
+    users: 2,
+    pieces: 0,
+    allPieces: 36,
+    starterPiecesExcluded: 36,
+    outfits: 0,
+    usersWithUploads: 0,
+    usersWithOutfits: 0,
+    favoritePieces: 0,
+    favoriteOutfits: 0,
+  });
+  assert.deepEqual(response.data.averages, {
+    piecesPerUser: 0,
+    outfitsPerUser: 0,
+    piecesPerOutfit: 0,
+  });
+  assert.equal(response.data.breakdowns.types.length, 0);
+  assert.equal(response.data.breakdowns.colors.length, 0);
+  assert.deepEqual(response.data.breakdowns.outfitSizes, {
+    simple: 0,
+    everyday: 0,
+    layered: 0,
+  });
+  assert.deepEqual(response.data.usernames, ["alice", "nayef"]);
+  assert.equal(typeof response.data.generatedAt, "string");
+  assert.equal(clothingItems.size, itemCountBeforeAnalytics);
+  assert.equal(outfits.size, outfitCountBeforeAnalytics);
 
   response = await request("/api/clothing/inventory", { cookie: aliceCookie });
   assert.equal(response.status, 200);
@@ -522,6 +680,16 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   assert.equal(response.status, 201);
   assert.equal(response.data.item.name, "Clean tee");
   const newItemId = response.data.item._id;
+
+  response = await request("/api/analytics", { cookie: nayefCookie });
+  assert.equal(response.status, 200);
+  assert.equal(response.data.summary.pieces, 1);
+  assert.equal(response.data.summary.allPieces, 37);
+  assert.equal(response.data.summary.starterPiecesExcluded, 36);
+  assert.equal(response.data.summary.usersWithUploads, 1);
+  assert.equal(response.data.averages.piecesPerUser, 0.5);
+  assert.deepEqual(response.data.breakdowns.types, [{ name: "shirt", count: 1 }]);
+  assert.deepEqual(response.data.breakdowns.colors, [{ name: "black", count: 1 }]);
 
   response = await request("/api/clothing/not-an-id/favorite", {
     method: "PATCH",
@@ -693,6 +861,20 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   });
   assert.equal(response.status, 204);
 
+  response = await request("/api/auth/account", {
+    method: "DELETE",
+    cookie: bobCookie,
+  });
+  assert.equal(response.status, 204);
+  assert.equal([...users.values()].some((user) => user.username === "bob"), false);
+  assert.equal(clothingItems.size, 36);
+
+  response = await request("/api/auth/status", { cookie: bobCookie });
+  assert.equal(response.status, 401);
+
+  response = await request("/api/auth/account", { method: "DELETE" });
+  assert.equal(response.status, 401);
+
   response = await request("/api/auth/logout", {
     method: "POST",
     cookie: aliceCookie,
@@ -701,4 +883,90 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
 
   response = await request("/api/auth/status", { cookie: aliceCookie });
   assert.equal(response.status, 401);
+});
+
+test("account deletion removes saved and unsaved uploads and can retry a provider failure", async () => {
+  users.clear();
+  clothingItems.clear();
+  outfits.clear();
+
+  const names = ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"];
+  const previousEnvironment = Object.fromEntries(names.map((name) => [name, process.env[name]]));
+  const previousUpload = cloudinary.uploader.upload;
+  const previousDestroy = cloudinary.uploader.destroy;
+  const previousError = console.error;
+  const destroyed = [];
+  let uploaded = 0;
+  let failSecondImage = true;
+
+  try {
+    process.env.CLOUDINARY_CLOUD_NAME = "test-cloud";
+    process.env.CLOUDINARY_API_KEY = "test-key";
+    process.env.CLOUDINARY_API_SECRET = "test-secret";
+    console.error = () => {};
+    cloudinary.uploader.upload = async () => {
+      uploaded += 1;
+      return {
+        secure_url: `https://res.cloudinary.com/test-cloud/image/upload/v1/malabis-clothing/photo-${uploaded}.png`,
+        public_id: `malabis-clothing/photo-${uploaded}`,
+      };
+    };
+    cloudinary.uploader.destroy = async (publicId, options) => {
+      assert.deepEqual(options, { resource_type: "image", invalidate: true });
+      destroyed.push(publicId);
+      if (publicId === "malabis-clothing/photo-2" && failSecondImage) {
+        throw new Error("Cloudinary unavailable");
+      }
+      return { result: destroyed.filter((id) => id === publicId).length > 1 ? "not found" : "ok" };
+    };
+
+    assert.equal((await signUp("image-owner")).status, 201);
+    const cookie = (await logIn("image-owner")).cookie;
+    const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
+
+    for (let index = 0; index < 2; index += 1) {
+      const body = new FormData();
+      body.append("image", new Blob([png], { type: "image/png" }), `photo-${index}.png`);
+      const upload = await request("/api/clothing/upload", { method: "POST", cookie, body });
+      assert.equal(upload.status, 200);
+      assert.equal(upload.data.publicId, `malabis-clothing/photo-${index + 1}`);
+      if (index === 0) {
+        const item = await request("/api/clothing", {
+          method: "POST", cookie,
+          json: { type: "shirt", color: "blue", name: "Uploaded shirt", imageLink: upload.data.imageUrl },
+        });
+        assert.equal(item.status, 201);
+      }
+    }
+
+    const owner = [...users.values()].find((user) => user.username === "image-owner");
+    assert.deepEqual(owner.uploadedImageIds, ["malabis-clothing/photo-1", "malabis-clothing/photo-2"]);
+    owner.deletingAccount = true;
+    owner.deletionStartedAt = new Date(Date.now() - 11 * 60 * 1000);
+
+    let deletion = await request("/api/auth/account", { method: "DELETE", cookie });
+    assert.equal(deletion.status, 500);
+    assert.equal(users.has(asId(owner)), true);
+    assert.equal(owner.deletingAccount, false);
+    assert.equal(owner.deletionStartedAt, null);
+    assert.equal(clothingItems.has(asId(owner.inventory.at(-1))), true);
+
+    failSecondImage = false;
+    deletion = await request("/api/auth/account", { method: "DELETE", cookie });
+    assert.equal(deletion.status, 204);
+    assert.equal(users.has(asId(owner)), false);
+    assert.equal(clothingItems.has(asId(owner.inventory.at(-1))), false);
+    assert.deepEqual(destroyed, [
+      "malabis-clothing/photo-1", "malabis-clothing/photo-2",
+      "malabis-clothing/photo-1", "malabis-clothing/photo-2",
+    ]);
+  } finally {
+    cloudinary.uploader.upload = previousUpload;
+    cloudinary.uploader.destroy = previousDestroy;
+    console.error = previousError;
+    for (const name of names) {
+      if (previousEnvironment[name] === undefined) delete process.env[name];
+      else process.env[name] = previousEnvironment[name];
+    }
+  }
 });

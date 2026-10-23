@@ -54,4 +54,21 @@ export const uploadToCloudinary = async (file, removeBackground = true) => {
   }
 };
 
+export const deleteCloudinaryImages = async (publicIds) => {
+  if (!publicIds.length) return;
+  configureCloudinary();
+
+  // A missing asset is already deleted. Keep the account when any other deletion fails
+  // so the remaining image IDs are available for a retry.
+  for (const publicId of new Set(publicIds)) {
+    const result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: "image",
+      invalidate: true,
+    });
+    if (result.result !== "ok" && result.result !== "not found") {
+      throw new Error(`Could not delete uploaded image: ${publicId}`);
+    }
+  }
+};
+
 export default cloudinary;

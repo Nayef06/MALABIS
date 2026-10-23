@@ -17,6 +17,7 @@ import { createDefaultClothingItems } from "../utils/defaultClothing.mjs";
 import { ClothingItem } from "../models/clothingItem.mjs";
 import { Outfit } from "../models/outfit.mjs";
 import { invalidateUserData } from "../services/userData.mjs";
+import { deleteCloudinaryImages } from "../utils/cloudinary.mjs";
 
 const router = Router();
 
@@ -119,17 +120,40 @@ router.delete(
   requireAuthentication,
   asyncHandler(async (req, res) => {
     const userId = req.user._id;
-    const user = await User.findById(userId).select("inventory outfits").lean();
+    const staleBefore = new Date(Date.now() - 10 * 60 * 1000);
+    const user = await User.findOneAndUpdate(
+      {
+        _id: userId,
+        $or: [
+          { deletingAccount: { $ne: true } },
+          { deletionStartedAt: { $lt: staleBefore } },
+        ],
+      },
+      { $set: { deletingAccount: true, deletionStartedAt: new Date() } },
+      { new: true },
+    );
     if (!user) {
-      return res.status(401).json({ error: "Authentication required." });
+      return res.status(409).json({ error: "Account deletion is already in progress." });
     }
 
-    await Promise.all([
-      ClothingItem.deleteMany({ _id: { $in: user.inventory } }),
-      Outfit.deleteMany({ _id: { $in: user.outfits } }),
-      invalidateUserData(userId),
-    ]);
-    await User.findByIdAndDelete(userId);
+    try {
+      await deleteCloudinaryImages(user.uploadedImageIds || []);
+
+      await Promise.all([
+        ClothingItem.deleteMany({ _id: { $in: user.inventory } }),
+        Outfit.deleteMany({ _id: { $in: user.outfits } }),
+        invalidateUserData(userId),
+      ]);
+      await User.findByIdAndDelete(userId);
+    } catch (error) {
+      await User.findByIdAndUpdate(userId, {
+        deletingAccount: false,
+        deletionStartedAt: null,
+      }).catch((resetError) => {
+        console.error("Could not reset account deletion state:", resetError);
+      });
+      throw error;
+    }
 
     return req.logout((logoutError) => {
       if (logoutError) return res.status(204).end();

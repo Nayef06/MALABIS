@@ -49,7 +49,7 @@ export default function LegalPage({ type }) {
           <h1>{policy.title}</h1>
           <p className="legal-intro">{policy.intro}</p>
           <div className="legal-meta">
-            <span><span className="legal-status-dot" aria-hidden="true" />Effective <time dateTime="2026-10-19">{POLICY_DATE}</time></span>
+            <span><span className="legal-status-dot" aria-hidden="true" />Effective <time dateTime="2026-10-22">{POLICY_DATE}</time></span>
             <span>Operated by Nayef · California, USA</span>
             <button type="button" onClick={() => window.print()}>Print / save PDF <Icon name="save" size={15} /></button>
           </div>

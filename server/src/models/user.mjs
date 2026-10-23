@@ -27,6 +27,18 @@ const UserSchema = new mongoose.Schema({
     ref: "Outfit",
     default: [],
   }],
+  uploadedImageIds: {
+    type: [String],
+    default: [],
+  },
+  deletingAccount: {
+    type: Boolean,
+    default: false,
+  },
+  deletionStartedAt: {
+    type: Date,
+    default: null,
+  },
 });
 
 export const User = mongoose.model("User", UserSchema);
