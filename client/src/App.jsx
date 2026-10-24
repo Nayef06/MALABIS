@@ -13,10 +13,6 @@ import CookieSettingsPage from './pages/CookieSettingsPage';
 import Navbar from './components/Navbar';
 import './App.css';
 
-// Analytics is a local-only page; a clean deployment does not include its files.
-const localPages = import.meta.glob('./pages/AnalyticsPage.jsx', { eager: true, import: 'default' });
-const AnalyticsPage = localPages['./pages/AnalyticsPage.jsx'];
-
 const WardrobeShell = () => (
   <div className="app-shell">
     <Navbar />
@@ -42,7 +38,6 @@ function App() {
           <Route path="/clothes" element={<ClothesPage />} />
           <Route path="/outfits" element={<OutfitsPage />} />
           <Route path="/generator" element={<GeneratorPage />} />
-          {AnalyticsPage && <Route path="/analytics" element={<AnalyticsPage />} />}
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

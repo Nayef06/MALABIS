@@ -536,10 +536,6 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   assert.equal(response.status, 401);
   assert.deepEqual(response.data, { error: "Authentication required." });
 
-  response = await request("/api/analytics");
-  assert.equal(response.status, 401);
-  assert.deepEqual(response.data, { error: "Authentication required." });
-
   response = await request("/api/not-a-route", {
     headers: { origin: "https://www.malabis.io" },
   });
@@ -582,10 +578,6 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   assert.equal(response.data.username, "alice");
   assert.equal(response.data.displayName, "Alice Doe");
 
-  response = await request("/api/analytics", { cookie: aliceCookie });
-  assert.equal(response.status, 403);
-  assert.deepEqual(response.data, { error: "Analytics access denied." });
-
   response = await request("/api/auth/update-profile", {
     method: "POST",
     cookie: aliceCookie,
@@ -609,45 +601,6 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
 
   response = await request("/api/auth/status", { cookie: aliceCookie });
   assert.equal(response.data.displayName, "Alice Updated");
-
-  response = await signUp("NaYeF", "A different display name");
-  assert.equal(response.status, 201);
-  const nayefLogin = await logIn("NAYEF");
-  assert.equal(nayefLogin.status, 200);
-  const nayefCookie = nayefLogin.cookie;
-  const itemCountBeforeAnalytics = clothingItems.size;
-  const outfitCountBeforeAnalytics = outfits.size;
-
-  response = await request("/api/analytics", { cookie: nayefCookie });
-  assert.equal(response.status, 200);
-  assert.equal(response.headers.get("cache-control"), "private, no-store");
-  assert.deepEqual(response.data.summary, {
-    users: 2,
-    pieces: 0,
-    allPieces: 36,
-    starterPiecesExcluded: 36,
-    outfits: 0,
-    usersWithUploads: 0,
-    usersWithOutfits: 0,
-    favoritePieces: 0,
-    favoriteOutfits: 0,
-  });
-  assert.deepEqual(response.data.averages, {
-    piecesPerUser: 0,
-    outfitsPerUser: 0,
-    piecesPerOutfit: 0,
-  });
-  assert.equal(response.data.breakdowns.types.length, 0);
-  assert.equal(response.data.breakdowns.colors.length, 0);
-  assert.deepEqual(response.data.breakdowns.outfitSizes, {
-    simple: 0,
-    everyday: 0,
-    layered: 0,
-  });
-  assert.deepEqual(response.data.usernames, ["alice", "nayef"]);
-  assert.equal(typeof response.data.generatedAt, "string");
-  assert.equal(clothingItems.size, itemCountBeforeAnalytics);
-  assert.equal(outfits.size, outfitCountBeforeAnalytics);
 
   response = await request("/api/clothing/inventory", { cookie: aliceCookie });
   assert.equal(response.status, 200);
@@ -680,16 +633,6 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   assert.equal(response.status, 201);
   assert.equal(response.data.item.name, "Clean tee");
   const newItemId = response.data.item._id;
-
-  response = await request("/api/analytics", { cookie: nayefCookie });
-  assert.equal(response.status, 200);
-  assert.equal(response.data.summary.pieces, 1);
-  assert.equal(response.data.summary.allPieces, 37);
-  assert.equal(response.data.summary.starterPiecesExcluded, 36);
-  assert.equal(response.data.summary.usersWithUploads, 1);
-  assert.equal(response.data.averages.piecesPerUser, 0.5);
-  assert.deepEqual(response.data.breakdowns.types, [{ name: "shirt", count: 1 }]);
-  assert.deepEqual(response.data.breakdowns.colors, [{ name: "black", count: 1 }]);
 
   response = await request("/api/clothing/not-an-id/favorite", {
     method: "PATCH",
@@ -867,7 +810,7 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   });
   assert.equal(response.status, 204);
   assert.equal([...users.values()].some((user) => user.username === "bob"), false);
-  assert.equal(clothingItems.size, 36);
+  assert.equal(clothingItems.size, 18);
 
   response = await request("/api/auth/status", { cookie: bobCookie });
   assert.equal(response.status, 401);
@@ -883,6 +826,43 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
 
   response = await request("/api/auth/status", { cookie: aliceCookie });
   assert.equal(response.status, 401);
+});
+
+test("account deletion requires a session and only deletes the signed-in account", async () => {
+  users.clear();
+  clothingItems.clear();
+  outfits.clear();
+
+  assert.equal((await signUp("account-owner")).status, 201);
+  assert.equal((await signUp("other-account")).status, 201);
+  const owner = [...users.values()].find((user) => user.username === "account-owner");
+  const other = [...users.values()].find((user) => user.username === "other-account");
+  const ownerCookie = (await logIn("account-owner")).cookie;
+
+  let response = await request("/api/auth/account", {
+    method: "DELETE",
+    json: { userId: asId(other) },
+  });
+  assert.equal(response.status, 401);
+  assert.equal(users.has(asId(owner)), true);
+  assert.equal(users.has(asId(other)), true);
+
+  response = await request(`/api/auth/account?userId=${asId(other)}`, {
+    method: "DELETE",
+    cookie: ownerCookie,
+    json: { userId: asId(other) },
+  });
+  assert.equal(response.status, 204);
+  assert.equal(users.has(asId(owner)), false);
+  assert.equal(users.has(asId(other)), true);
+  assert.equal(clothingItems.has(asId(other.inventory[0])), true);
+
+  response = await request("/api/auth/account", {
+    method: "DELETE",
+    cookie: ownerCookie,
+  });
+  assert.equal(response.status, 401);
+  assert.equal(users.has(asId(other)), true);
 });
 
 test("account deletion removes saved and unsaved uploads and can retry a provider failure", async () => {

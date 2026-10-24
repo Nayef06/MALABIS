@@ -31,7 +31,7 @@ export default function CookieSettingsPage() {
             <span className="cookie-required">Always on</span>
           </div>
           <label className="cookie-choice">
-            <div><h2>Analytics</h2><p>Records your choice for optional browser measurement. No optional analytics tracker is currently active. This does not control operational reports based on existing account records.</p></div>
+            <div><h2>Analytics</h2><p>Records your choice for optional browser measurement. No optional analytics tracker is currently active.</p></div>
             <input type="checkbox" checked={preferences.analytics} onChange={() => toggle('analytics')} />
             <span className="toggle" aria-hidden="true" />
           </label>
