@@ -50,18 +50,6 @@ function plain(document) {
   return document?.toObject ? document.toObject() : document;
 }
 
-function matchesClothingItem(item, query = {}) {
-  if (query.isFavorited !== undefined && item.isFavorited !== query.isFavorited) {
-    return false;
-  }
-  if (query.$nor?.some((clause) => (
-    Object.entries(clause).every(([key, value]) => item[key] === value)
-  ))) {
-    return false;
-  }
-  return true;
-}
-
 function populatedUser(document, populate) {
   if (!document) return null;
 
@@ -162,7 +150,6 @@ function installModelDoubles() {
       && (!query.outfits || includesId(user.outfits, query.outfits))
     )) ?? null;
   }));
-  replace(User, "find", () => new FakeQuery(() => [...users.values()]));
   replace(User, "exists", async (query) => {
     const user = users.get(asId(query._id));
     if (!user) return null;
@@ -194,33 +181,6 @@ function installModelDoubles() {
     users.set(asId(user), user);
     return user;
   });
-  replace(User, "countDocuments", async (query = {}) => (
-    [...users.values()].filter((user) => {
-      if (query["outfits.0"]?.$exists && !user.outfits.length) return false;
-      if (query.inventory?.$in) {
-        const matchingIds = new Set(query.inventory.$in.map(asId));
-        if (!user.inventory.some((id) => matchingIds.has(asId(id)))) return false;
-      }
-      return true;
-    }).length
-  ));
-  replace(User, "aggregate", async () => {
-    const values = [...users.values()];
-    if (!values.length) return [];
-    return [{
-      _id: null,
-      piecesInClosets: values.reduce((total, user) => total + user.inventory.length, 0),
-      uploadedPiecesInClosets: values.reduce(
-        (total, user) => total + Math.max(user.inventory.length - 18, 0),
-        0,
-      ),
-      outfitsInLookbooks: values.reduce((total, user) => total + user.outfits.length, 0),
-      usersWithPieces: values.filter((user) => user.inventory.length > 0).length,
-      usersWithOutfits: values.filter((user) => user.outfits.length > 0).length,
-      usersWithUploads: values.filter((user) => user.inventory.length > 18).length,
-    }];
-  });
-
   replace(ClothingItem.prototype, "save", async function saveClothingItem() {
     clothingItems.set(asId(this), this);
     return this;
@@ -231,28 +191,6 @@ function installModelDoubles() {
       clothingItems.set(asId(document), document);
     }
     return documents;
-  });
-  replace(ClothingItem, "countDocuments", async (query = {}) => (
-    [...clothingItems.values()].filter((item) => matchesClothingItem(item, query)).length
-  ));
-  replace(ClothingItem, "distinct", async (property, query = {}) => (
-    [...clothingItems.values()]
-      .filter((item) => matchesClothingItem(item, query))
-      .map((item) => item[property])
-  ));
-  replace(ClothingItem, "aggregate", async (pipeline) => {
-    const match = pipeline.find((stage) => stage.$match)?.$match ?? {};
-    const groupKey = pipeline.find((stage) => stage.$group)?.$group?._id;
-    const property = groupKey === "$color" ? "color" : "type";
-    const counts = new Map();
-    for (const item of [...clothingItems.values()].filter(
-      (entry) => matchesClothingItem(entry, match),
-    )) {
-      counts.set(item[property], (counts.get(item[property]) || 0) + 1);
-    }
-    return [...counts.entries()]
-      .map(([_id, count]) => ({ _id, count }))
-      .sort((left, right) => right.count - left.count || left._id.localeCompare(right._id));
   });
   replace(ClothingItem, "findById", async (id) => (
     clothingItems.get(asId(id)) ?? null
@@ -274,23 +212,6 @@ function installModelDoubles() {
   replace(Outfit.prototype, "save", async function saveOutfit() {
     outfits.set(asId(this), this);
     return this;
-  });
-  replace(Outfit, "countDocuments", async (query = {}) => (
-    [...outfits.values()].filter((outfit) => (
-      query.isFavorited === undefined || outfit.isFavorited === query.isFavorited
-    )).length
-  ));
-  replace(Outfit, "aggregate", async () => {
-    const values = [...outfits.values()];
-    if (!values.length) return [];
-    const sizes = values.map((outfit) => outfit.clothingItems.length);
-    return [{
-      _id: null,
-      piecesUsedInOutfits: sizes.reduce((total, size) => total + size, 0),
-      simple: sizes.filter((size) => size <= 2).length,
-      everyday: sizes.filter((size) => size >= 3 && size <= 4).length,
-      layered: sizes.filter((size) => size >= 5).length,
-    }];
   });
   replace(Outfit, "findById", async (id) => outfits.get(asId(id)) ?? null);
   replace(Outfit, "findByIdAndDelete", async (id) => {
@@ -381,13 +302,17 @@ after(async () => {
   await new Promise((resolve) => server.close(resolve));
 });
 
-test("password helpers hash and verify without retaining plaintext", () => {
+test("password helpers hash and verify asynchronously", async () => {
   const password = "a-secure-password";
-  const hash = hashPassword(password);
+  const hashing = hashPassword(password);
+  assert.equal(typeof hashing.then, "function");
+  const hash = await hashing;
 
   assert.notEqual(hash, password);
-  assert.equal(comparePassword(password, hash), true);
-  assert.equal(comparePassword("wrong-password", hash), false);
+  const comparison = comparePassword(password, hash);
+  assert.equal(typeof comparison.then, "function");
+  assert.equal(await comparison, true);
+  assert.equal(await comparePassword("wrong-password", hash), false);
 });
 
 test("models enforce wardrobe data constraints", async () => {
@@ -444,6 +369,119 @@ test("outfit generation is deterministic, honors locks, and reports gaps", () =>
     missingTypes: ["shirt"],
     success: false,
   });
+});
+
+test("generation fills the requested accessory count without duplicates", () => {
+  const inventory = Array.from({ length: 6 }, (_, index) => ({
+    _id: `accessory-${index}`,
+    type: "accessory",
+  }));
+  const originalInventory = structuredClone(inventory);
+
+  for (let count = 0; count <= 5; count += 1) {
+    for (const lockedItems of [[], ["accessory-5"], inventory.map(asId)]) {
+      const { outfit } = generateOutfit(inventory, {
+        selectedTypes: [], lockedItems, accessoryCount: count,
+      }, () => 0);
+      assert.equal(outfit.length, count);
+      assert.equal(new Set(outfit.map(asId)).size, count);
+      if (count > 0 && lockedItems.length === 1) {
+        assert.ok(outfit.some((item) => item._id === "accessory-5"));
+      }
+    }
+  }
+
+  const { outfit } = generateOutfit(inventory.slice(0, 2), {
+    selectedTypes: [], accessoryCount: 5,
+  });
+  assert.equal(outfit.length, 2);
+  assert.deepEqual(inventory, originalInventory);
+});
+
+test("new passwords respect bcrypt's byte limit and validation omits submitted values", async () => {
+  users.clear();
+  clothingItems.clear();
+  outfits.clear();
+
+  for (const password of [undefined, null, 42, "short", "x".repeat(73), "\u00e9".repeat(37)]) {
+    const response = await request("/api/auth/signup", {
+      method: "POST",
+      json: { username: "password-limits", displayName: "Test User", password },
+    });
+    assert.equal(response.status, 400);
+    assert.ok(response.data.errors.some((error) => error.path === "password"));
+    assert.ok(response.data.errors.every((error) => !Object.hasOwn(error, "value")));
+    assert.equal(users.size, 0);
+  }
+
+  const password = "\u00e9".repeat(36);
+  const signup = await request("/api/auth/signup", {
+    method: "POST",
+    json: { username: "password-limits", displayName: "Test User", password },
+  });
+  assert.equal(signup.status, 201);
+  const login = await logIn("password-limits", password);
+  assert.equal(login.status, 200);
+
+  const response = await request("/api/auth/update-profile", {
+    method: "POST", cookie: login.cookie, json: { password: `${password}x` },
+  });
+  assert.equal(response.status, 400);
+  assert.ok(response.data.errors.every((error) => !Object.hasOwn(error, "value")));
+  assert.equal((await logIn("password-limits", password)).status, 200);
+
+  const update = await request("/api/auth/update-profile", {
+    method: "POST", cookie: login.cookie, json: { password: "updated-password" },
+  });
+  assert.equal(update.status, 200);
+  assert.equal((await logIn("password-limits", password)).status, 401);
+  assert.equal((await logIn("password-limits", "updated-password")).status, 200);
+});
+
+test("saves racing with account deletion leave no new clothing or outfits", async () => {
+  users.clear();
+  clothingItems.clear();
+  outfits.clear();
+
+  assert.equal((await signUp("deleting-owner")).status, 201);
+  const cookie = (await logIn("deleting-owner")).cookie;
+  const owner = [...users.values()][0];
+  const inventoryIds = owner.inventory.map(asId);
+
+  for (const { Model, path, json, store } of [
+    {
+      Model: ClothingItem, path: "/api/clothing", store: clothingItems,
+      json: { name: "Late shirt", type: "shirt", color: "black", imageLink: "https://example.com/shirt.png" },
+    },
+    {
+      Model: Outfit, path: "/api/outfits", store: outfits,
+      json: { name: "Late outfit", clothingItems: [inventoryIds[0]] },
+    },
+  ]) {
+    const originalSave = Model.prototype.save;
+    const sizeBefore = store.size;
+    let saveAttempted = false;
+    owner.deletingAccount = false;
+    Model.prototype.save = async function saveDuringDeletion() {
+      const document = await originalSave.call(this);
+      // Deletion acquires its lock after authentication but before ownership is saved.
+      owner.deletingAccount = true;
+      owner.deletionStartedAt = new Date();
+      saveAttempted = true;
+      return document;
+    };
+
+    try {
+      const response = await request(path, { method: "POST", cookie, json });
+      assert.equal(saveAttempted, true);
+      assert.equal(response.status, 401);
+      assert.equal(store.size, sizeBefore);
+      assert.deepEqual(owner.inventory.map(asId), inventoryIds);
+      assert.equal(owner.outfits.length, 0);
+    } finally {
+      Model.prototype.save = originalSave;
+    }
+  }
 });
 
 test("utility fallbacks work without optional external services", async () => {

@@ -24,7 +24,7 @@ passport.use(
         return done(null, false, { message: "Invalid username or password." });
       }
 
-      if (!comparePassword(password, findUser.password)) {
+      if (!await comparePassword(password, findUser.password)) {
         return done(null, false, { message: "Invalid username or password." });
       }
 

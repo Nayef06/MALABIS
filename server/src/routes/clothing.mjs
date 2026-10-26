@@ -66,8 +66,8 @@ router.post(
     try {
       savedItem = await newItem.save();
 
-      const owner = await User.findByIdAndUpdate(
-        req.user._id,
+      const owner = await User.findOneAndUpdate(
+        { _id: req.user._id, deletingAccount: { $ne: true } },
         { $push: { inventory: savedItem._id } },
       );
       if (!owner) {

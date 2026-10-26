@@ -8,6 +8,19 @@ const itemIdValidation = {
   isMongoId: { errorMessage: "Invalid resource ID" },
 };
 
+const passwordValidation = {
+  in: ["body"],
+  isString: { bail: true, errorMessage: "Password must be a string" },
+  isLength: {
+    options: { min: 8 },
+    errorMessage: "Password must be at least 8 characters",
+  },
+  custom: {
+    options: (value) => Buffer.byteLength(value, "utf8") <= 72,
+    errorMessage: "Password must be 72 bytes or fewer",
+  },
+};
+
 export const createUserValidationSchema = {
   username: {
     in: ["body"],
@@ -34,15 +47,7 @@ export const createUserValidationSchema = {
     optional: true,
     isEmail: { errorMessage: "Invalid email" },
   },
-  password: {
-    in: ["body"],
-    isString: true,
-    isLength: {
-      options: { min: 8, max: 128 },
-      errorMessage: "Password must be between 8 and 128 characters",
-    },
-    notEmpty: { errorMessage: "Password is required" },
-  },
+  password: passwordValidation,
 };
 
 export const loginValidationSchema = {
@@ -121,13 +126,8 @@ export const profileValidationSchema = {
     },
   },
   password: {
-    in: ["body"],
+    ...passwordValidation,
     optional: true,
-    isString: { errorMessage: "Password must be a string" },
-    isLength: {
-      options: { min: 8, max: 128 },
-      errorMessage: "Password must be between 8 and 128 characters",
-    },
   },
 };
 

@@ -66,7 +66,7 @@ router.post(
       const newUser = new User({
         username: lowerCaseUsername,
         displayName,
-        password: hashPassword(password),
+        password: await hashPassword(password),
       });
 
       await newUser.save();
@@ -102,7 +102,7 @@ router.post(
 
     const update = {};
     if (displayName !== undefined) update.displayName = displayName;
-    if (password !== undefined) update.password = hashPassword(password);
+    if (password !== undefined) update.password = await hashPassword(password);
 
     const user = await User.findByIdAndUpdate(req.user._id, update, {
       runValidators: true,

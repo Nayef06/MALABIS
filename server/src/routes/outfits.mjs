@@ -61,8 +61,8 @@ router.post(
     let savedOutfit;
     try {
       savedOutfit = await newOutfit.save();
-      const owner = await User.findByIdAndUpdate(
-        req.user._id,
+      const owner = await User.findOneAndUpdate(
+        { _id: req.user._id, deletingAccount: { $ne: true } },
         { $push: { outfits: savedOutfit._id } },
       );
       if (!owner) {

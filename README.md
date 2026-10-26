@@ -16,7 +16,7 @@ MALABIS is a full-stack wardrobe organizer and outfit builder. Users can upload 
 ## Tech stack
 
 - **Client:** React 18, React Router 6, Vite, CSS
-- **API:** Node.js 18+, Express, Passport, express-session
+- **API:** Node.js 20.9+, Express, Passport, express-session
 - **Data:** MongoDB, Mongoose, optional Redis cache
 - **Images:** Multer, Sharp, Cloudinary
 - **Deployment:** Vercel configurations for separate client and server projects
@@ -50,7 +50,7 @@ malabis/
 
 ### Prerequisites
 
-- Node.js 18 or newer
+- Node.js 20.9 or newer
 - npm
 - MongoDB, either local or hosted
 - Docker Desktop if you want to use the included MongoDB and Redis services

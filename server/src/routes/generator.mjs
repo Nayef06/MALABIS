@@ -52,15 +52,18 @@ export function generateOutfit(
   if (accessoryCount > 0) {
     const lockedAccessories = lockedItemsData.filter(
       (item) => item.type === "accessory",
-    );
+    ).slice(0, accessoryCount);
     outfit.push(...lockedAccessories);
 
     const availableAccessories = (itemsByType.accessory ?? []).filter((item) => (
       !lockedItemIds.has(String(item._id))
     ));
-    const remaining = Math.min(accessoryCount, 5) - lockedAccessories.length;
+    const remaining = Math.min(
+      accessoryCount - lockedAccessories.length,
+      availableAccessories.length,
+    );
 
-    for (let i = 0; i < Math.min(remaining, availableAccessories.length); i += 1) {
+    for (let i = 0; i < remaining; i += 1) {
       const randomIndex = Math.floor(random() * availableAccessories.length);
       outfit.push(...availableAccessories.splice(randomIndex, 1));
     }
