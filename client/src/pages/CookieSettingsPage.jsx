@@ -22,21 +22,21 @@ export default function CookieSettingsPage() {
         <header className="legal-hero">
           <p className="eyebrow">Your browser, your choice</p>
           <h1>Cookie settings</h1>
-          <p>Choose which optional categories Malabis may use. Your selection is saved only in this browser.</p>
+          <p>Choose which optional categories Malabis may use, with your selection saved only in this browser.</p>
           <p className="cookie-policy-link">Read the <Link to="/cookies">Cookie Policy</Link> for storage names, purposes, and lifetimes.</p>
         </header>
         <section className="cookie-paper" aria-label="Cookie preferences">
           <div className="cookie-choice">
-            <div><h2>Strictly necessary</h2><p>Keeps you securely signed in and provides core account features. This category cannot be switched off.</p></div>
+            <div><h2>Strictly necessary</h2><p>This category keeps you securely signed in, provides core account features, and cannot be switched off.</p></div>
             <span className="cookie-required">Always on</span>
           </div>
           <label className="cookie-choice">
-            <div><h2>Analytics</h2><p>Records your choice for optional browser measurement. No optional analytics tracker is currently active.</p></div>
+            <div><h2>Analytics</h2><p>Your choice for optional browser measurement is recorded here, although no optional analytics tracker is currently active.</p></div>
             <input type="checkbox" checked={preferences.analytics} onChange={() => toggle('analytics')} />
             <span className="toggle" aria-hidden="true" />
           </label>
           <label className="cookie-choice">
-            <div><h2>Personalization</h2><p>Records your choice for optional browser preferences beyond core wardrobe features. No separate optional personalization technology is currently active.</p></div>
+            <div><h2>Personalization</h2><p>Your choice for optional preferences beyond core wardrobe features is recorded here, although no separate optional personalization technology is currently active.</p></div>
             <input type="checkbox" checked={preferences.personalization} onChange={() => toggle('personalization')} />
             <span className="toggle" aria-hidden="true" />
           </label>

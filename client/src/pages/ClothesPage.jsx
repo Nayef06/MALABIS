@@ -93,7 +93,7 @@ export default function ClothesPage() {
   const favorite = async (item) => {
     const value=!item.isFavorited; setItems((current)=>current.map((piece)=>piece._id===item._id?{...piece,isFavorited:value}:piece));
     try { const response=await apiFetch(`/api/clothing/${item._id}/favorite`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({isFavorited:value})}); if(!response.ok) throw new Error(); updateInventoryItem(item._id,{isFavorited:value}); }
-    catch { setItems((current)=>current.map((piece)=>piece._id===item._id?{...piece,isFavorited:!value}:piece)); setToast({show:true,type:'error',message:'That favorite did not stick. Try again.'}); }
+    catch { setItems((current)=>current.map((piece)=>piece._id===item._id?{...piece,isFavorited:!value}:piece)); setToast({show:true,type:'error',message:'We could not save that favorite, so please try again.'}); }
   };
   const remove = async () => {
     const id=confirmId; setConfirmId(null);
@@ -105,7 +105,7 @@ export default function ClothesPage() {
   return (
     <div className="page closet-page">
       <Toast {...toast}/>
-      <header className="page-heading closet-heading"><div><p className="eyebrow">The everyday archive</p><h1>My closet</h1></div><p className="page-heading__copy">Everything you own, out where you can see it. Favorites stay a little closer.</p><button className="button button--rose" onClick={()=>setAddOpen(true)}><Icon name="plus" size={18}/> Add a piece</button></header>
+      <header className="page-heading closet-heading"><div><h1>My closet</h1></div><p className="page-heading__copy">See everything you own in one place, with your favorite pieces always easy to find.</p><button className="button button--rose" onClick={()=>setAddOpen(true)}><Icon name="plus" size={18}/> Add a piece</button></header>
       <div className="closet-tabs" role="group" aria-label="Filter closet"><button className={filter==='all'?'is-active':''} onClick={()=>setFilter('all')}>All pieces <span>{items.length}</span></button><button className={filter==='favorites'?'is-active':''} onClick={()=>setFilter('favorites')}><Icon name="heart" size={15}/> Favorites <span>{items.filter((item)=>item.isFavorited).length}</span></button></div>
       {loading ? <div className="closet-loading"><i/><i/><i/><span>Opening the wardrobe…</span></div> : error ? <EmptyState title="The wardrobe is stuck" copy={error}/> : grouped.length===0 ? <EmptyState title={filter==='favorites'?'No favorites yet':'A lovely empty rail'} copy={filter==='favorites'?'Tap the little heart on a piece you reach for often.':'Add your first piece and start building your small fashion world.'} action={filter==='all'?()=>setAddOpen(true):()=>setFilter('all')} actionLabel={filter==='all'?'Add a piece':'See everything'}/> : <div className="closet-rails">{grouped.map((group)=><section className="closet-rail" key={group.id}><header><div><Icon name={group.id} size={19}/><h2>{group.label}</h2></div><span>{group.items.length} {group.items.length===1?'piece':'pieces'}</span></header><div className="closet-rail__rod"/><div className="closet-rail__items">{group.items.sort((a,b)=>Number(!!b.isFavorited)-Number(!!a.isFavorited)).map((item,index)=><Garment key={item._id} item={item} index={index} onFavorite={favorite} onDelete={setConfirmId}/>)}</div></section>)}</div>}
       <AddPiece open={addOpen} onClose={()=>setAddOpen(false)} onAdded={add}/><ConfirmDialog open={!!confirmId} onClose={()=>setConfirmId(null)} onConfirm={remove} noun="piece"/>

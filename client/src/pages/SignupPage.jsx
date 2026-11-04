@@ -16,14 +16,14 @@ export default function SignupPage() {
     event.preventDefault(); setError(''); setSubmitting(true);
     try {
       const response = await apiFetch('/api/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
-      if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || 'We could not make that account. Try a different username.'); }
+      if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || 'We could not make that account, so please try a different username.'); }
       navigate('/login');
     } catch (err) { setError(err.message); }
     finally { setSubmitting(false); }
   };
 
   return (
-    <AuthShell eyebrow="A room of your own" title="Make it yours." note="Start with a few details. We’ll leave plenty of space for your style.">
+    <AuthShell eyebrow="A room of your own" title="Make room for your style" note="Start with a few details and leave plenty of room to make this wardrobe your own.">
       <form className="auth-fields" onSubmit={handleSubmit}>
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="field"><label htmlFor="displayName">What should we call you?</label><input className="input" id="displayName" value={form.displayName} onChange={update('displayName')} autoComplete="name" minLength="3" required /></div>

@@ -17,7 +17,7 @@ export default function LegalShell({ children }) {
       </header>
       {children}
       <footer className="legal-footer">
-        <span>© {new Date().getFullYear()} Malabis<span className="legal-footer__note">Your wardrobe. Thoughtfully organized.</span></span>
+        <span>© {new Date().getFullYear()} Malabis<span className="legal-footer__note">A thoughtful home for your wardrobe.</span></span>
         <div><Link to="/terms">Terms of Service</Link><Link to="/privacy">Privacy Policy</Link><Link to="/cookies">Cookie Policy</Link><Link to="/cookie-settings">Cookie settings</Link></div>
       </footer>
     </div>

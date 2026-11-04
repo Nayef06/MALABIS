@@ -9,7 +9,7 @@ export const policies = {
   terms: {
     label: 'Terms',
     title: 'Terms of Service',
-    intro: 'The agreement for using your digital wardrobe. Please read these terms before creating an account or using Malabis.',
+    intro: 'Please read the agreement for using your digital wardrobe before creating an account or using Malabis.',
     summary: [
       ['Your wardrobe, your content', 'You keep ownership of the clothing photos and outfit content you add.'],
       ['Use it responsibly', 'Protect your account and upload only content you have permission to use.'],

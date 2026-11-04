@@ -56,7 +56,7 @@ export default function LegalPage({ type }) {
         </header>
 
         <section className="legal-overview" aria-labelledby="legal-overview-title">
-          <div className="legal-overview__heading"><Icon name={type === 'privacy' ? 'lock' : type === 'cookies' ? 'cookie' : 'layers'} size={18} /><h2 id="legal-overview-title">At a glance</h2><span>A quick guide. Full details below.</span></div>
+          <div className="legal-overview__heading"><Icon name={type === 'privacy' ? 'lock' : type === 'cookies' ? 'cookie' : 'layers'} size={18} /><h2 id="legal-overview-title">At a glance</h2><span>A quick guide to the details below.</span></div>
           <div className="legal-overview__grid">{policy.summary.map(([title, copy]) => <div key={title}><h3>{title}</h3><p>{copy}</p></div>)}</div>
         </section>
 

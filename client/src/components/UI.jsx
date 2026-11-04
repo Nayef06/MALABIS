@@ -34,7 +34,7 @@ export function ConfirmDialog({ open, onClose, onConfirm, noun = 'item' }) {
   return (
     <Modal open={open} onClose={onClose} eyebrow="A small goodbye" title={`Remove this ${noun}?`} className="confirm-sheet">
       <div className="confirm-sheet__body">
-        <p>This will take it out of your Malabis collection. This action cannot be undone.</p>
+        <p>Removing this {noun} from your Malabis collection cannot be undone.</p>
         <div className="button-row">
           <button className="button button--quiet" type="button" onClick={onClose}>Keep it</button>
           <button className="button button--danger" type="button" onClick={onConfirm}>Remove</button>

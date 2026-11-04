@@ -24,7 +24,7 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthShell eyebrow="Welcome back" title="Come on in." note="Your clothes have been right where you left them.">
+    <AuthShell eyebrow="Welcome back" title="Welcome to your wardrobe" note="Your clothes are right where you left them, ready for whatever you want to wear next.">
       <form className="auth-fields" onSubmit={handleSubmit}>
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="field"><label htmlFor="username">Username</label><input className="input" id="username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" required /></div>
