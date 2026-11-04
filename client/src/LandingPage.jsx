@@ -15,19 +15,20 @@ const pieces = {
   cap: { name: 'Weekend cap', category: 'Accessories' },
 };
 const looks = [
-  { title: 'The everyday favorite', mood: 'An easy, familiar look that feels put together.', top: 'sweatshirt', accessory: 'sunglasses', colors: ['#8d8173', '#648199', '#f4f0e8'] },
+  { title: 'The everyday favorite', mood: 'An easy, familiar look that feels put together.', top: 'tee', accessory: 'sunglasses', colors: ['#333330', '#648199', '#f4f0e8'] },
   { title: 'Off-duty essentials', mood: 'Made for a coffee run or a long walk on your kind of day.', top: 'tee', accessory: 'cap', colors: ['#333330', '#648199', '#f4f0e8'] },
-  { title: 'A slower Sunday', mood: 'A few favorite pieces come together in one easy outfit.', top: 'sweatshirt', accessory: 'cap', colors: ['#8d8173', '#648199', '#30302f'] },
+  { title: 'A slower Sunday', mood: 'A few favorite pieces come together in one easy outfit.', top: 'starter-Jackets-1', accessory: 'cap', colors: ['#333330', '#648199', '#30302f'] },
 ];
 const sampleColors = { sweatshirt: 'brown', tee: 'black', jeans: 'blue', sneakers: 'white', sunglasses: 'black', cap: 'black' };
 const swatchColors = { black: '#333330', white: '#f4f0e8', yellow: '#dfbc52', blue: '#648199', brown: '#8d8173', red: '#b34341', gray: '#999b9d' };
 const starterSlots = { Hats: 'accessory', Jackets: 'top', Shirts: 'top', Pants: 'bottom', Shoes: 'shoes', Accessories: 'accessory' };
-const excludedPreviewPieces = new Set(['BUCKET HAT', 'RING']);
+const excludedPreviewPieces = new Set(['BUCKET HAT', 'RING', 'FEAR OF GOD', 'BASIC T', 'JEANS', 'AF1', 'SUNGLASSES', 'YANKEES CAP']);
+const excludedSamplePieces = new Set(['sweatshirt']);
 const previewStarterPieces = Object.entries(defaultClothingItems).flatMap(([category, items]) => items
   .map((item, index) => ({ id: `starter-${category}-${index}`, name: item.name, category, color: item.color, image: item.image, slot: starterSlots[category] }))
   .filter((item) => !excludedPreviewPieces.has(item.name)));
 const previewBank = [
-  ...Object.entries(pieces).map(([id, piece]) => ({ id, ...piece, color: sampleColors[id], image: `/images/${id}.webp`, slot: { sweatshirt: 'top', tee: 'top', jeans: 'bottom', sneakers: 'shoes', sunglasses: 'accessory', cap: 'accessory' }[id] })),
+  ...Object.entries(pieces).filter(([id]) => !excludedSamplePieces.has(id)).map(([id, piece]) => ({ id, ...piece, color: sampleColors[id], image: `/images/${id}.webp`, slot: { tee: 'top', jeans: 'bottom', sneakers: 'shoes', sunglasses: 'accessory', cap: 'accessory' }[id] })),
   ...previewStarterPieces,
 ];
 const previewPieces = Object.fromEntries(previewBank.map((piece) => [piece.id, piece]));
