@@ -573,6 +573,7 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   let response = await request("/api/auth/status");
   assert.equal(response.status, 401);
   assert.deepEqual(response.data, { error: "Authentication required." });
+  assert.equal(response.headers.get("cache-control"), "private, no-store");
 
   response = await request("/api/not-a-route", {
     headers: { origin: "https://www.malabis.io" },
@@ -615,6 +616,7 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   assert.equal(response.status, 200);
   assert.equal(response.data.username, "alice");
   assert.equal(response.data.displayName, "Alice Doe");
+  assert.equal(response.headers.get("cache-control"), "private, no-store");
 
   response = await request("/api/auth/update-profile", {
     method: "POST",
@@ -642,6 +644,7 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
 
   response = await request("/api/clothing/inventory", { cookie: aliceCookie });
   assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "private, no-store");
   assert.equal(response.headers.get("x-cache"), "MISS");
   assert.equal(response.data.items.length, 18);
   const firstDefaultItemId = response.data.items[0]._id;
@@ -715,6 +718,26 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
     json: { name: "Duplicate", clothingItems: [newItemId, newItemId] },
   });
   assert.equal(response.status, 400);
+
+  response = await request("/api/outfits", {
+    method: "POST",
+    cookie: aliceCookie,
+    json: { name: "Mixed-case duplicate", clothingItems: [newItemId, newItemId.toUpperCase()] },
+  });
+  assert.equal(response.status, 400);
+
+  response = await request("/api/outfits", {
+    method: "POST",
+    cookie: aliceCookie,
+    json: { name: "Uppercase ID", clothingItems: [newItemId.toUpperCase()] },
+  });
+  assert.equal(response.status, 201);
+  assert.equal(response.data.outfit.clothingItems[0], newItemId);
+  response = await request(`/api/outfits/${response.data.outfit._id}`, {
+    method: "DELETE",
+    cookie: aliceCookie,
+  });
+  assert.equal(response.status, 204);
 
   response = await request("/api/outfits", {
     method: "POST",

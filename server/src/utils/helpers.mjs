@@ -8,6 +8,7 @@ export const hashPassword = (password) => bcrypt.hash(password, saltRounds);
 export const comparePassword = (plain, hashed) => bcrypt.compare(plain, hashed);
 
 export function requireAuthentication(req, res, next) {
+  res.set("Cache-Control", "private, no-store");
   if (!req.user) {
     return res.status(401).json({ error: "Authentication required." });
   }

@@ -33,7 +33,8 @@ router.post(
   validateRequest,
   asyncHandler(async (req, res) => {
     const { name, clothingItems } = req.body;
-    const uniqueItemIds = new Set(clothingItems);
+    const normalizedItemIds = clothingItems.map((itemId) => itemId.toLowerCase());
+    const uniqueItemIds = new Set(normalizedItemIds);
     if (uniqueItemIds.size !== clothingItems.length) {
       return res.status(400).json({
         error: "An outfit cannot contain duplicate items.",
@@ -46,7 +47,7 @@ router.post(
     }
 
     const inventoryIds = new Set(user.inventory.map(String));
-    if (clothingItems.some((itemId) => !inventoryIds.has(itemId))) {
+    if (normalizedItemIds.some((itemId) => !inventoryIds.has(itemId))) {
       return res.status(403).json({
         error: "An outfit can only contain items from your inventory.",
       });
@@ -54,7 +55,7 @@ router.post(
 
     const newOutfit = new Outfit({
       name,
-      clothingItems,
+      clothingItems: normalizedItemIds,
       isFavorited: false,
     });
 
