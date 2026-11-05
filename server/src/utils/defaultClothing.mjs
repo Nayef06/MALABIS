@@ -88,8 +88,8 @@ const categoryToTypeMap = {
   Accessories: "accessory",
 };
 
-export function getDefaultClothingRecords() {
-  return Object.entries(defaultClothingItems).flatMap(
+export async function createDefaultClothingItems() {
+  const items = Object.entries(defaultClothingItems).flatMap(
     ([category, categoryItems]) => categoryItems.map((item) => ({
       type: categoryToTypeMap[category],
       color: item.color,
@@ -98,9 +98,6 @@ export function getDefaultClothingRecords() {
       isFavorited: false,
     })),
   );
-}
-
-export async function createDefaultClothingItems() {
-  const createdItems = await ClothingItem.insertMany(getDefaultClothingRecords());
+  const createdItems = await ClothingItem.insertMany(items);
   return createdItems.map((item) => item._id);
 }

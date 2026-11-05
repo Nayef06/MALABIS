@@ -30,14 +30,15 @@ export function Modal({ open, onClose, title, eyebrow, children, className = '' 
   );
 }
 
-export function ConfirmDialog({ open, onClose, onConfirm, noun = 'item' }) {
+export function ConfirmDialog({ open, onClose, onConfirm, noun = 'item', count = 1, pending = false }) {
+  const subject = count === 1 ? `this ${noun}` : `these ${count} ${noun}s`;
   return (
-    <Modal open={open} onClose={onClose} eyebrow="Are you sure you want to" title={`Remove this ${noun}?`} className="confirm-sheet">
+    <Modal open={open} onClose={() => { if (!pending) onClose(); }} eyebrow="Are you sure you want to" title={`Remove ${subject}?`} className="confirm-sheet">
       <div className="confirm-sheet__body">
-        <p>Removing this {noun} from your Malabis collection cannot be undone.</p>
+        <p>Removing {subject} from your Malabis collection cannot be undone.</p>
         <div className="button-row">
-          <button className="button button--quiet" type="button" onClick={onClose}>Keep it</button>
-          <button className="button button--danger" type="button" onClick={onConfirm}>Remove</button>
+          <button className="button button--quiet" type="button" onClick={onClose} disabled={pending}>{count === 1 ? 'Keep it' : 'Keep them'}</button>
+          <button className="button button--danger" type="button" onClick={onConfirm} disabled={pending}>{pending ? 'Removing…' : count === 1 ? 'Remove' : `Remove ${count} ${noun}s`}</button>
         </div>
       </div>
     </Modal>

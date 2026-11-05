@@ -34,7 +34,7 @@ export async function exportOutfit(pieces, name = 'Untitled look') {
   const context = canvas.getContext('2d');
   if (!context) throw new Error('Your browser could not create the image.');
 
-  context.fillStyle = '#fffdf8';
+  context.fillStyle = '#f0e7da';
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.save();
   context.translate(margin, margin);

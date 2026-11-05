@@ -117,39 +117,6 @@ For local development, leave `VITE_API_BASE_URL` empty; Vite proxies `/api` requ
 
 New accounts start with the 14 pieces in `client/public/images/default-clothing/`. The landing page uses the same pieces for its interactive preview. The client (`client/src/starterClothing.mjs`) and server (`server/src/utils/defaultClothing.mjs`) keep separate catalogs for independent deployment; backend tests verify they match the shipped assets. Starter image paths resolve on the client origin, so they also work with a separately hosted API.
 
-### Replacing defaults in existing accounts
-
-Run the reusable migration from `server/`. It defaults to a **dry run** against `.env.local`; the selected file must explicitly contain `MONGODB_URI`. Choose one account or all accounts:
-
-```bash
-npm run migrate:defaults -- --username nayef
-npm run migrate:defaults -- --username nayef --apply
-npm run migrate:defaults -- --all
-npm run migrate:defaults -- --all --apply
-```
-
-Only exact matches for an original default's name, type, color, and image URL qualify. Uploaded pieces, including uploads with the same names as defaults, are preserved. Replacement defaults retain their item IDs and favorites when possible, preserving saved outfits. The three old hats and ring have no replacement; their references are removed from the wardrobe and saved outfits. No outfits, clothing documents, or hosted images are deleted.
-
-Accounts with remaining legacy defaults receive the complete new set without duplicating defaults they already have. Accounts without recognized legacy defaults are skipped. Applied migrations are recorded in MongoDB's `defaultclothingmigrations` collection and can be rerun safely. Pending runs resume their recorded plan; concurrent edits cause the script to stop instead of overwriting user changes.
-
-Before account changes, the migration saves originals and its plan in the journal and an ignored `server/migration-backups/<host>-<database>/` directory. Backups exclude passwords. Configured Redis inventory and outfit caches are cleared after migration, using the same `.env` fallback as the local API.
-
-For a later hosted rollout, deploy the new client assets first. Use the hosted environment file explicitly. Applying a hosted migration also requires checking that the client serves every new image:
-
-```bash
-npm run migrate:defaults -- --env-file .env --all
-npm run migrate:defaults -- --env-file .env --all --apply --asset-origin https://www.malabis.io
-```
-
-Migration unit tests run with `npm test`. To include MongoDB integration tests in PowerShell:
-
-```powershell
-$env:MIGRATION_TEST_MONGODB_URI = 'mongodb://127.0.0.1:27017/malabis'
-try { npm test } finally { Remove-Item Env:MIGRATION_TEST_MONGODB_URI }
-```
-
-Integration tests create and remove a separate temporary database; existing accounts are not used as fixtures.
-
 ### 4. Run the app
 
 In one terminal:
@@ -241,7 +208,6 @@ npm run dev            # Start the API with nodemon
 npm start              # Start the API with Node.js
 npm test               # Run backend tests serially
 npm run test:coverage  # Run backend tests with coverage
-npm run migrate:defaults -- --all  # Preview an existing-account defaults migration
 ```
 
 ## Deployment
