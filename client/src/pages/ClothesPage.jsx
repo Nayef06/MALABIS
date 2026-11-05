@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Icon } from '../components/Icons';
 import { ConfirmDialog, EmptyState, Modal, Toast } from '../components/UI';
 import { apiFetch } from '../api';
@@ -89,9 +89,20 @@ export default function ClothesPage() {
   const [items,setItems] = useState([]); const [loading,setLoading] = useState(true); const [error,setError] = useState('');
   const [filter,setFilter] = useState('all'); const [addOpen,setAddOpen] = useState(false); const [confirmIds,setConfirmIds] = useState(null);
   const [selecting,setSelecting] = useState(false); const [selectedIds,setSelectedIds] = useState(new Set()); const [deleting,setDeleting] = useState(false);
+  const selectionRef = useRef(null);
+  const [selectionHeight,setSelectionHeight] = useState(0);
   const [toast,setToast] = useState({ show:false, message:'', type:'success' });
   useEffect(() => { getInventory().then(setItems).catch(() => setError('Your closet could not be opened just now.')).finally(() => setLoading(false)); }, []);
   useEffect(() => { if (!toast.show) return; const id=setTimeout(() => setToast((t)=>({...t,show:false})),2200); return () => clearTimeout(id); }, [toast.show]);
+  useEffect(() => {
+    const selection = selectionRef.current;
+    if (!selection) return;
+    const updateHeight = () => setSelectionHeight(selection.getBoundingClientRect().height);
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(selection);
+    return () => observer.disconnect();
+  }, [selecting]);
 
   const grouped = useMemo(() => TYPES.map((type) => ({ ...type, items:items.filter((item) => item.type === type.id && (filter !== 'favorites' || item.isFavorited)) })).filter((group) => group.items.length), [items,filter]);
   const selectableItems = grouped.flatMap((group) => group.items).filter((item) => !item.isFavorited);
@@ -141,13 +152,13 @@ export default function ClothesPage() {
   const add = (item) => { const cached=addInventoryItem(item); setItems(cached || ((current)=>[...current,item])); setToast({show:true,type:'success',message:'Your new piece is hanging up.'}); };
 
   return (
-    <div className="page closet-page">
+    <div className={`page closet-page${selecting ? ' is-selecting' : ''}`} style={{ '--closet-selection-height': `${selectionHeight}px` }}>
       <Toast {...toast}/>
       <header className="page-heading closet-heading"><div><h1>My closet</h1></div><p className="page-heading__copy">See everything you own in one place, with your favorite pieces always easy to find.</p><div className="closet-heading__actions"><button type="button" className="button button--paper closet-select" onClick={toggleSelection} disabled={loading || !!error || !items.length || deleting} aria-pressed={selecting}><Icon name={selecting ? 'close' : 'check'} size={18}/>{selecting ? 'Cancel' : 'Select'}</button><button type="button" className="button button--rose closet-add" onClick={()=>setAddOpen(true)} disabled={deleting} aria-label="Add a piece"><Icon name="plus" size={18}/> Add a piece</button></div></header>
       <div className="closet-tabs" role="group" aria-label="Filter closet"><button className={filter==='all'?'is-active':''} onClick={()=>changeFilter('all')} disabled={deleting}>All pieces <span>{items.length}</span></button><button className={filter==='favorites'?'is-active':''} onClick={()=>changeFilter('favorites')} disabled={deleting}><Icon name="heart" size={15}/> Favorites <span>{items.filter((item)=>item.isFavorited).length}</span></button></div>
-      {selecting && <div className="closet-selection" role="group" aria-label="Select pieces to delete" aria-busy={deleting}>
-        <div className="closet-selection__summary"><strong role="status">{selectedItems.length} selected</strong><span>Favorite pieces are protected. Unfavorite them before deleting.</span></div>
-        <div className="button-row"><button type="button" className="button button--quiet closet-selection__all" onClick={() => setSelectedIds(new Set(allSelected ? [] : selectableItems.map((item) => item._id)))} disabled={!selectableItems.length || deleting}>{allSelected ? 'Deselect all' : 'Select all'}</button><button type="button" className="button button--danger" onClick={() => setConfirmIds(selectedItems.map((item) => item._id))} disabled={!selectedItems.length || deleting}><Icon name="trash" size={16}/>{deleting ? 'Deleting…' : `Delete selected (${selectedItems.length})`}</button></div>
+      {selecting && <div ref={selectionRef} className="closet-selection" role="group" aria-label="Select pieces to delete" aria-busy={deleting}>
+        <div className="closet-selection__summary"><strong role="status">{selectedItems.length} selected</strong><span>Favorite pieces are protected. Unfavorite them before deleting.</span><button type="button" className="icon-button closet-selection__cancel" onClick={toggleSelection} disabled={deleting} aria-label="Cancel selection"><Icon name="close" size={18}/></button></div>
+        <div className="button-row"><button type="button" className="button button--quiet closet-selection__all" onClick={() => setSelectedIds(new Set(allSelected ? [] : selectableItems.map((item) => item._id)))} disabled={!selectableItems.length || deleting}>{allSelected ? 'Deselect all' : 'Select all'}</button><button type="button" className="button button--danger" onClick={() => setConfirmIds(selectedItems.map((item) => item._id))} disabled={!selectedItems.length || deleting}><Icon name="trash" size={16}/><span>{deleting ? 'Deleting…' : <>Delete <span className="closet-selection__delete-detail">selected </span>({selectedItems.length})</>}</span></button></div>
       </div>}
       {loading ? <div className="closet-loading"><i/><i/><i/><span>Opening the wardrobe…</span></div> : error ? <EmptyState title="The wardrobe is stuck" copy={error}/> : grouped.length===0 ? <EmptyState title={filter==='favorites'?'No favorites yet':'A lovely empty rail'} copy={filter==='favorites'?'Tap the little heart on a piece you reach for often.':'Add your first piece and start building your small fashion world.'} action={filter==='all'?()=>setAddOpen(true):()=>changeFilter('all')} actionLabel={filter==='all'?'Add a piece':'See everything'}/> : <div className="closet-rails">{grouped.map((group)=><section className="closet-rail" key={group.id}><header><div><Icon name={group.id} size={19}/><h2>{group.label}</h2></div><span>{group.items.length} {group.items.length===1?'piece':'pieces'}</span></header><div className="closet-rail__rod"/><div className="closet-rail__items">{group.items.sort((a,b)=>Number(!!b.isFavorited)-Number(!!a.isFavorited)).map((item,index)=><Garment key={item._id} item={item} index={index} onFavorite={favorite} onDelete={setConfirmIds} selecting={selecting} selected={!item.isFavorited && selectedIds.has(item._id)} onSelect={select} deleting={deleting}/>)}</div></section>)}</div>}
       <AddPiece open={addOpen} onClose={()=>setAddOpen(false)} onAdded={add}/><ConfirmDialog open={!!confirmIds} onClose={()=>setConfirmIds(null)} onConfirm={remove} noun="piece" count={confirmIds?.length || 1} pending={deleting}/>
