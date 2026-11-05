@@ -6,54 +6,33 @@ import { DoodleStar, Icon } from './components/Icons';
 import { defaultClothingItems } from './starterClothing.mjs';
 import './LandingPage.css';
 
-const pieces = {
-  sweatshirt: { name: 'Everyday essential tee', category: 'Tops' },
-  tee: { name: 'The classic black tee', category: 'Tops' },
-  jeans: { name: 'Favorite blue jeans', category: 'Bottoms' },
-  sneakers: { name: 'White sneakers', category: 'Shoes' },
-  sunglasses: { name: 'Black sunglasses', category: 'Accessories' },
-  cap: { name: 'Weekend cap', category: 'Accessories' },
-};
 const looks = [
-  { title: 'The everyday favorite', mood: 'An easy, familiar look that feels put together.', top: 'tee', accessory: 'sunglasses', colors: ['#333330', '#648199', '#f4f0e8'] },
-  { title: 'Off-duty essentials', mood: 'Made for a coffee run or a long walk on your kind of day.', top: 'tee', accessory: 'cap', colors: ['#333330', '#648199', '#f4f0e8'] },
-  { title: 'A slower Sunday', mood: 'A few favorite pieces come together in one easy outfit.', top: 'starter-Jackets-1', accessory: 'cap', colors: ['#333330', '#648199', '#30302f'] },
+  { title: 'The everyday favorite', mood: 'An easy, familiar look that feels put together.' },
+  { title: 'Off-duty essentials', mood: 'Made for a coffee run or a long walk on your kind of day.' },
+  { title: 'A slower Sunday', mood: 'A few favorite pieces come together in one easy outfit.' },
 ];
-const sampleColors = { sweatshirt: 'brown', tee: 'black', jeans: 'blue', sneakers: 'white', sunglasses: 'black', cap: 'black' };
-const swatchColors = { black: '#333330', white: '#f4f0e8', yellow: '#dfbc52', blue: '#648199', brown: '#8d8173', red: '#b34341', gray: '#999b9d' };
-const starterSlots = { Hats: 'accessory', Jackets: 'top', Shirts: 'top', Pants: 'bottom', Shoes: 'shoes', Accessories: 'accessory' };
-const excludedPreviewPieces = new Set(['BUCKET HAT', 'RING', 'FEAR OF GOD', 'BASIC T', 'JEANS', 'AF1', 'SUNGLASSES', 'YANKEES CAP']);
-const excludedSamplePieces = new Set(['sweatshirt']);
-const previewStarterPieces = Object.entries(defaultClothingItems).flatMap(([category, items]) => items
-  .map((item, index) => ({ id: `starter-${category}-${index}`, name: item.name, category, color: item.color, image: item.image, slot: starterSlots[category] }))
-  .filter((item) => !excludedPreviewPieces.has(item.name)));
-const previewBank = [
-  ...Object.entries(pieces).filter(([id]) => !excludedSamplePieces.has(id)).map(([id, piece]) => ({ id, ...piece, color: sampleColors[id], image: `/images/${id}.webp`, slot: { tee: 'top', jeans: 'bottom', sneakers: 'shoes', sunglasses: 'accessory', cap: 'accessory' }[id] })),
-  ...previewStarterPieces,
-];
+const swatchColors = { black: '#333330', white: '#f4f0e8', blue: '#648199', brown: '#8d8173', gray: '#999b9d' };
+const starterSlots = { Jackets: 'top', Shirts: 'top', Pants: 'bottom', Shoes: 'shoes', Accessories: 'accessory' };
+const previewBank = Object.entries(defaultClothingItems).flatMap(([category, items]) => items
+  .map((item, index) => ({ id: `starter-${category}-${index}`, ...item, category, slot: starterSlots[category] })));
 const previewPieces = Object.fromEntries(previewBank.map((piece) => [piece.id, piece]));
 const starterIds = Object.fromEntries(Object.keys(defaultClothingItems).map((category) => [category,
-  previewStarterPieces.filter((item) => item.category === category).map((item) => item.id),
+  previewBank.filter((item) => item.category === category).map((item) => item.id),
 ]));
 const alternate = (first, second) => Array.from({ length: Math.max(first.length, second.length) }, (_, index) => [first[index], second[index]].filter(Boolean)).flat();
 const tops = alternate(starterIds.Shirts, starterIds.Jackets);
-const extras = alternate(starterIds.Accessories, starterIds.Hats);
+const extras = starterIds.Accessories;
 // A shirt or jacket fills the same top slot; generated looks never include both.
-const generatedOutfits = Array.from({ length: Math.max(tops.length, starterIds.Pants.length, starterIds.Shoes.length, extras.length) }, (_, index) => ({
-  top: tops[index % tops.length],
-  bottom: starterIds.Pants[index % starterIds.Pants.length],
-  shoes: starterIds.Shoes[index % starterIds.Shoes.length],
-  accessory: extras[index % extras.length],
+const previewLooks = Array.from({ length: Math.max(tops.length, starterIds.Pants.length, starterIds.Shoes.length, extras.length) }, (_, index) => ({
+  ...looks[index % looks.length],
+  outfit: {
+    top: tops[index % tops.length],
+    bottom: starterIds.Pants[index % starterIds.Pants.length],
+    shoes: starterIds.Shoes[index % starterIds.Shoes.length],
+    accessory: extras[index % extras.length],
+  },
 }));
-const previewLooks = [
-  { ...looks[0], outfit: { top: looks[0].top, bottom: 'jeans', shoes: 'sneakers', accessory: looks[0].accessory } },
-  ...generatedOutfits.map((outfit, index) => ({ ...looks[(index + 1) % looks.length], outfit })),
-  ...looks.slice(1).map((look) => ({ ...look, outfit: { top: look.top, bottom: 'jeans', shoes: 'sneakers', accessory: look.accessory } })),
-];
-
-function PieceImage({ piece, className = '', decorative = false }) {
-  return <img className={className} src={`/images/${piece}.webp`} alt={decorative ? '' : pieces[piece].name} draggable="false" />;
-}
+const wardrobeSamples = [starterIds.Shirts[2], starterIds.Pants[0], starterIds.Shoes[0]];
 
 function PreviewImage({ piece, className = '', decorative = false }) {
   const [failed, setFailed] = useState(false);
@@ -72,15 +51,13 @@ function OutfitPreview() {
   const signature = Object.values(outfit).join('|');
   const saved = savedLooks.includes(signature);
   const customLook = Object.keys(chosenPieces).length > 0;
-  const colors = customLook || (lookIndex > 0 && lookIndex <= generatedOutfits.length)
-    ? [...new Set(Object.values(outfit).map((id) => previewPieces[id].color))].slice(0, 3).map((color) => swatchColors[color] || color)
-    : look.colors;
+  const colors = [...new Set(Object.values(outfit).map((id) => previewPieces[id].color))].slice(0, 3).map((color) => swatchColors[color] || color);
   const toggleSaved = () => setSavedLooks((current) => current.includes(signature) ? current.filter((item) => item !== signature) : [...current, signature]);
   const shuffle = () => { setLookIndex((current) => (current + 1) % previewLooks.length); setChosenPieces({}); };
   const choosePiece = (piece) => setChosenPieces((current) => ({ ...current, [piece.slot]: piece.id }));
   return (
     <div className="outfit-preview" id="try-an-outfit">
-      <div className="outfit-preview__note">a little outfit inspiration <span aria-hidden="true">↘</span></div>
+      <div className="outfit-preview__note">Save your outfits <span aria-hidden="true">↘</span></div>
       <div className="outfit-preview__paper">
         <span className="outfit-preview__tape" aria-hidden="true" />
         <div className="outfit-preview__header"><span><Icon name="hanger" size={19} /> The outfit studio</span><span className="sample-label">Interactive preview</span></div>
@@ -95,11 +72,11 @@ function OutfitPreview() {
           <div className="preview-board">
             <div className="preview-board__heading"><span>LET’S GET DRESSED</span><span>{String(lookIndex + 1).padStart(2, '0')} / {String(previewLooks.length).padStart(2, '0')}</span></div>
             <div className="preview-board__clothes" key={signature}>
-              <PreviewImage key={outfit.top} piece={outfit.top} className={`preview-garment preview-garment--top ${outfit.top === 'tee' ? 'preview-garment--tee' : ''}`} />
+              <PreviewImage key={outfit.top} piece={outfit.top} className={`preview-garment preview-garment--top ${previewPieces[outfit.top].category === 'Shirts' ? 'preview-garment--shirt' : ''}`} />
               <PreviewImage key={outfit.bottom} piece={outfit.bottom} className="preview-garment preview-garment--bottom" />
               <PreviewImage key={outfit.shoes} piece={outfit.shoes} className="preview-garment preview-garment--shoes" />
-              <PreviewImage key={outfit.accessory} piece={outfit.accessory} className={`preview-garment preview-garment--accessory ${outfit.accessory === 'cap' ? 'preview-garment--cap' : ''}`} />
-              <span className="preview-board__scribble">better together</span>
+              <PreviewImage key={outfit.accessory} piece={outfit.accessory} className="preview-garment preview-garment--accessory" />
+              <span className="preview-board__scribble">Mix and match</span>
             </div>
             <div className="preview-board__caption">
               <div aria-live="polite" aria-atomic="true"><h3>{customLook ? 'Your own mix' : look.title}</h3><p>{customLook ? 'Put together with a piece from the wardrobe.' : look.mood}</p></div>
@@ -156,7 +133,7 @@ export default function LandingPage() {
         <section className="landing__wardrobe" id="your-wardrobe" aria-labelledby="wardrobe-title">
           <div className="wardrobe-collection" aria-label="A sample digital wardrobe">
             <div className="wardrobe-collection__heading"><span><Icon name="hanger" size={20} /> A few closet favorites</span><span>THE EVERYDAY EDIT</span></div>
-            <div className="wardrobe-collection__grid">{['sweatshirt', 'jeans', 'sneakers'].map((piece, index) => <div className="wardrobe-piece" key={piece}><div><span className="wardrobe-piece__number">0{index + 1}</span><PieceImage piece={piece} /><Icon name="heart" size={15} /></div><p>{pieces[piece].name}</p><span>{pieces[piece].category}</span></div>)}</div>
+            <div className="wardrobe-collection__grid">{wardrobeSamples.map((piece, index) => <div className="wardrobe-piece" key={piece}><div><span className="wardrobe-piece__number">0{index + 1}</span><PreviewImage piece={piece} /><Icon name="heart" size={15} /></div><p>{previewPieces[piece].name}</p><span>{previewPieces[piece].category}</span></div>)}</div>
             <p className="wardrobe-collection__note">A few familiar pieces can become so many different outfits.</p>
           </div>
           <div className="landing__wardrobe-copy"><p className="landing__eyebrow">NEW IDEAS FOR THE CLOTHES YOU OWN</p><h2 id="wardrobe-title">There’s more in your<br />wardrobe than you think.</h2><p>Bring the tee you always reach for and the jeans you forgot about into the same space, then see how well they work together.</p><Link to={wardrobeLink} className="landing__text-link">Make room for your wardrobe <Icon name="arrow" size={18} /></Link></div>

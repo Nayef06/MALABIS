@@ -59,11 +59,10 @@
 .preview-board__clothes { position: relative; width: 100%; aspect-ratio: 5 / 4; animation: fade-in .4s ease both; }
 .preview-garment { position: absolute; width: auto; height: auto; max-width: none; object-fit: contain; mix-blend-mode: multiply; filter: drop-shadow(3px 6px 3px #4e393219); }
 .preview-garment--top { height: 66%; top: 0; left: 0; transform: rotate(-7deg); z-index: 2; }
-.preview-garment--tee { height: 53%; top: 6%; left: 7%; }
+.preview-garment--shirt { height: 58%; top: 4%; left: 2%; }
 .preview-garment--bottom { height: 90%; top: 3%; right: -12%; transform: rotate(5deg); }
 .preview-garment--shoes { width: 29%; bottom: 5%; left: 9%; transform: rotate(-8deg); z-index: 3; }
 .preview-garment--accessory { width: 16%; top: 66%; left: 41%; transform: rotate(-12deg); z-index: 4; }
-.preview-garment--cap { width: 21%; top: 62%; left: 38%; }
 .preview-image-fallback { display: grid !important; place-items: center; padding: 4px; color: var(--ink-soft); background: #eee6db; font-size: .5rem; line-height: 1.2; text-align: center; }
 .preview-board__scribble { position: absolute; bottom: 1px; right: -1px; font: .63rem var(--hand); color: var(--rose-deep); transform: rotate(-7deg); }
 .preview-board__caption { margin-top: 15px; padding-top: 13px; border-top: 1px dashed var(--line); display: flex; gap: 6px; justify-content: space-between; align-items: center; }

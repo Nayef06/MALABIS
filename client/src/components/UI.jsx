@@ -32,7 +32,7 @@ export function Modal({ open, onClose, title, eyebrow, children, className = '' 
 
 export function ConfirmDialog({ open, onClose, onConfirm, noun = 'item' }) {
   return (
-    <Modal open={open} onClose={onClose} eyebrow="A small goodbye" title={`Remove this ${noun}?`} className="confirm-sheet">
+    <Modal open={open} onClose={onClose} eyebrow="Are you sure you want to" title={`Remove this ${noun}?`} className="confirm-sheet">
       <div className="confirm-sheet__body">
         <p>Removing this {noun} from your Malabis collection cannot be undone.</p>
         <div className="button-row">

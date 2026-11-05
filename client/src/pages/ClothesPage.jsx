@@ -8,7 +8,7 @@ import './ClothesPage.css';
 const TYPES = [
   { id: 'shirt', label: 'Tops', singular: 'Top' }, { id: 'pants', label: 'Bottoms', singular: 'Bottom' },
   { id: 'jacket', label: 'Layers', singular: 'Layer' }, { id: 'shoes', label: 'Shoes', singular: 'Shoes' },
-  { id: 'hat', label: 'Hats', singular: 'Hat' }, { id: 'accessory', label: 'Little extras', singular: 'Accessory' },
+  { id: 'hat', label: 'Hats', singular: 'Hat' }, { id: 'accessory', label: 'Accessories', singular: 'Accessory' },
 ];
 const COLORS = [
   ['red','#bd716b'],['orange','#cf8e64'],['yellow','#ddc76f'],['green','#8fa27c'],['blue','#86a9bc'],

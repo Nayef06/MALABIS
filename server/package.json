@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node src/index.mjs",
     "dev": "nodemon src/index.mjs",
+    "migrate:defaults": "node scripts/migrate-default-clothing.mjs",
     "test": "node --test --test-concurrency=1",
     "test:coverage": "node --test --test-concurrency=1 --experimental-test-coverage"
   },

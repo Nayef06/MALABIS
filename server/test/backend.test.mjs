@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { once } from "node:events";
+import { readdir } from "node:fs/promises";
 import test, { after, before } from "node:test";
+import { defaultClothingItems } from "../src/utils/defaultClothing.mjs";
+import { defaultClothingItems as previewClothingItems } from "../../client/src/starterClothing.mjs";
 
 process.env.NODE_ENV = "test";
 process.env.SESSION_SECRET = "malabis-test-session-secret";
@@ -339,6 +342,24 @@ test("models enforce wardrobe data constraints", async () => {
   await assert.rejects(new Outfit({ clothingItems: [] }).validate(), /required/);
 });
 
+test("signup and preview catalogs include exactly the shipped default clothing", async () => {
+  assert.deepEqual(defaultClothingItems, previewClothingItems);
+  const assetPrefix = "/images/default-clothing/";
+  const items = Object.values(defaultClothingItems).flat();
+  assert.equal(items.length, 14);
+  assert.equal(new Set(items.map((item) => item.name)).size, 14);
+  assert.ok(items.every((item) => item.image.startsWith(assetPrefix)));
+
+  const assetFiles = await readdir(
+    new URL("../../client/public/images/default-clothing/", import.meta.url),
+    { recursive: true },
+  );
+  assert.deepEqual(
+    items.map((item) => decodeURIComponent(item.image.slice(assetPrefix.length))).sort(),
+    assetFiles.filter((file) => file.endsWith(".png")).map((file) => file.replaceAll("\\", "/")).sort(),
+  );
+});
+
 test("outfit generation is deterministic, honors locks, and reports gaps", () => {
   const inventory = [
     { _id: "shirt-1", type: "shirt" },
@@ -598,7 +619,7 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   response = await signUp(" Alice ", " Alice Doe ");
   assert.equal(response.status, 201);
   assert.equal(users.size, 1);
-  assert.equal(clothingItems.size, 18);
+  assert.equal(clothingItems.size, 14);
 
   response = await signUp("ALICE");
   assert.equal(response.status, 409);
@@ -646,7 +667,16 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("cache-control"), "private, no-store");
   assert.equal(response.headers.get("x-cache"), "MISS");
-  assert.equal(response.data.items.length, 18);
+  assert.equal(response.data.items.length, 14);
+  assert.deepEqual(
+    response.data.items.map(({ name, color, imageLink }) => ({ name, color, image: imageLink })).sort((a, b) => a.name.localeCompare(b.name)),
+    Object.values(previewClothingItems).flat().sort((a, b) => a.name.localeCompare(b.name)),
+  );
+  assert.deepEqual(
+    Object.fromEntries(["shirt", "jacket", "pants", "shoes", "accessory", "hat"].map((type) => [type, response.data.items.filter((item) => item.type === type).length])),
+    { shirt: 3, jacket: 3, pants: 3, shoes: 3, accessory: 2, hat: 0 },
+  );
+  assert.ok(response.data.items.every((item) => item.isFavorited === false));
   const firstDefaultItemId = response.data.items[0]._id;
 
   response = await request("/api/clothing", {
@@ -871,7 +901,7 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   });
   assert.equal(response.status, 204);
   assert.equal([...users.values()].some((user) => user.username === "bob"), false);
-  assert.equal(clothingItems.size, 18);
+  assert.equal(clothingItems.size, 14);
 
   response = await request("/api/auth/status", { cookie: bobCookie });
   assert.equal(response.status, 401);
