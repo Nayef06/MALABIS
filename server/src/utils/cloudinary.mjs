@@ -30,11 +30,19 @@ export const uploadToCloudinary = async (file, removeBackground = true) => {
 
     const uploadOptions = {
       folder: "malabis-clothing",
-      resource_type: "auto",
+      resource_type: "image",
+      format: "png",
       transformation: [
         ...(removeBackground ? [{ effect: "background_removal" }] : []),
+        // Trim only fully transparent pixels, retaining even faint garment edges.
+        { effect: "trim:0:transparent" },
+        // Use the cropped dimensions (w/h), preserving size until the final limit.
+        { if: "w_gte_h" },
+        { crop: "pad", width: "w", aspect_ratio: "1:1", background: "transparent", gravity: "center" },
+        { if: "else" },
+        { crop: "pad", height: "h", aspect_ratio: "1:1", background: "transparent", gravity: "center" },
+        { if: "end" },
         { width: 800, height: 800, crop: "limit" },
-        { quality: "auto" },
       ],
     };
 

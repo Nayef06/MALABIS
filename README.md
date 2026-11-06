@@ -173,7 +173,11 @@ All wardrobe, outfit, generator, and profile endpoints require an authenticated 
 - `PATCH /api/clothing/:id/favorite`
 - `DELETE /api/clothing/:id`
 
-Uploads use the multipart field `image`, accept image MIME types, and are limited to 5 MB. The optional multipart field `removeBackground` controls Cloudinary background removal.
+The add-piece form sends one multipart request to `POST /api/clothing` with `image`, `name`, `type`, `color`, and optional `removeBackground`. Metadata is validated before the image is uploaded. If saving the item or attaching it to the inventory fails, the server removes the image from Cloudinary; failed provider cleanup keeps the image ID tracked for account deletion to retry. JSON item creation with `imageLink` and the standalone `/api/clothing/upload` endpoint remain supported.
+
+Uploads accept image MIME types and are limited to 5 MB. The optional multipart field `removeBackground` controls Cloudinary background removal.
+
+Cloudinary then trims fully transparent borders, centers the remaining image on a transparent square, and limits the square to 800 × 800 without upscaling. Output is PNG to preserve transparency. The same crop-and-pad steps apply to existing transparent uploads when background removal is disabled; opaque photo backgrounds are preserved.
 
 ### Outfits
 

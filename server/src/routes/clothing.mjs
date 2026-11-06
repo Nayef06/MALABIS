@@ -34,6 +34,50 @@ const upload = multer({
   },
 });
 
+const validateItem = checkSchema(clothingItemValidationSchema);
+const validateUploadedItem = checkSchema(Object.fromEntries(
+  Object.entries(clothingItemValidationSchema).filter(([field]) => field !== "imageLink"),
+));
+
+async function uploadTrackedImage(req, res) {
+  const result = await uploadToCloudinary(req.file, req.body.removeBackground === "true");
+  if (!result.success) {
+    res.status(502).json({ error: result.error || "Failed to upload image" });
+    return null;
+  }
+
+  try {
+    const owner = await User.findOneAndUpdate({
+      _id: req.user._id,
+      deletingAccount: { $ne: true },
+    }, {
+      $addToSet: { uploadedImageIds: result.publicId },
+    });
+    if (!owner) {
+      const error = new Error("Authentication required.");
+      error.status = 401;
+      throw error;
+    }
+  } catch (error) {
+    await deleteCloudinaryImages([result.publicId]).catch((cleanupError) => {
+      console.error("Could not clean up untracked image:", cleanupError);
+    });
+    throw error;
+  }
+
+  return result;
+}
+
+async function discardUploadedImage(userId, publicId) {
+  try {
+    await deleteCloudinaryImages([publicId]);
+    await User.findByIdAndUpdate(userId, { $pull: { uploadedImageIds: publicId } });
+  } catch (error) {
+    // Keep the tracked ID when the provider is unavailable so account cleanup can retry.
+    console.error("Could not clean up failed item upload:", error);
+  }
+}
+
 async function sendInventory(req, res) {
   const { data, cacheHit } = await getUserInventory(req.user._id);
   res.set("X-Cache", cacheHit ? "HIT" : "MISS");
@@ -52,14 +96,21 @@ router.get(
 router.post(
   "/api/clothing",
   requireAuthentication,
-  checkSchema(clothingItemValidationSchema),
+  upload.single("image"),
+  asyncHandler(async (req, _res, next) => {
+    await (req.file ? validateUploadedItem : validateItem).run(req);
+    next();
+  }),
   validateRequest,
   asyncHandler(async (req, res) => {
+    const uploaded = req.file ? await uploadTrackedImage(req, res) : null;
+    if (req.file && !uploaded) return;
+
     const newItem = new ClothingItem({
       type: req.body.type,
       color: req.body.color,
       name: req.body.name,
-      imageLink: req.body.imageLink,
+      imageLink: uploaded ? uploaded.url : req.body.imageLink,
     });
 
     let savedItem;
@@ -71,18 +122,25 @@ router.post(
         { $push: { inventory: savedItem._id } },
       );
       if (!owner) {
-        await ClothingItem.findByIdAndDelete(savedItem._id);
-        return res.status(401).json({ error: "Authentication required." });
+        const error = new Error("Authentication required.");
+        error.status = 401;
+        throw error;
       }
-
-      await invalidateInventory(req.user._id);
-      return res.status(201).json({ item: savedItem });
     } catch (err) {
-      if (savedItem) {
-        await ClothingItem.findByIdAndDelete(savedItem._id).catch(() => {});
-      }
+      await ClothingItem.findByIdAndDelete(newItem._id).catch((cleanupError) => {
+        console.error("Could not clean up failed clothing item:", cleanupError);
+      });
+      await User.findByIdAndUpdate(req.user._id, {
+        $pull: { inventory: newItem._id },
+      }).catch((cleanupError) => {
+        console.error("Could not clean up failed inventory entry:", cleanupError);
+      });
+      if (uploaded) await discardUploadedImage(req.user._id, uploaded.publicId);
       throw err;
     }
+
+    await invalidateInventory(req.user._id);
+    return res.status(201).json({ item: savedItem });
   }),
 );
 
@@ -152,32 +210,8 @@ router.post(
       return res.status(400).json({ error: "No image file provided" });
     }
 
-    const shouldRemoveBackground = req.body.removeBackground === "true";
-    const uploadResult = await uploadToCloudinary(req.file, shouldRemoveBackground);
-
-    if (!uploadResult.success) {
-      return res.status(502).json({
-        error: uploadResult.error || "Failed to upload image",
-      });
-    }
-
-    try {
-      const owner = await User.findOneAndUpdate({
-        _id: req.user._id,
-        deletingAccount: { $ne: true },
-      }, {
-        $addToSet: { uploadedImageIds: uploadResult.publicId },
-      });
-      if (!owner) {
-        await deleteCloudinaryImages([uploadResult.publicId]);
-        return res.status(401).json({ error: "Authentication required." });
-      }
-    } catch (error) {
-      await deleteCloudinaryImages([uploadResult.publicId]).catch((cleanupError) => {
-        console.error("Could not clean up untracked image:", cleanupError);
-      });
-      throw error;
-    }
+    const uploadResult = await uploadTrackedImage(req, res);
+    if (!uploadResult) return;
 
     return res.json({
       success: true,

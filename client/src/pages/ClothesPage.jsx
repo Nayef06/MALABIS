@@ -50,14 +50,17 @@ function AddPiece({ open, onClose, onAdded }) {
 
   const submit = async (event) => {
     event.preventDefault();
+    if (uploading) return;
     if (!file || !form.name.trim() || !form.type || !form.color) { setError('Add a photo and finish the three little labels.'); return; }
     setUploading(true); setError('');
     try {
-      const uploadBody = new FormData(); uploadBody.append('image', file); uploadBody.append('removeBackground', String(removeBackground));
-      const uploadResponse = await apiFetch('/api/clothing/upload', { method: 'POST', body: uploadBody });
-      if (!uploadResponse.ok) throw new Error('The photo could not be prepared.');
-      const uploaded = await uploadResponse.json();
-      const itemResponse = await apiFetch('/api/clothing', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ ...form, name:form.name.trim(), imageLink:uploaded.imageUrl }) });
+      const body = new FormData();
+      body.append('image', file);
+      body.append('removeBackground', String(removeBackground));
+      body.append('name', form.name.trim());
+      body.append('type', form.type);
+      body.append('color', form.color);
+      const itemResponse = await apiFetch('/api/clothing', { method: 'POST', body });
       if (!itemResponse.ok) throw new Error('The piece could not be added.');
       const { item } = await itemResponse.json(); onAdded(item); onClose();
     } catch (err) { setError(err.message || 'Something went wrong while adding this piece.'); }

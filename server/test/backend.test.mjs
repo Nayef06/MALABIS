@@ -116,6 +116,11 @@ function applyUserUpdate(user, update) {
   if (update.$addToSet?.uploadedImageIds && !user.uploadedImageIds.includes(update.$addToSet.uploadedImageIds)) {
     user.uploadedImageIds.push(update.$addToSet.uploadedImageIds);
   }
+  if (update.$pull?.uploadedImageIds) {
+    user.uploadedImageIds = user.uploadedImageIds.filter(
+      (id) => id !== update.$pull.uploadedImageIds,
+    );
+  }
   if (update.$pull?.inventory) {
     user.inventory = user.inventory.filter(
       (id) => asId(id) !== asId(update.$pull.inventory),
@@ -954,6 +959,136 @@ test("account deletion requires a session and only deletes the signed-in account
   });
   assert.equal(response.status, 401);
   assert.equal(users.has(asId(other)), true);
+});
+
+test("multipart item creation validates first and cleans up failed saves", async (t) => {
+  users.clear();
+  clothingItems.clear();
+  outfits.clear();
+
+  const names = ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"];
+  const previousEnvironment = Object.fromEntries(names.map((name) => [name, process.env[name]]));
+  const previousUpload = cloudinary.uploader.upload;
+  const previousDestroy = cloudinary.uploader.destroy;
+  const previousSave = ClothingItem.prototype.save;
+  const previousUpdate = User.findOneAndUpdate;
+  const previousError = console.error;
+  const destroyed = [];
+  let uploaded = 0;
+  let mode = "success";
+  let cleanupUnavailable = false;
+
+  try {
+    process.env.CLOUDINARY_CLOUD_NAME = "test-cloud";
+    process.env.CLOUDINARY_API_KEY = "test-key";
+    process.env.CLOUDINARY_API_SECRET = "test-secret";
+    console.error = () => {};
+    assert.equal((await signUp("multipart-owner")).status, 201);
+    const cookie = (await logIn("multipart-owner")).cookie;
+    const owner = [...users.values()].find((user) => user.username === "multipart-owner");
+    const inventoryBefore = owner.inventory.map(asId);
+    const sizeBefore = clothingItems.size;
+    const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
+    const makeBody = (fields = {}) => {
+      const body = new FormData();
+      body.append("image", new Blob([png], { type: "image/png" }), "shirt.png");
+      for (const [key, value] of Object.entries({
+        name: "  Blue shirt  ", type: "shirt", color: "blue", removeBackground: "true", ...fields,
+      })) body.append(key, value);
+      return body;
+    };
+
+    cloudinary.uploader.upload = async (_dataUri, options) => {
+      if (mode === "upload") throw new Error("Upload unavailable");
+      assert.ok(options.transformation.some((step) => step.effect === "background_removal"));
+      uploaded += 1;
+      return {
+        secure_url: `https://example.com/multipart-${uploaded}.png`,
+        public_id: `malabis-clothing/multipart-${uploaded}`,
+      };
+    };
+    cloudinary.uploader.destroy = async (publicId) => {
+      destroyed.push(publicId);
+      if (cleanupUnavailable) throw new Error("Cleanup unavailable");
+      return { result: "ok" };
+    };
+    ClothingItem.prototype.save = async function save() {
+      if (mode === "save-before") throw new Error("Save unavailable");
+      const document = await previousSave.call(this);
+      if (mode === "save-after") throw new Error("Save acknowledgment lost");
+      if (mode === "account-deletion") owner.deletingAccount = true;
+      return document;
+    };
+    User.findOneAndUpdate = async (query, update) => {
+      if (update.$push?.inventory && mode === "attach-before") throw new Error("Inventory unavailable");
+      const result = await previousUpdate(query, update);
+      if (update.$push?.inventory && mode === "attach-after") throw new Error("Inventory acknowledgment lost");
+      return result;
+    };
+
+    await t.test("authentication and metadata errors never upload an image", async () => {
+      const unauthenticated = await request("/api/clothing", { method: "POST", body: makeBody() });
+      assert.equal(unauthenticated.status, 401);
+      for (const fields of [{ type: "cape" }, { color: "pink" }, { name: " " }]) {
+        const response = await request("/api/clothing", { method: "POST", cookie, body: makeBody(fields) });
+        assert.equal(response.status, 400);
+      }
+      assert.equal(uploaded, 0);
+    });
+
+    for (const failure of ["upload", "save-before", "save-after", "attach-before", "attach-after", "account-deletion"]) {
+      await t.test(`rolls back ${failure} failure`, async () => {
+        mode = failure;
+        owner.deletingAccount = false;
+        const destroyedBefore = destroyed.length;
+        const response = await request("/api/clothing", { method: "POST", cookie, body: makeBody() });
+        assert.equal(response.status, failure === "upload" ? 502 : failure === "account-deletion" ? 401 : 500);
+        assert.equal(clothingItems.size, sizeBefore);
+        assert.deepEqual(owner.inventory.map(asId), inventoryBefore);
+        assert.deepEqual(owner.uploadedImageIds, []);
+        assert.equal(destroyed.length, destroyedBefore + (failure === "upload" ? 0 : 1));
+        if (failure !== "upload") assert.equal(destroyed.at(-1), `malabis-clothing/multipart-${uploaded}`);
+      });
+    }
+
+    await t.test("a retry creates one item with the server's uploaded URL", async () => {
+      mode = "success";
+      owner.deletingAccount = false;
+      const response = await request("/api/clothing", {
+        method: "POST", cookie, body: makeBody({ imageLink: "https://example.com/ignored.png" }),
+      });
+      assert.equal(response.status, 201);
+      assert.equal(response.data.item.name, "Blue shirt");
+      assert.equal(response.data.item.imageLink, `https://example.com/multipart-${uploaded}.png`);
+      assert.equal(clothingItems.size, sizeBefore + 1);
+      assert.deepEqual(owner.inventory.map(asId), [...inventoryBefore, response.data.item._id]);
+      assert.deepEqual(owner.uploadedImageIds, [`malabis-clothing/multipart-${uploaded}`]);
+    });
+
+    await t.test("provider cleanup failures keep the image tracked for deletion to retry", async () => {
+      mode = "save-before";
+      cleanupUnavailable = true;
+      const response = await request("/api/clothing", { method: "POST", cookie, body: makeBody() });
+      assert.equal(response.status, 500);
+      assert.equal(clothingItems.size, sizeBefore + 1);
+      assert.equal(owner.inventory.length, inventoryBefore.length + 1);
+      assert.ok(owner.uploadedImageIds.includes(`malabis-clothing/multipart-${uploaded}`));
+      cleanupUnavailable = false;
+      const deletion = await request("/api/auth/account", { method: "DELETE", cookie });
+      assert.equal(deletion.status, 204);
+      assert.ok(destroyed.filter((id) => id === `malabis-clothing/multipart-${uploaded}`).length === 2);
+    });
+  } finally {
+    cloudinary.uploader.upload = previousUpload;
+    cloudinary.uploader.destroy = previousDestroy;
+    ClothingItem.prototype.save = previousSave;
+    User.findOneAndUpdate = previousUpdate;
+    console.error = previousError;
+    for (const name of names) {
+      if (previousEnvironment[name] === undefined) delete process.env[name];
+      else process.env[name] = previousEnvironment[name];
+    }
+  }
 });
 
 test("account deletion removes saved and unsaved uploads and can retry a provider failure", async () => {
