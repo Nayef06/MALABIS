@@ -1,0 +1,21 @@
+.outfit-creator {
+  --creator-divider: rgba(99, 76, 64, .08);
+  min-width: 0;
+  padding: clamp(18px, 2vw, 24px);
+  border: 1px solid rgba(99, 76, 64, .16);
+  border-radius: 12px;
+  background: #faf7f1;
+  box-shadow: 0 14px 36px rgba(85, 62, 48, .09), 0 2px 5px rgba(85, 62, 48, .03);
+}
+.outfit-creator__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
+.outfit-creator__badge { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 999px; background: #eee7dd; color: var(--ink); font-size: .85rem; font-weight: 600; }
+.outfit-creator__count { color: var(--ink-soft); font-size: .72rem; }
+.outfit-creator .outfit-canvas { transition: opacity .2s; }
+.outfit-creator.is-busy .outfit-canvas { opacity: .55; }
+.outfit-creator__footer { display: grid; gap: 14px; margin-top: 20px; padding-top: 17px; border-top: 1px solid var(--creator-divider); }
+.outfit-creator__footer .field { gap: 8px; }
+.outfit-creator__footer .field label { font-size: .64rem; letter-spacing: .12em; }
+.outfit-creator__footer .input { min-height: 46px; border-color: var(--creator-divider); border-radius: 8px; background: #f5f0e8; font-weight: 600; }
+.outfit-creator__footer .input:focus { border-color: var(--rose-deep); }
+.outfit-creator__footer .button { width: 100%; min-height: 46px; border-radius: 8px; }
+.outfit-creator__footer .form-error { margin: 0; font-size: .78rem; }

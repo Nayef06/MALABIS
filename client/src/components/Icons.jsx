@@ -10,7 +10,7 @@ const base = {
 
 export const Icon = ({ name, size = 20, className = '' }) => {
   const paths = {
-    hanger: <><path d="M5 10.5 12 6l7 4.5"/><path d="M12 6c-1.8-1.1-.5-3.3 1-3.3 1.2 0 1.8.7 1.8 1.6"/><path d="M4 11.3h16"/></>,
+    hanger: <g transform="translate(0 5)"><path d="M5 10.5 12 6l7 4.5"/><path d="M12 6c-1.8-1.1-.5-3.3 1-3.3 1.2 0 1.8.7 1.8 1.6"/><path d="M4 11.3h16"/></g>,
     sparkle: <><path d="M12 2c.5 5 2.5 7 7 7-4.5.1-6.5 2.2-7 7-.5-4.8-2.5-6.9-7-7 4.5 0 6.5-2 7-7Z"/><path d="M19 16.5c.2 1.7.9 2.4 2.5 2.5-1.6.1-2.3.8-2.5 2.5-.2-1.7-.9-2.4-2.5-2.5 1.6-.1 2.3-.8 2.5-2.5Z"/></>,
     heart: <path d="M20.8 5.8c-1.8-3-6.2-2.6-8.8.8-2.6-3.4-7-3.8-8.8-.8C.6 10.3 6.5 15.4 12 20c5.5-4.6 11.4-9.7 8.8-14.2Z"/>,
     plus: <><path d="M12 5v14M5 12h14"/></>,
@@ -32,9 +32,11 @@ export const Icon = ({ name, size = 20, className = '' }) => {
     layers: <><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></>,
     minus: <path d="M5 12h14"/>,
     menu: <><path d="M4 7h16M4 12h16M4 17h16"/></>,
+    more: <><circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/></>,
     check: <path d="m5 12 4 4L19 6"/>,
     logout: <><path d="M10 4H4v16h6M14 8l4 4-4 4M8 12h10"/></>,
     image: <><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m4 17 5-5 4 4 2-2 5 4"/></>,
+    cookie: <><path d="M20.5 13.3A8.5 8.5 0 1 1 10.7 3.5 4.4 4.4 0 0 0 15 8a4.4 4.4 0 0 0 5.5 5.3Z"/><circle cx="8" cy="12" r=".8" fill="currentColor" stroke="none"/><circle cx="11" cy="17" r=".8" fill="currentColor" stroke="none"/></>,
   };
 
   return (

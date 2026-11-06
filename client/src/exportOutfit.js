@@ -27,38 +27,22 @@ export async function exportOutfit(pieces, name = 'Untitled look') {
   const images = await Promise.all(ordered.map((piece) => loadImage(piece.item.imageLink)));
   const canvas = document.createElement('canvas');
   const width = 1080;
-  const height = 1350;
+  const height = 1215; // Match the saved card's 8:9 outfit preview.
   const margin = 54;
   canvas.width = width + margin * 2;
   canvas.height = height + margin * 2 + 130;
   const context = canvas.getContext('2d');
   if (!context) throw new Error('Your browser could not create the image.');
 
-  context.fillStyle = '#f0e7da';
+  context.fillStyle = '#faf7f1';
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.save();
   context.translate(margin, margin);
   context.beginPath();
-  context.rect(0, 0, width, height);
+  context.roundRect(0, 0, width, height, 24);
   context.clip();
-  context.fillStyle = '#e8dfd2';
+  context.fillStyle = '#eee8de';
   context.fillRect(0, 0, width, height);
-  context.strokeStyle = 'rgba(255,255,255,.22)';
-  context.lineWidth = 3;
-  context.beginPath();
-  for (let x = 0; x < width; x += 72) {
-    context.moveTo(x, 0);
-    context.lineTo(x, height);
-  }
-  for (let y = 0; y < height; y += 72) {
-    context.moveTo(0, y);
-    context.lineTo(width, y);
-  }
-  context.stroke();
-  context.strokeStyle = 'rgba(96,72,60,.15)';
-  context.setLineDash([9, 9]);
-  context.strokeRect(42, 42, width - 84, height - 84);
-  context.setLineDash([]);
 
   ordered.forEach((piece, index) => {
     const image = images[index];

@@ -8,7 +8,7 @@ MALABIS is a full-stack wardrobe organizer and outfit builder. Users can upload 
 - Wardrobe organization by clothing type and color
 - Image uploads through Cloudinary, with optional background removal
 - Favorite clothing and outfit filters
-- A drag-and-drop outfit canvas for arranging, resizing, rotating, and layering pieces
+- Automatically arranged outfit previews shared by the creators and saved outfits
 - Outfit generation by selected clothing types, locked items, and accessory count
 - Responsive React interface for desktop and mobile
 - Optional Redis caching for wardrobe and outfit reads
