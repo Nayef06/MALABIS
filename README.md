@@ -183,6 +183,7 @@ Cloudinary then trims fully transparent borders, centers the remaining image on 
 
 - `GET /api/outfits`
 - `POST /api/outfits`
+- `PATCH /api/outfits/:id/name`
 - `PATCH /api/outfits/:id/favorite`
 - `DELETE /api/outfits/:id`
 

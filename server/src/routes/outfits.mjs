@@ -4,6 +4,7 @@ import { Outfit } from "../models/outfit.mjs";
 import { User } from "../models/user.mjs";
 import {
   favoriteValidationSchema,
+  outfitNameValidationSchema,
   outfitValidationSchema,
   resourceIdValidationSchema,
 } from "../utils/validationSchemas.mjs";
@@ -79,6 +80,26 @@ router.post(
       }
       throw error;
     }
+  }),
+);
+
+router.patch(
+  "/api/outfits/:id/name",
+  requireAuthentication,
+  checkSchema(outfitNameValidationSchema),
+  validateRequest,
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const ownsOutfit = await User.exists({ _id: req.user._id, outfits: id });
+    if (!ownsOutfit) {
+      return res.status(403).json({ error: "Not authorized to update this outfit." });
+    }
+    const outfit = await Outfit.findById(id);
+    if (!outfit) return res.sendStatus(404);
+    outfit.name = req.body.name;
+    await outfit.save();
+    await invalidateOutfits(req.user._id);
+    return res.json({ outfit });
   }),
 );
 

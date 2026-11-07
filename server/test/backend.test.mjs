@@ -810,6 +810,48 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   assert.equal(response.status, 200);
   assert.equal(response.data.outfit.isFavorited, true);
 
+  response = await request(`/api/outfits/${outfitId}/name`, {
+    method: "PATCH",
+    json: { name: "Unauthorized" },
+  });
+  assert.equal(response.status, 401);
+
+  response = await request(`/api/outfits/${outfitId}/name`, {
+    method: "PATCH",
+    cookie: bobCookie,
+    json: { name: "Not my outfit" },
+  });
+  assert.equal(response.status, 403);
+
+  response = await request("/api/outfits/invalid-id/name", {
+    method: "PATCH",
+    cookie: aliceCookie,
+    json: { name: "Invalid ID" },
+  });
+  assert.equal(response.status, 400);
+
+  for (const json of [{}, { name: "   " }, { name: "x".repeat(101) }, { name: 123 }, { name: ["Invalid"] }]) {
+    response = await request(`/api/outfits/${outfitId}/name`, {
+      method: "PATCH",
+      cookie: aliceCookie,
+      json,
+    });
+    assert.equal(response.status, 400);
+  }
+
+  response = await request(`/api/outfits/${outfitId}/name`, {
+    method: "PATCH",
+    cookie: aliceCookie,
+    json: { name: "  Weekend fit  ", clothingItems: [], isFavorited: false },
+  });
+  assert.equal(response.status, 200);
+  assert.equal(response.data.outfit.name, "Weekend fit");
+  assert.equal(response.data.outfit.isFavorited, true);
+  assert.equal(response.data.outfit.clothingItems.length, 2);
+
+  response = await request("/api/outfits", { cookie: aliceCookie });
+  assert.equal(response.data.outfits[0].name, "Weekend fit");
+
   response = await request("/api/generator/generate", {
     method: "POST",
     cookie: aliceCookie,

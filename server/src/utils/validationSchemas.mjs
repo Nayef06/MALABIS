@@ -169,6 +169,14 @@ export const outfitValidationSchema = {
   },
 };
 
+export const outfitNameValidationSchema = {
+  id: itemIdValidation,
+  name: {
+    ...outfitValidationSchema.name,
+    isString: { bail: true, errorMessage: "Name must be a string" },
+  },
+};
+
 export const generatorValidationSchema = {
   selectedTypes: {
     in: ["body"],

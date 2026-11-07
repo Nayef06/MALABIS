@@ -27,6 +27,7 @@ export const Icon = ({ name, size = 20, className = '' }) => {
     unlock: <><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7.5-2"/></>,
     save: <><path d="M5 3h11l3 3v15H5V3Z"/><path d="M8 3v6h7V3M8 21v-7h8v7"/></>,
     edit: <><path d="m14 5 5 5L9 20H4v-5L14 5Z"/><path d="m12 7 5 5"/></>,
+    pencil: <g strokeWidth={2.5}><path d="M16.5 3.5a2.83 2.83 0 0 1 4 4L6.9 21.1l-2.6.24Q2.5 21.5 2.66 19.7l.24-2.6L16.5 3.5Z"/><path d="m14.5 5.5 4 4"/></g>,
     arrow: <><path d="M5 12h14M14 7l5 5-5 5"/></>,
     rotate: <><path d="M19 8V3l-2 2a8 8 0 1 0 2 8"/></>,
     layers: <><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></>,

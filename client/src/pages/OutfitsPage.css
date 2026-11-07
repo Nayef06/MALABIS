@@ -32,6 +32,17 @@
 .look__title { min-width: 0; }
 .look__title > span { display: block; margin-bottom: 6px; color: var(--ink-soft); font-size: .62rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
 .look__title h2 { margin: 0; overflow-wrap: anywhere; font: 600 clamp(1.1rem, 1.7vw, 1.45rem)/1.3 var(--sans); letter-spacing: -.025em; }
+.look__name-row { display: flex; align-items: center; gap: 6px; }
+.look__name-row h2 { min-width: 0; }
+.look__name-button { flex: 0 0 30px; width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border-radius: 6px; background: none; color: var(--ink-soft); cursor: pointer; transition: background .2s, color .2s; }
+.look__name-edit { color: var(--ink); }
+.look__name-button:hover:not(:disabled) { background: #eee7dd; color: var(--rose-deep); }
+.look__name-button:focus-visible { outline: 2px solid var(--rose-deep); outline-offset: 2px; }
+.look__name-button:disabled { opacity: .45; cursor: not-allowed; }
+.look__name-editor { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.look__name-input { width: 100%; min-width: 0; padding: 2px 0; border: 0; border-bottom: 1px solid var(--rose-deep); border-radius: 0; background: transparent; color: var(--ink); font: 600 clamp(1.1rem, 1.7vw, 1.45rem)/1.3 var(--sans); letter-spacing: -.025em; }
+.look__name-input:focus-visible { outline: 2px solid var(--rose-deep); outline-offset: 2px; }
+.look__name-error { margin: 8px 0 0; }
 .new-page{grid-column:span 4;align-self:stretch;min-height:430px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px dashed var(--line);border-radius:12px;background:rgba(255,250,241,.35);color:var(--ink-soft);cursor:pointer;transition:background .2s}.new-page:hover{background:rgba(217,166,161,.1)}.new-page>span{width:64px;height:64px;display:grid;place-items:center;margin-bottom:7px;border:1px solid var(--line);border-radius:50%}.new-page strong{font:500 1.45rem var(--serif);color:var(--ink)}.new-page small{font:.72rem var(--hand);color:var(--rose-deep)}.lookbook-loading{min-height:360px;display:grid;place-items:center;color:var(--ink-soft);font-family:var(--hand)}
 .modal-sheet.builder-sheet { width: min(1020px, 96vw); border: 1px solid rgba(99, 76, 64, .16); border-radius: 12px; background: #faf7f1; }
 .modal-sheet.builder-sheet::before { display: none; }
