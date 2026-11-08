@@ -19,9 +19,9 @@ export function placeItems(items = []) {
     const base = LOOKBOOK_POSITIONS[item.type] || { x: 50, y: 50, scale: .7 };
     let { x, y, scale } = base;
     if (item.type === 'shirt' && !hasJacket) x = 35;
-    // Center simple stacks, and balance a lone pair of shoes beside the garments.
+    // Center simple stacks, and balance shoes in the open space beside the garments.
     if (centerStack) x = 50;
-    if (item.type === 'shoes' && !hasLayeredTop && accessoryCount === 0) y = 50;
+    if (item.type === 'shoes' && accessoryCount === 0) y = hasLayeredTop ? 70 : 50;
     if (item.type === 'accessory') {
       // Keep up to five accessories in their own column beside the larger garments.
       y = accessoryCount === 1 ? 48 : 40 + count * Math.min(16, 36 / (accessoryCount - 1));

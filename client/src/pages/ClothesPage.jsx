@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Icon } from '../components/Icons';
 import { ConfirmDialog, EmptyState, Modal, Toast } from '../components/UI';
 import { apiFetch } from '../api';
+import { prepareImageUpload } from '../prepareImageUpload';
 import { addInventoryItem, getInventory, removeInventoryItem, updateInventoryItem } from '../dataCache';
 import { useAnimatedReorder } from '../hooks/useAnimatedReorder';
 import './ClothesPage.css';
@@ -45,9 +46,7 @@ function PieceDetails({ file, index, total, onNext, onClose, onAdded }) {
   const [error, setError] = useState('');
   const [preview, setPreview] = useState('');
   const uploadingRef = useRef(false);
-  const fileError = !file.type.startsWith('image/')
-    ? 'Choose an image file for this piece.'
-    : file.size > 5 * 1024 * 1024 ? 'This photo is over 5 MB. Cancel this piece and choose a smaller photo.' : '';
+  const fileError = !file.type.startsWith('image/') ? 'Choose an image file for this piece.' : '';
   const hasNext = index + 1 < total;
 
   useEffect(() => {
@@ -67,8 +66,9 @@ function PieceDetails({ file, index, total, onNext, onClose, onAdded }) {
     uploadingRef.current = true;
     setUploading(true); setError('');
     try {
+      const image = await prepareImageUpload(file);
       const body = new FormData();
-      body.append('image', file);
+      body.append('image', image);
       body.append('removeBackground', String(removeBackground));
       body.append('name', form.name.trim());
       body.append('type', form.type);
@@ -125,7 +125,7 @@ function AddPieces({ onClose, onAdded }) {
         <label className="photo-drop photo-drop--multiple">
           <Icon name="image" size={36}/>
           <strong>Choose one or more photos</strong>
-          <span>JPG, PNG or WEBP · up to 5 MB each</span>
+          <span>JPG, PNG or WEBP · large photos are optimized automatically</span>
           <input type="file" accept="image/*" multiple aria-label="Choose photos of your pieces" onChange={(event) => setFiles(Array.from(event.target.files || []))}/>
         </label>
         <button type="button" className="button button--quiet" onClick={onClose}>Cancel</button>
