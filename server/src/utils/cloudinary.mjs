@@ -1,6 +1,10 @@
 import { v2 as cloudinary } from "cloudinary";
 import sharp from "sharp";
 
+const MAX_CLOUDINARY_UPLOAD_BYTES = 10 * 1024 * 1024;
+// Even a full-colour RGBA PNG at this size stays below the 10 MiB upload limit.
+const MAX_UPLOAD_EDGE = 1536;
+
 function configureCloudinary() {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const apiKey = process.env.CLOUDINARY_API_KEY;
@@ -21,9 +25,21 @@ export const uploadToCloudinary = async (file, removeBackground = true) => {
   try {
     configureCloudinary();
     const processedImageBuffer = await sharp(file.buffer)
-      .png({ force: true })
+      .autoOrient()
+      .resize({
+        width: MAX_UPLOAD_EDGE,
+        height: MAX_UPLOAD_EDGE,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .toColourspace("srgb")
       .ensureAlpha()
+      .png({ force: true })
       .toBuffer();
+
+    if (processedImageBuffer.length > MAX_CLOUDINARY_UPLOAD_BYTES) {
+      throw new Error("This photo could not be prepared within the upload limit. Please try another photo.");
+    }
 
     const b64 = processedImageBuffer.toString("base64");
     const dataURI = `data:image/png;base64,${b64}`;

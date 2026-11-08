@@ -175,7 +175,7 @@ All wardrobe, outfit, generator, and profile endpoints require an authenticated 
 
 The add-piece picker accepts multiple photos and opens a separate popup for each piece's name, type, color, and cutout choice. Saving or canceling a piece advances to the next photo; canceling a piece does not upload it. Each saved piece sends one multipart request to `POST /api/clothing` with `image`, `name`, `type`, `color`, and optional `removeBackground`. A failed save keeps the current popup and its details available for retry. Metadata is validated before the image is uploaded. If saving the item or attaching it to the inventory fails, the server removes the image from Cloudinary; failed provider cleanup keeps the image ID tracked for account deletion to retry. JSON item creation with `imageLink` and the standalone `/api/clothing/upload` endpoint remain supported.
 
-Uploads accept image MIME types and are limited to 5 MB. The optional multipart field `removeBackground` controls Cloudinary background removal.
+Uploads accept image MIME types. The browser automatically resizes and compresses photos larger than 4 MB before sending them; the API retains a 5 MiB input limit. Before converting to PNG for Cloudinary, the server applies EXIF orientation and fits the image within 1536 × 1536 without upscaling. This bounds the PNG size below Cloudinary's 10 MiB upload limit, even for high-resolution JPEGs that expand substantially during conversion. The encoded size is also checked before upload. The optional multipart field `removeBackground` controls Cloudinary background removal.
 
 Cloudinary then trims fully transparent borders, centers the remaining image on a transparent square, and limits the square to 800 × 800 without upscaling. Output is PNG to preserve transparency. The same crop-and-pad steps apply to existing transparent uploads when background removal is disabled; opaque photo backgrounds are preserved.
 
@@ -223,5 +223,3 @@ The repository includes separate Vercel configurations in `client/vercel.json` a
 2. Create a second Vercel project with `server` as its root directory.
 3. Add the server environment variables in Vercel. Production requires `MONGODB_URI` and `SESSION_SECRET`; image uploads also require the three Cloudinary variables.
 4. If the deployed client origin is not one of the server's built-in allowed origins, add it to `CLIENT_ORIGINS`.
-
-Never commit `.env` files or production credentials.

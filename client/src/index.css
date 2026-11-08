@@ -4,3 +4,8 @@ body { margin: 0; min-width: 320px; }
 button, input, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 img { max-width: 100%; }
+
+@media (max-width: 760px), (pointer: coarse) {
+  /* Prevent iOS focus zoom while preserving larger inherited text sizes. */
+  input, textarea, select { font-size: max(16px, 1em); }
+}

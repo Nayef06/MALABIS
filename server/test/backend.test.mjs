@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { once } from "node:events";
 import { readdir } from "node:fs/promises";
 import test, { after, before } from "node:test";
+import sharp from "sharp";
 import { defaultClothingItems } from "../src/utils/defaultClothing.mjs";
 import { defaultClothingItems as previewClothingItems } from "../../client/src/starterClothing.mjs";
 
@@ -587,6 +588,85 @@ test("image uploads are normalized before the configured Cloudinary call", async
     for (const name of environmentNames) {
       if (originalEnvironment[name] === undefined) delete process.env[name];
       else process.env[name] = originalEnvironment[name];
+    }
+  }
+});
+
+test("Cloudinary upload preparation bounds decoded image size and preserves image details", async (t) => {
+  const names = ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"];
+  const previousEnvironment = Object.fromEntries(names.map((name) => [name, process.env[name]]));
+  const previousUpload = cloudinary.uploader.upload;
+  let uploaded;
+  let uploadOptions;
+
+  try {
+    process.env.CLOUDINARY_CLOUD_NAME = "test-cloud";
+    process.env.CLOUDINARY_API_KEY = "test-key";
+    process.env.CLOUDINARY_API_SECRET = "test-secret";
+    cloudinary.uploader.upload = async (dataUri, options) => {
+      assert.match(dataUri, /^data:image\/png;base64,/);
+      uploaded = Buffer.from(dataUri.split(",")[1], "base64");
+      uploadOptions = options;
+      assert.ok(uploaded.length <= 10 * 1024 * 1024, "Actual Cloudinary file fits the account limit");
+      return { secure_url: "https://example.com/prepared.png", public_id: "malabis-clothing/prepared" };
+    };
+
+    await t.test("a small JPEG that expands beyond 10 MiB still uploads successfully", async () => {
+      const width = 3072;
+      const height = 4096;
+      const pixels = Buffer.alloc(width * height * 3);
+      let seed = 123;
+      for (let index = 0; index < pixels.length; index += 3) {
+        seed = Math.imul(seed, 1664525) + 1013904223 | 0;
+        pixels[index] = seed & 255;
+        pixels[index + 1] = seed >>> 8 & 255;
+        pixels[index + 2] = seed >>> 16 & 255;
+      }
+      const jpeg = await sharp(pixels, { raw: { width, height, channels: 3 } })
+        .jpeg({ quality: 30 }).toBuffer();
+      assert.ok(jpeg.length < 4_000_000, "Photo passes the browser's size check without compression");
+      const inflatedPng = await sharp(jpeg).ensureAlpha().png().toBuffer();
+      assert.ok(inflatedPng.length > 10 * 1024 * 1024, "Fixture reproduces PNG expansion past the provider limit");
+
+      const result = await uploadToCloudinary({ buffer: jpeg }, true);
+      assert.equal(result.success, true);
+      const metadata = await sharp(uploaded).metadata();
+      assert.equal(metadata.format, "png");
+      assert.equal(metadata.hasAlpha, true);
+      assert.ok(Math.abs(metadata.width / metadata.height - width / height) < 0.001, "Aspect ratio is preserved");
+      assert.ok(uploadOptions.transformation.some((step) => step.effect === "background_removal"));
+    });
+
+    await t.test("small transparent images retain faint alpha and are not enlarged", async () => {
+      const png = await sharp(Buffer.from([255, 0, 0, 0, 0, 255, 0, 1, 0, 0, 255, 128]), {
+        raw: { width: 3, height: 1, channels: 4 },
+      }).png().toBuffer();
+      const result = await uploadToCloudinary({ buffer: png }, false);
+      assert.equal(result.success, true);
+      const { data, info } = await sharp(uploaded).raw().toBuffer({ resolveWithObject: true });
+      assert.equal(info.width, 3);
+      assert.equal(info.height, 1);
+      assert.equal(info.channels, 4);
+      assert.deepEqual([data[3], data[7], data[11]], [0, 1, 128]);
+      assert.equal(uploadOptions.transformation.some((step) => step.effect === "background_removal"), false);
+      assert.ok(uploadOptions.transformation.some((step) => step.effect === "trim:0:transparent"));
+    });
+
+    await t.test("phone EXIF orientation is applied before metadata is stripped", async () => {
+      const jpeg = await sharp({ create: { width: 300, height: 200, channels: 3, background: "#cb6644" } })
+        .jpeg().withMetadata({ orientation: 6 }).toBuffer();
+      const result = await uploadToCloudinary({ buffer: jpeg }, false);
+      assert.equal(result.success, true);
+      const metadata = await sharp(uploaded).metadata();
+      assert.equal(metadata.width, 200);
+      assert.equal(metadata.height, 300);
+      assert.equal(metadata.orientation, undefined);
+    });
+  } finally {
+    cloudinary.uploader.upload = previousUpload;
+    for (const name of names) {
+      if (previousEnvironment[name] === undefined) delete process.env[name];
+      else process.env[name] = previousEnvironment[name];
     }
   }
 });
