@@ -3,6 +3,7 @@ import { Icon } from '../components/Icons';
 import { ConfirmDialog, EmptyState, Modal, Toast } from '../components/UI';
 import { apiFetch } from '../api';
 import { addInventoryItem, getInventory, removeInventoryItem, updateInventoryItem } from '../dataCache';
+import { useAnimatedReorder } from '../hooks/useAnimatedReorder';
 import './ClothesPage.css';
 
 const TYPES = [
@@ -19,7 +20,7 @@ const TINTS = { red:'#ead1cc',orange:'#edd6c3',yellow:'#efe5bd',green:'#dce3d1',
 function Garment({ item, onFavorite, onDelete, index, selecting, selected, onSelect, deleting }) {
   const canDelete = !item.isFavorited;
   return (
-    <article className={`garment ${selected ? 'is-selected' : ''}`} style={{ '--garment-delay': `${Math.min(index * 35, 280)}ms` }}>
+    <article className={`garment ${selected ? 'is-selected' : ''}`} data-reorder-id={item._id} style={{ '--garment-delay': `${Math.min(index * 35, 280)}ms` }}>
       <div className="garment__image-wrap" style={{ '--garment-tint': TINTS[item.color] || '#ebe3d7' }}>
         {item.imageLink ? <img src={item.imageLink} alt={item.name} draggable="false"/> : <Icon name={item.type} size={70}/>} 
         {selecting && <label className={`garment__selection ${canDelete ? '' : 'is-protected'}`} title={canDelete ? `Select ${item.name}` : 'Unfavorite before removing'}>
@@ -37,21 +38,33 @@ function Garment({ item, onFavorite, onDelete, index, selecting, selected, onSel
   );
 }
 
-function AddPiece({ open, onClose, onAdded }) {
+function PieceDetails({ file, index, total, onNext, onClose, onAdded }) {
   const [form, setForm] = useState({ name: '', type: '', color: '' });
-  const [file, setFile] = useState(null);
   const [removeBackground, setRemoveBackground] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
-  const preview = useMemo(() => file ? URL.createObjectURL(file) : '', [file]);
-  useEffect(() => () => preview && URL.revokeObjectURL(preview), [preview]);
-  useEffect(() => { if (!open) { setForm({ name:'', type:'', color:'' }); setFile(null); setError(''); } }, [open]);
+  const [preview, setPreview] = useState('');
+  const uploadingRef = useRef(false);
+  const fileError = !file.type.startsWith('image/')
+    ? 'Choose an image file for this piece.'
+    : file.size > 5 * 1024 * 1024 ? 'This photo is over 5 MB. Cancel this piece and choose a smaller photo.' : '';
+  const hasNext = index + 1 < total;
+
+  useEffect(() => {
+    if (fileError) return undefined;
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file, fileError]);
+
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+  const cancel = () => { if (!uploadingRef.current) onNext(); };
 
   const submit = async (event) => {
     event.preventDefault();
-    if (uploading) return;
-    if (!file || !form.name.trim() || !form.type || !form.color) { setError('Add a photo and finish the three little labels.'); return; }
+    if (uploadingRef.current || fileError) return;
+    if (!form.name.trim() || !form.type || !form.color) { setError('Give this piece a name, a rail, and a color.'); return; }
+    uploadingRef.current = true;
     setUploading(true); setError('');
     try {
       const body = new FormData();
@@ -62,28 +75,61 @@ function AddPiece({ open, onClose, onAdded }) {
       body.append('color', form.color);
       const itemResponse = await apiFetch('/api/clothing', { method: 'POST', body });
       if (!itemResponse.ok) throw new Error('The piece could not be added.');
-      const { item } = await itemResponse.json(); onAdded(item); onClose();
+      const { item } = await itemResponse.json();
+      onAdded(item);
+      onNext();
     } catch (err) { setError(err.message || 'Something went wrong while adding this piece.'); }
-    finally { setUploading(false); }
+    finally { uploadingRef.current = false; setUploading(false); }
   };
 
   return (
-    <Modal open={open} onClose={onClose} eyebrow="A new find" title="Add a piece" className="add-piece-sheet">
-      <form className="add-piece" onSubmit={submit}>
-        <label className={`photo-drop ${preview ? 'has-preview' : ''}`}>
-          {preview ? <img src={preview} alt="Preview of the selected garment"/> : <><Icon name="image" size={31}/><strong>Lay your photo here</strong><span>JPG, PNG or WEBP · up to 5 MB</span></>}
-          <input type="file" accept="image/*" onChange={(event) => setFile(event.target.files?.[0] || null)} required />
-          {preview && <span className="photo-drop__change">Choose another photo</span>}
-        </label>
+    <Modal open onClose={cancel} closeDisabled={uploading} closeLabel="Cancel this piece" eyebrow={`Piece ${index + 1} of ${total}`} title="Add this piece" className="add-piece-sheet">
+      <form className="add-piece" onSubmit={submit} aria-busy={uploading}>
+        <div className="photo-drop photo-drop--preview">
+          {preview ? <img src={preview} alt={`Preview of ${file.name}`}/> : <Icon name="image" size={60}/>}
+          <span className="photo-drop__filename" title={file.name}>{file.name}</span>
+        </div>
         <div className="add-piece__details">
-          {error && <p className="form-error" role="alert">{error}</p>}
-          <div className="field"><label htmlFor="piece-name">Name</label><input className="input" id="piece-name" value={form.name} maxLength="15" onChange={(e) => update('name',e.target.value)} placeholder="striped Sunday shirt" required/><small>{form.name.length}/15</small></div>
-          <div className="field"><label htmlFor="piece-type">Where does it belong?</label><select className="select" id="piece-type" value={form.type} onChange={(e) => update('type',e.target.value)} required><option value="">Choose a rail</option>{TYPES.map((type) => <option key={type.id} value={type.id}>{type.singular}</option>)}</select></div>
-          <fieldset className="color-field"><legend className="field-label">Color note</legend><div className="swatches">{COLORS.map(([name,color]) => <button key={name} type="button" className={form.color === name ? 'is-selected' : ''} style={{ '--swatch':color }} onClick={() => update('color',name)} aria-label={name} aria-pressed={form.color === name}/>)}</div></fieldset>
-          <label className="background-toggle"><input type="checkbox" checked={removeBackground} onChange={(e) => setRemoveBackground(e.target.checked)}/><span><b>Make it a cutout</b><small>Gently remove the photo background</small></span></label>
-          <button className="button button--rose button--wide" disabled={uploading}>{uploading ? 'Preparing your piece…' : <>Hang it in my closet <Icon name="hanger" size={18}/></>}</button>
+          {(fileError || error) && <p className="form-error" role="alert">{fileError || error}</p>}
+          <div className="field"><label htmlFor="piece-name">Name</label><input className="input" id="piece-name" value={form.name} maxLength="15" onChange={(e) => update('name',e.target.value)} placeholder="Sunday shirt" required disabled={uploading} autoFocus/><small>{form.name.length}/15</small></div>
+          <div className="field"><label htmlFor="piece-type">Where does it belong?</label><select className="select" id="piece-type" value={form.type} onChange={(e) => update('type',e.target.value)} required disabled={uploading}><option value="">Choose a rail</option>{TYPES.map((type) => <option key={type.id} value={type.id}>{type.singular}</option>)}</select></div>
+          <fieldset className="color-field" disabled={uploading}><legend className="field-label">Color note</legend><div className="swatches">{COLORS.map(([name,color]) => <button key={name} type="button" className={form.color === name ? 'is-selected' : ''} style={{ '--swatch':color }} onClick={() => update('color',name)} aria-label={name} aria-pressed={form.color === name}/>)}</div></fieldset>
+          <label className="background-toggle"><input type="checkbox" checked={removeBackground} onChange={(e) => setRemoveBackground(e.target.checked)} disabled={uploading}/><span><b>Make it a cutout</b><small>Gently remove the photo background</small></span></label>
+          <div className="add-piece__actions">
+            <button type="button" className="button button--paper" onClick={cancel} disabled={uploading}>Cancel this piece</button>
+            <button type="submit" className="button button--rose" disabled={uploading || !!fileError}>{uploading ? 'Preparing your piece…' : hasNext ? 'Save & next' : 'Save piece'}</button>
+          </div>
+          {hasNext && <button type="button" className="add-piece__cancel-remaining" onClick={onClose} disabled={uploading}>Cancel all remaining pieces</button>}
         </div>
       </form>
+    </Modal>
+  );
+}
+
+function AddPieces({ onClose, onAdded }) {
+  const [files, setFiles] = useState([]);
+  const [index, setIndex] = useState(0);
+  const next = () => {
+    if (index + 1 < files.length) setIndex((current) => current + 1);
+    else onClose();
+  };
+
+  if (files.length) {
+    return <PieceDetails key={index} file={files[index]} index={index} total={files.length} onNext={next} onClose={onClose} onAdded={onAdded}/>;
+  }
+
+  return (
+    <Modal open onClose={onClose} eyebrow="A few new finds" title="Add pieces" className="piece-picker-sheet">
+      <div className="piece-picker">
+        <p>Choose your photos, then add the details for each piece one at a time.</p>
+        <label className="photo-drop photo-drop--multiple">
+          <Icon name="image" size={36}/>
+          <strong>Choose one or more photos</strong>
+          <span>JPG, PNG or WEBP · up to 5 MB each</span>
+          <input type="file" accept="image/*" multiple aria-label="Choose photos of your pieces" onChange={(event) => setFiles(Array.from(event.target.files || []))}/>
+        </label>
+        <button type="button" className="button button--quiet" onClick={onClose}>Cancel</button>
+      </div>
     </Modal>
   );
 }
@@ -93,6 +139,7 @@ export default function ClothesPage() {
   const [filter,setFilter] = useState('all'); const [addOpen,setAddOpen] = useState(false); const [confirmIds,setConfirmIds] = useState(null);
   const [selecting,setSelecting] = useState(false); const [selectedIds,setSelectedIds] = useState(new Set()); const [deleting,setDeleting] = useState(false);
   const selectionRef = useRef(null);
+  const { containerRef: railsRef, capture: captureReorder } = useAnimatedReorder();
   const [selectionHeight,setSelectionHeight] = useState(0);
   const [toast,setToast] = useState({ show:false, message:'', type:'success' });
   useEffect(() => { getInventory().then(setItems).catch(() => setError('Your closet could not be opened just now.')).finally(() => setLoading(false)); }, []);
@@ -122,9 +169,10 @@ export default function ClothesPage() {
     });
   };
   const favorite = async (item) => {
+    captureReorder(item._id);
     const value=!item.isFavorited; setItems((current)=>current.map((piece)=>piece._id===item._id?{...piece,isFavorited:value}:piece));
     try { const response=await apiFetch(`/api/clothing/${item._id}/favorite`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({isFavorited:value})}); if(!response.ok) throw new Error(); updateInventoryItem(item._id,{isFavorited:value}); }
-    catch { setItems((current)=>current.map((piece)=>piece._id===item._id?{...piece,isFavorited:!value}:piece)); setToast({show:true,type:'error',message:'We could not save that favorite, so please try again.'}); }
+    catch { captureReorder(item._id); setItems((current)=>current.map((piece)=>piece._id===item._id?{...piece,isFavorited:!value}:piece)); setToast({show:true,type:'error',message:'We could not save that favorite, so please try again.'}); }
   };
   const remove = async () => {
     if (!confirmIds?.length || deleting) return;
@@ -163,8 +211,8 @@ export default function ClothesPage() {
         <div className="closet-selection__summary"><strong role="status">{selectedItems.length} selected</strong><span>Favorite pieces are protected. Unfavorite them before deleting.</span><button type="button" className="icon-button closet-selection__cancel" onClick={toggleSelection} disabled={deleting} aria-label="Cancel selection"><Icon name="close" size={18}/></button></div>
         <div className="button-row"><button type="button" className="button button--quiet closet-selection__all" onClick={() => setSelectedIds(new Set(allSelected ? [] : selectableItems.map((item) => item._id)))} disabled={!selectableItems.length || deleting}>{allSelected ? 'Deselect all' : 'Select all'}</button><button type="button" className="button button--danger" onClick={() => setConfirmIds(selectedItems.map((item) => item._id))} disabled={!selectedItems.length || deleting}><Icon name="trash" size={16}/><span>{deleting ? 'Deleting…' : <>Delete <span className="closet-selection__delete-detail">selected </span>({selectedItems.length})</>}</span></button></div>
       </div>}
-      {loading ? <div className="closet-loading"><i/><i/><i/><span>Opening the wardrobe…</span></div> : error ? <EmptyState title="The wardrobe is stuck" copy={error}/> : grouped.length===0 ? <EmptyState title={filter==='favorites'?'No favorites yet':'A lovely empty rail'} copy={filter==='favorites'?'Tap the little heart on a piece you reach for often.':'Add your first piece and start building your small fashion world.'} action={filter==='all'?()=>setAddOpen(true):()=>changeFilter('all')} actionLabel={filter==='all'?'Add a piece':'See everything'}/> : <div className="closet-rails">{grouped.map((group)=><section className="closet-rail" key={group.id}><header><div><Icon name={group.id} size={19}/><h2>{group.label}</h2></div><span>{group.items.length} {group.items.length===1?'piece':'pieces'}</span></header><div className="closet-rail__rod"/><div className="closet-rail__items">{group.items.sort((a,b)=>Number(!!b.isFavorited)-Number(!!a.isFavorited)).map((item,index)=><Garment key={item._id} item={item} index={index} onFavorite={favorite} onDelete={setConfirmIds} selecting={selecting} selected={!item.isFavorited && selectedIds.has(item._id)} onSelect={select} deleting={deleting}/>)}</div></section>)}</div>}
-      <AddPiece open={addOpen} onClose={()=>setAddOpen(false)} onAdded={add}/><ConfirmDialog open={!!confirmIds} onClose={()=>setConfirmIds(null)} onConfirm={remove} noun="piece" count={confirmIds?.length || 1} pending={deleting}/>
+      {loading ? <div className="closet-loading"><i/><i/><i/><span>Opening the wardrobe…</span></div> : error ? <EmptyState title="The wardrobe is stuck" copy={error}/> : grouped.length===0 ? <EmptyState title={filter==='favorites'?'No favorites yet':'A lovely empty rail'} copy={filter==='favorites'?'Tap the little heart on a piece you reach for often.':'Add your first piece and start building your small fashion world.'} action={filter==='all'?()=>setAddOpen(true):()=>changeFilter('all')} actionLabel={filter==='all'?'Add a piece':'See everything'}/> : <div className="closet-rails" ref={railsRef}>{grouped.map((group)=><section className="closet-rail" key={group.id}><header><div><Icon name={group.id} size={19}/><h2>{group.label}</h2></div><span>{group.items.length} {group.items.length===1?'piece':'pieces'}</span></header><div className="closet-rail__rod"/><div className="closet-rail__items">{group.items.sort((a,b)=>Number(!!b.isFavorited)-Number(!!a.isFavorited)).map((item,index)=><Garment key={item._id} item={item} index={index} onFavorite={favorite} onDelete={setConfirmIds} selecting={selecting} selected={!item.isFavorited && selectedIds.has(item._id)} onSelect={select} deleting={deleting}/>)}</div></section>)}</div>}
+      {addOpen && <AddPieces onClose={()=>setAddOpen(false)} onAdded={add}/>}<ConfirmDialog open={!!confirmIds} onClose={()=>setConfirmIds(null)} onConfirm={remove} noun="piece" count={confirmIds?.length || 1} pending={deleting}/>
     </div>
   );
 }

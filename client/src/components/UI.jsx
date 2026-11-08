@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Icon } from './Icons';
 
-export function Modal({ open, onClose, title, eyebrow, children, className = '' }) {
+export function Modal({ open, onClose, title, eyebrow, children, className = '', closeDisabled = false, closeLabel = 'Close dialog' }) {
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (event) => event.key === 'Escape' && onClose();
@@ -22,7 +22,7 @@ export function Modal({ open, onClose, title, eyebrow, children, className = '' 
             {eyebrow && <p className="eyebrow">{eyebrow}</p>}
             <h2 id="modal-title">{title}</h2>
           </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Close dialog"><Icon name="close" /></button>
+          <button className="icon-button" type="button" onClick={onClose} disabled={closeDisabled} aria-label={closeLabel}><Icon name="close" /></button>
         </header>
         {children}
       </section>

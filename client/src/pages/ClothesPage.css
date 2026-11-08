@@ -6,6 +6,18 @@
 @media(max-width:800px){.closet-heading{grid-template-columns:1fr auto}.closet-heading .page-heading__copy{display:none}.closet-rail{padding-inline:15px}.garment{flex-basis:180px}.add-piece{grid-template-columns:1fr}.photo-drop{min-height:250px;border-right:0;border-bottom:1px dashed var(--line)}.photo-drop img{height:200px}}
 @media(max-width:520px){.closet-heading .button{width:45px;padding:0;font-size:0}.closet-heading .button svg{width:20px}.closet-rail{margin-inline:-18px;border-left:0;border-right:0}.closet-rail>header{padding-inline:3px}.garment{flex-basis:166px;min-height:280px}.garment__image-wrap{height:177px}.add-piece__details{padding:24px 20px}}
 .modal-sheet.add-piece-sheet{width:min(870px,100%)}
+.piece-picker { display:grid; gap:20px; padding:28px; }
+.piece-picker>p { margin:0; color:var(--ink-soft); font-size:.85rem; }
+.photo-drop--multiple { min-height:260px; border:1px dashed var(--line); }
+.photo-drop--multiple:focus-within { outline:3px solid var(--rose-deep); outline-offset:3px; }
+.photo-drop--preview { min-width:0; cursor:default; background:rgba(234,220,157,.18); }
+.photo-drop__filename { width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.add-piece__actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.add-piece__actions .button { min-width:0; padding-inline:12px; letter-spacing:0; }
+.add-piece__cancel-remaining { justify-self:center; padding:4px; background:none; color:var(--ink-soft); text-decoration:underline; font-size:.72rem; cursor:pointer; }
+.add-piece__cancel-remaining:disabled { cursor:not-allowed; opacity:.5; }
+.color-field:disabled .swatches button { cursor:wait; }
+@media(max-width:520px) { .piece-picker { padding:24px 20px; }.add-piece__actions { grid-template-columns:1fr; } }
 .garment{min-height:285px}
 .garment__image-wrap{height:auto;aspect-ratio:1;padding:0;overflow:hidden}
 .garment__image-wrap img{width:calc(100% - 30px);height:calc(100% - 30px);object-position:center;transform:none;pointer-events:none}
@@ -42,4 +54,15 @@
   .closet-selection__delete-detail { display:none; }
 }
 @media(max-width:520px) { .closet-heading { gap:12px; }.closet-heading__actions { gap:6px; }.closet-heading .closet-select { width:auto; padding:10px 12px; font-size:.8rem; }.closet-heading .closet-select svg { display:none; }.closet-selection { padding:14px; }.closet-selection .button-row { width:100%; }.closet-selection .button { flex:1; padding-inline:10px; letter-spacing:0; } }
-@media(max-width:520px){.garment{min-height:260px}.garment__image-wrap{height:auto}.garment__image-wrap img{width:calc(100% - 22px);height:calc(100% - 22px)}}
+@media(max-width:800px) {
+  .garment { min-width:0; }
+  .garment__image-wrap { width:100%; height:auto; }
+  .garment__image-wrap img { position:absolute; inset:15px; width:calc(100% - 30px); height:calc(100% - 30px); }
+  .garment__caption>div:first-child { flex:1; min-width:0; }
+  .garment__caption h3 { max-width:100%; }
+  .garment__actions { flex-shrink:0; }
+}
+@media(max-width:520px) {
+  .garment { min-height:260px; }
+  .garment__image-wrap img { inset:11px; width:calc(100% - 22px); height:calc(100% - 22px); }
+}

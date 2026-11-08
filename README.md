@@ -173,7 +173,7 @@ All wardrobe, outfit, generator, and profile endpoints require an authenticated 
 - `PATCH /api/clothing/:id/favorite`
 - `DELETE /api/clothing/:id`
 
-The add-piece form sends one multipart request to `POST /api/clothing` with `image`, `name`, `type`, `color`, and optional `removeBackground`. Metadata is validated before the image is uploaded. If saving the item or attaching it to the inventory fails, the server removes the image from Cloudinary; failed provider cleanup keeps the image ID tracked for account deletion to retry. JSON item creation with `imageLink` and the standalone `/api/clothing/upload` endpoint remain supported.
+The add-piece picker accepts multiple photos and opens a separate popup for each piece's name, type, color, and cutout choice. Saving or canceling a piece advances to the next photo; canceling a piece does not upload it. Each saved piece sends one multipart request to `POST /api/clothing` with `image`, `name`, `type`, `color`, and optional `removeBackground`. A failed save keeps the current popup and its details available for retry. Metadata is validated before the image is uploaded. If saving the item or attaching it to the inventory fails, the server removes the image from Cloudinary; failed provider cleanup keeps the image ID tracked for account deletion to retry. JSON item creation with `imageLink` and the standalone `/api/clothing/upload` endpoint remain supported.
 
 Uploads accept image MIME types and are limited to 5 MB. The optional multipart field `removeBackground` controls Cloudinary background removal.
 

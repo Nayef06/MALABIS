@@ -6,6 +6,7 @@ import { ConfirmDialog, EmptyState, Modal, Toast } from '../components/UI';
 import { apiFetch } from '../api';
 import { exportOutfit } from '../exportOutfit';
 import { addOutfit, getInventory, getOutfits, removeOutfit, updateOutfit } from '../dataCache';
+import { useAnimatedReorder } from '../hooks/useAnimatedReorder';
 import './OutfitsPage.css';
 
 const TYPES = [ ['all','All'],['shirt','Tops'],['pants','Bottoms'],['jacket','Layers'],['shoes','Shoes'],['hat','Hats'],['accessory','Extras'] ];
@@ -119,7 +120,7 @@ function Look({ outfit,index,onFavorite,onDelete,onRename }) {
     catch{setNameError('This name could not be saved. Please try again.')}
     finally{setSavingName(false)}
   };
-  return <article className="look">
+  return <article className="look" data-reorder-id={outfit._id}>
     <header className="look__header">
       <span className="look__badge"><Icon name="hanger" size={22}/>Outfit</span>
       <div className="look__actions">
@@ -157,10 +158,11 @@ function Look({ outfit,index,onFavorite,onDelete,onRename }) {
 }
 
 export default function OutfitsPage(){
+  const { containerRef: gridRef, capture: captureReorder } = useAnimatedReorder();
   const [outfits,setOutfits]=useState([]);const [loading,setLoading]=useState(true);const [builder,setBuilder]=useState(false);const [confirmId,setConfirmId]=useState(null);const [filter,setFilter]=useState('all');const [toast,setToast]=useState({show:false,message:'',type:'success'});
   useEffect(()=>{getOutfits().then(setOutfits).catch(()=>setOutfits([])).finally(()=>setLoading(false))},[]);useEffect(()=>{if(!toast.show)return;const id=setTimeout(()=>setToast((t)=>({...t,show:false})),2200);return()=>clearTimeout(id)},[toast.show]);
   const visible=useMemo(()=>outfits.filter((outfit)=>filter==='all'||outfit.isFavorited).sort((a,b)=>Number(!!b.isFavorited)-Number(!!a.isFavorited)),[outfits,filter]);
-  const favorite=async(outfit)=>{const value=!outfit.isFavorited;setOutfits((current)=>current.map((look)=>look._id===outfit._id?{...look,isFavorited:value}:look));try{const response=await apiFetch(`/api/outfits/${outfit._id}/favorite`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({isFavorited:value})});if(!response.ok)throw new Error();updateOutfit(outfit._id,{isFavorited:value});}catch{setOutfits((current)=>current.map((look)=>look._id===outfit._id?{...look,isFavorited:!value}:look));setToast({show:true,type:'error',message:'That favorite did not stick.'})}};
+  const favorite=async(outfit)=>{captureReorder(outfit._id);const value=!outfit.isFavorited;setOutfits((current)=>current.map((look)=>look._id===outfit._id?{...look,isFavorited:value}:look));try{const response=await apiFetch(`/api/outfits/${outfit._id}/favorite`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({isFavorited:value})});if(!response.ok)throw new Error();updateOutfit(outfit._id,{isFavorited:value});}catch{captureReorder(outfit._id);setOutfits((current)=>current.map((look)=>look._id===outfit._id?{...look,isFavorited:!value}:look));setToast({show:true,type:'error',message:'That favorite did not stick.'})}};
   const remove=async()=>{const id=confirmId;setConfirmId(null);try{const response=await apiFetch(`/api/outfits/${id}`,{method:'DELETE'});if(!response.ok)throw new Error();const cached=removeOutfit(id);setOutfits(cached||outfits.filter((look)=>look._id!==id));setToast({show:true,type:'success',message:'Look removed from the book.'})}catch{setToast({show:true,type:'error',message:'We could not remove that look.'})}};
   const saved=(outfit)=>{setOutfits((current)=>[...current,outfit]);setToast({show:true,type:'success',message:'A new page was added to your lookbook.'})};
   const rename=async(outfit,name)=>{
@@ -172,5 +174,5 @@ export default function OutfitsPage(){
   };
   return <div className="page lookbook-page"><Toast {...toast}/><header className="page-heading lookbook-heading"><div><p className="eyebrow">Looks worth remembering</p><h1>My outfits</h1></div><p className="page-heading__copy">Keep the looks that feel like you in one place and make a new one whenever inspiration appears.</p><button className="button button--rose" onClick={()=>setBuilder(true)}><Icon name="plus" size={18}/> Make a look</button></header>
     <div className="lookbook-tabs"><button className={filter==='all'?'is-active':''} onClick={()=>setFilter('all')}>Every look</button><button className={filter==='favorites'?'is-active':''} onClick={()=>setFilter('favorites')}><Icon name="heart" size={15}/> Favorites</button><span>{visible.length} pages</span></div>
-    {loading?<div className="lookbook-loading">Turning the pages…</div>:visible.length?<div className="lookbook-grid"><button className="new-page" onClick={()=>setBuilder(true)}><span><Icon name="plus" size={27}/></span><strong>Start a fresh page</strong><small>choose, combine, make it yours</small></button>{visible.map((outfit,index)=><Look key={outfit._id||index} outfit={outfit} index={index} onFavorite={favorite} onDelete={setConfirmId} onRename={rename}/>)}</div>:<EmptyState title={filter==='favorites'?'No favorite looks yet':'Your pages are waiting'} copy={filter==='favorites'?'Keep the looks you love close with the little heart.':'Choose pieces from your closet and create your first outfit.'} action={filter==='favorites'?()=>setFilter('all'):()=>setBuilder(true)} actionLabel={filter==='favorites'?'See every look':'Make a look'}/>}<Builder open={builder} onClose={()=>setBuilder(false)} onSaved={saved}/><ConfirmDialog open={!!confirmId} onClose={()=>setConfirmId(null)} onConfirm={remove} noun="look"/></div>
+    {loading?<div className="lookbook-loading">Turning the pages…</div>:visible.length?<div className="lookbook-grid" ref={gridRef}><button className="new-page" onClick={()=>setBuilder(true)}><span><Icon name="plus" size={27}/></span><strong>Start a fresh page</strong><small>choose, combine, make it yours</small></button>{visible.map((outfit,index)=><Look key={outfit._id||index} outfit={outfit} index={index} onFavorite={favorite} onDelete={setConfirmId} onRename={rename}/>)}</div>:<EmptyState title={filter==='favorites'?'No favorite looks yet':'Your pages are waiting'} copy={filter==='favorites'?'Keep the looks you love close with the little heart.':'Choose pieces from your closet and create your first outfit.'} action={filter==='favorites'?()=>setFilter('all'):()=>setBuilder(true)} actionLabel={filter==='favorites'?'See every look':'Make a look'}/>}<Builder open={builder} onClose={()=>setBuilder(false)} onSaved={saved}/><ConfirmDialog open={!!confirmId} onClose={()=>setConfirmId(null)} onConfirm={remove} noun="look"/></div>
 }
