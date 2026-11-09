@@ -8,7 +8,7 @@ export default function AuthShell({ eyebrow, title, note, children }) {
     <main className="auth-page">
       <Link to="/" className="auth-page__brand"><Brand /></Link>
       <section className="auth-room" aria-hidden="true">
-        <p className="auth-room__note">a closet is a diary<br/>you get to wear</p>
+        <p className="auth-room__note">organize clothes<br/>plan outfits</p>
         <div className="auth-mirror"><span><Icon name="sparkle" size={30}/></span></div>
         <div className="auth-chair"><i/><b/></div>
         <div className="auth-dress"><span/><i/></div>

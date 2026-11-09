@@ -16,22 +16,22 @@ export default function SignupPage() {
     event.preventDefault(); setError(''); setSubmitting(true);
     try {
       const response = await apiFetch('/api/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
-      if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || 'We could not make that account, so please try a different username.'); }
+      if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || 'Could not create your account. Try again.'); }
       navigate('/login');
     } catch (err) { setError(err.message); }
     finally { setSubmitting(false); }
   };
 
   return (
-    <AuthShell eyebrow="A room of your own" title="Make room for your style" note="Start with a few details and leave plenty of room to make this wardrobe your own.">
+    <AuthShell eyebrow="Malabis" title="Create an account" note="Create an account to add clothes and save outfits.">
       <form className="auth-fields" onSubmit={handleSubmit}>
         {error && <p className="form-error" role="alert">{error}</p>}
-        <div className="field"><label htmlFor="displayName">What should we call you?</label><input className="input" id="displayName" value={form.displayName} onChange={update('displayName')} autoComplete="name" minLength="3" required /></div>
+        <div className="field"><label htmlFor="displayName">Display name</label><input className="input" id="displayName" value={form.displayName} onChange={update('displayName')} autoComplete="name" minLength="3" required /></div>
         <div className="field"><label htmlFor="username">Username</label><input className="input" id="username" value={form.username} onChange={update('username')} autoComplete="username" required /></div>
         <div className="field"><label htmlFor="password">Password</label><input className="input" id="password" type="password" value={form.password} onChange={update('password')} autoComplete="new-password" minLength="8" required /><small>At least 8 characters</small></div>
-        <button className="button button--rose button--wide" disabled={submitting}>{submitting ? 'Making space…' : <>Begin my closet <Icon name="arrow" size={17}/></>}</button>
+        <button className="button button--rose button--wide" disabled={submitting}>{submitting ? 'Creating account…' : <>Create account <Icon name="arrow" size={17}/></>}</button>
         <p className="auth-consent">By creating an account, you agree to the <Link to="/terms">Terms of Service</Link> and acknowledge the <Link to="/privacy">Privacy Policy</Link> and <Link to="/cookies">Cookie Policy</Link>.</p>
-        <p className="auth-switch">Already have a corner here? <Link to="/login">Log in</Link></p>
+        <p className="auth-switch">Already have an account? <Link to="/login">Log in</Link></p>
       </form>
     </AuthShell>
   );

@@ -11,8 +11,8 @@ export default function OutfitCreator({
   saving = false,
   busy = false,
   error = '',
-  emptyCopy = 'Choose pieces from your closet to start an outfit.',
-  placeholder = 'A new look',
+  emptyCopy = 'Select items from your closet to create an outfit.',
+  placeholder = 'Outfit name',
   children,
 }) {
   const nameId = useId();
@@ -21,9 +21,9 @@ export default function OutfitCreator({
   return <section className={`outfit-creator ${busy ? 'is-busy' : ''}`} aria-label="Outfit preview" aria-busy={busy}>
     <header className="outfit-creator__header">
       <span className="outfit-creator__badge"><Icon name="hanger" size={22}/>Outfit</span>
-      <span className="outfit-creator__count" aria-live="polite">{busy ? 'Shuffling…' : `${items.length} ${items.length === 1 ? 'piece' : 'pieces'}`}</span>
+      <span className="outfit-creator__count" aria-live="polite">{busy ? 'Generating…' : `${items.length} ${items.length === 1 ? 'item' : 'items'}`}</span>
     </header>
-    <OutfitCanvas pieces={pieces} emptyCopy={busy ? 'Putting your outfit together…' : emptyCopy}/>
+    <OutfitCanvas pieces={pieces} emptyCopy={busy ? 'Generating outfit…' : emptyCopy}/>
     {children}
     <footer className="outfit-creator__footer">
       <div className="field">

@@ -20,23 +20,23 @@ export default function CookieSettingsPage() {
     <LegalShell>
       <main id="legal-main" className="legal-page cookie-page" tabIndex={-1}>
         <header className="legal-hero">
-          <p className="eyebrow">Your browser, your choice</p>
+          <p className="eyebrow">Preferences</p>
           <h1>Cookie settings</h1>
-          <p>Choose which optional categories Malabis may use, with your selection saved only in this browser.</p>
+          <p>Manage optional cookies and browser storage. These settings apply only to this browser.</p>
           <p className="cookie-policy-link">Read the <Link to="/cookies">Cookie Policy</Link> for storage names, purposes, and lifetimes.</p>
         </header>
         <section className="cookie-paper" aria-label="Cookie preferences">
           <div className="cookie-choice">
-            <div><h2>Strictly necessary</h2><p>This category keeps you securely signed in, provides core account features, and cannot be switched off.</p></div>
+            <div><h2>Strictly necessary</h2><p>Required for login and account features. These cannot be turned off here.</p></div>
             <span className="cookie-required">Always on</span>
           </div>
           <label className="cookie-choice">
-            <div><h2>Analytics</h2><p>Your choice for optional browser measurement is recorded here, although no optional analytics tracker is currently active.</p></div>
+            <div><h2>Analytics</h2><p>Saves your preference for optional usage tracking. Malabis currently has no optional analytics tracker.</p></div>
             <input type="checkbox" checked={preferences.analytics} onChange={() => toggle('analytics')} />
             <span className="toggle" aria-hidden="true" />
           </label>
           <label className="cookie-choice">
-            <div><h2>Personalization</h2><p>Your choice for optional preferences beyond core wardrobe features is recorded here, although no separate optional personalization technology is currently active.</p></div>
+            <div><h2>Personalization</h2><p>Saves your preference for optional personalization. Malabis currently has no separate optional personalization feature.</p></div>
             <input type="checkbox" checked={preferences.personalization} onChange={() => toggle('personalization')} />
             <span className="toggle" aria-hidden="true" />
           </label>
@@ -44,7 +44,7 @@ export default function CookieSettingsPage() {
             <button className="button button--quiet" type="button" onClick={() => save(defaultCookiePreferences)}>Necessary only</button>
             <button className="button button--rose" type="button" onClick={() => save()}>Save choices</button>
           </div>
-          <p className={`cookie-saved ${saved ? 'is-visible' : ''}`} role="status">Your choices are saved on this device.</p>
+          <p className={`cookie-saved ${saved ? 'is-visible' : ''}`} role="status">Preferences saved in this browser.</p>
         </section>
       </main>
     </LegalShell>

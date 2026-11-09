@@ -7,11 +7,11 @@ import { addOutfit, getInventory } from '../dataCache';
 import './GeneratorPage.css';
 
 const TYPE_OPTIONS = [
-  { id: 'shirt', label: 'Top', note: 'tees, shirts & knits' },
-  { id: 'pants', label: 'Bottom', note: 'trousers, skirts & denim' },
-  { id: 'jacket', label: 'Layer', note: 'jackets & outerwear' },
-  { id: 'shoes', label: 'Shoes', note: 'the finishing pair' },
-  { id: 'hat', label: 'Hat', note: 'something up top' },
+  { id: 'shirt', label: 'Top', note: 'T-shirts, shirts & sweaters' },
+  { id: 'pants', label: 'Bottom', note: 'pants, shorts & skirts' },
+  { id: 'jacket', label: 'Jacket', note: 'jackets & coats' },
+  { id: 'shoes', label: 'Shoes', note: 'sneakers, boots & other shoes' },
+  { id: 'hat', label: 'Hat', note: 'caps, beanies & other hats' },
 ];
 
 export default function GeneratorPage() {
@@ -30,7 +30,7 @@ export default function GeneratorPage() {
     let active = true;
     getInventory()
       .then((inventory) => { if (active) setInventory(inventory); })
-      .catch(() => { if (active) setToast({ show: true, type: 'error', message: 'Your closet could not be opened.' }); })
+      .catch(() => { if (active) setToast({ show: true, type: 'error', message: 'Could not load your clothes. Try refreshing the page.' }); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
@@ -62,7 +62,7 @@ export default function GeneratorPage() {
       setItems(data.outfit);
       setLocked((current) => current.filter((id) => data.outfit.some((item) => item._id === id)));
     } catch {
-      setToast({ show: true, type: 'error', message: 'We could not make a combination from the selected pieces in your closet.' });
+      setToast({ show: true, type: 'error', message: 'Could not generate an outfit. Try again.' });
     } finally {
       setGenerating(false);
     }
@@ -78,14 +78,14 @@ export default function GeneratorPage() {
     try {
       const response = await apiFetch('/api/outfits', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() || 'Made by chance', clothingItems: items.map((item) => item._id) }),
+        body: JSON.stringify({ name: name.trim() || 'Untitled outfit', clothingItems: items.map((item) => item._id) }),
       });
       if (!response.ok) throw new Error();
       const data = await response.json();
       addOutfit(data.outfit);
-      setToast({ show: true, type: 'success', message: 'Your outfit is saved in your lookbook.' });
+      setToast({ show: true, type: 'success', message: 'Outfit saved.' });
     } catch {
-      setToast({ show: true, type: 'error', message: 'This outfit could not be saved.' });
+      setToast({ show: true, type: 'error', message: 'Could not save this outfit. Try again.' });
     } finally {
       setSaving(false);
     }
@@ -94,19 +94,19 @@ export default function GeneratorPage() {
   return <div className="page create-page">
     <Toast {...toast}/>
     <header className="page-heading create-heading">
-      <div><p className="eyebrow">The dressing room</p><h1>Create an outfit</h1></div>
-      <p className="page-heading__copy">Choose the kinds of pieces you want to wear, find a combination you love, and save it for later.</p>
+      <div><p className="eyebrow">Outfit generator</p><h1>Create an outfit</h1></div>
+      <p className="page-heading__copy">Choose clothing types, generate an outfit from your closet, and save it.</p>
     </header>
     <div className="create-layout">
       <aside className="recipe-panel" aria-busy={loading}>
-        <header><p className="eyebrow">Your combination</p><h2>Choose your pieces</h2><p>Start with the essentials. Add a little extra.</p></header>
+        <header><p className="eyebrow">Options</p><h2>Choose clothing types</h2><p>Select the types to include and the number of accessories.</p></header>
         <div className="type-list">{TYPE_OPTIONS.map((type) => {
           const count = byType[type.id]?.length || 0;
           const checked = count > 0 && selectedTypes.includes(type.id);
           return <label key={type.id} className={`${checked ? 'is-checked' : ''} ${!count ? 'is-disabled' : ''}`}>
             <input type="checkbox" checked={checked} disabled={!count || generating || saving} onChange={() => toggleType(type.id)}/>
             <span className="type-list__check"><Icon name={checked ? 'check' : 'plus'} size={15}/></span>
-            <span className="type-list__copy"><b>{type.label}</b><small>{loading ? 'Opening your closet…' : count ? `${type.note} · ${count} in closet` : 'No pieces yet'}</small></span>
+            <span className="type-list__copy"><b>{type.label}</b><small>{loading ? 'Loading clothes…' : count ? `${type.note} · ${count} in closet` : 'No items yet'}</small></span>
             <Icon name={type.id} size={20}/>
           </label>;
         })}</div>
@@ -118,11 +118,11 @@ export default function GeneratorPage() {
             <button type="button" onClick={() => setAccessoryCount((count) => Math.min(maxAccessories, count + 1))} disabled={accessoryCount >= maxAccessories || generating || saving} aria-label="More accessories"><Icon name="plus" size={15}/></button>
           </div>
         </div>
-        <button type="button" className="button button--rose button--wide shuffle-button" onClick={generate} disabled={!canGenerate}><Icon name="sparkle" size={18}/>{generating ? 'Shuffling…' : items.length ? 'Try another outfit' : 'Make me an outfit'}</button>
-        <p className="recipe-tip"><Icon name="lock" size={15}/>Lock a piece in your outfit to keep it when you shuffle.</p>
+        <button type="button" className="button button--rose button--wide shuffle-button" onClick={generate} disabled={!canGenerate}><Icon name="sparkle" size={18}/>{generating ? 'Generating…' : items.length ? 'Try another outfit' : 'Generate outfit'}</button>
+        <p className="recipe-tip"><Icon name="lock" size={15}/>Lock an item to keep it in the next generated outfit.</p>
       </aside>
-      <OutfitCreator items={items} name={name} onNameChange={setName} onSave={save} saving={saving} busy={generating} emptyCopy="Choose your pieces, then make your first outfit." placeholder="Blue-sky Tuesday">
-        {items.length > 0 && <ul className="piece-ribbon" aria-label="Pieces in this outfit">{items.map((item) => {
+      <OutfitCreator items={items} name={name} onNameChange={setName} onSave={save} saving={saving} busy={generating} emptyCopy="Select clothing types, then generate an outfit." placeholder="Casual outfit">
+        {items.length > 0 && <ul className="piece-ribbon" aria-label="Items in this outfit">{items.map((item) => {
           const isLocked = locked.includes(item._id);
           return <li className={isLocked ? 'is-locked' : ''} key={item._id}>
             <img src={item.imageLink} alt="" draggable="false"/>

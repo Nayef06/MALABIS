@@ -12,7 +12,7 @@ const Navbar = () => {
   return (
     <header className="wardrobe-nav">
       <NavLink className="wardrobe-nav__brand" to="/clothes"><Brand /></NavLink>
-      <nav className="wardrobe-nav__links" aria-label="Wardrobe navigation">
+      <nav className="wardrobe-nav__links" aria-label="Main navigation">
         {links.map(({ to, label, icon }) => (
           <NavLink key={to} to={to} className={({ isActive }) => `wardrobe-link ${isActive ? 'is-active' : ''}`}>
             <Icon name={icon} size={18}/><span>{label}</span>
@@ -20,7 +20,7 @@ const Navbar = () => {
         ))}
       </nav>
       <NavLink to="/account" className={({ isActive }) => `wardrobe-nav__account ${isActive ? 'is-active' : ''}`} aria-label="Account settings">
-        <Icon name="user" size={20}/><span>My corner</span>
+        <Icon name="user" size={20}/><span>Account</span>
       </NavLink>
     </header>
   );

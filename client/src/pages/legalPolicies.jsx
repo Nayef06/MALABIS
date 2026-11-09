@@ -9,11 +9,11 @@ export const policies = {
   terms: {
     label: 'Terms',
     title: 'Terms of Service',
-    intro: 'Please read the agreement for using your digital wardrobe before creating an account or using Malabis.',
+    intro: 'The terms for creating an account and using Malabis.',
     summary: [
-      ['Your wardrobe, your content', 'You keep ownership of the clothing photos and outfit content you add.'],
+      ['Content ownership', 'You keep ownership of the clothing photos and outfit content you add.'],
       ['Use it responsibly', 'Protect your account and upload only content you have permission to use.'],
-      ['You are in control', 'Manage your profile, remove pieces, or delete your account in My corner.'],
+      ['Account controls', 'Manage your profile, remove items, or delete your account in Account settings.'],
     ],
     sections: [
       {
@@ -26,7 +26,7 @@ export const policies = {
       },
       {
         id: 'account', title: 'Your account & security',
-        body: <><p>Registration requires a username, display name, and password. Provide information you are entitled to use, do not impersonate another person, and keep your credentials confidential. Use a unique password, log out on shared devices, and contact me promptly if you suspect unauthorized access. You are responsible for activity you authorize through your account.</p><p>You can change your display name and password in <Link to="/account">My corner</Link>. Malabis does not currently collect an account recovery email or offer automated password reset, so recovery may not be possible if you lose access. I may need to verify ownership before helping with an account and cannot guarantee recovery.</p></>,
+        body: <><p>Registration requires a username, display name, and password. Provide information you are entitled to use, do not impersonate another person, and keep your credentials confidential. Use a unique password, log out on shared devices, and contact me promptly if you suspect unauthorized access. You are responsible for activity you authorize through your account.</p><p>You can change your display name and password in <Link to="/account">Account settings</Link>. Malabis does not currently collect an account recovery email or offer automated password reset, so recovery may not be possible if you lose access. I may need to verify ownership before helping with an account and cannot guarantee recovery.</p></>,
       },
       {
         id: 'features', title: 'Outfit suggestions & feature limitations',
@@ -58,7 +58,7 @@ export const policies = {
       },
       {
         id: 'deletion', title: 'Deleting content & ending your account',
-        body: <><p>You may stop using Malabis at any time, delete individual items or outfits, or permanently delete your account from <Link to="/account">My corner</Link>. Account deletion removes your profile and associated clothing and outfit records from the active database and requests deletion of Cloudinary images tracked as uploaded by your account, including uploads that were never attached to a saved item. It cannot be undone through the app. Deleting a clothing item may also remove its reference from saved outfits, but does not itself delete its hosted image.</p><p>If hosted-image deletion fails, account deletion does not complete and you can try again. Images uploaded before upload tracking was added may not be identified automatically. Provider caches, backups, and legally required records may also remain. To request removal of an older image, email {email} with your username and relevant image URLs, if available. Never send your password. Read the <Link to="/privacy#retention">retention and deletion details</Link> before deleting your account.</p></>,
+        body: <><p>You may stop using Malabis at any time, delete individual items or outfits, or permanently delete your account from <Link to="/account">Account settings</Link>. Account deletion removes your profile and associated clothing and outfit records from the active database and requests deletion of Cloudinary images tracked as uploaded by your account, including uploads that were never attached to a saved item. It cannot be undone through the app. Deleting a clothing item may also remove its reference from saved outfits, but does not itself delete its hosted image.</p><p>If hosted-image deletion fails, account deletion does not complete and you can try again. Images uploaded before upload tracking was added may not be identified automatically. Provider caches, backups, and legally required records may also remain. To request removal of an older image, email {email} with your username and relevant image URLs, if available. Never send your password. Read the <Link to="/privacy#retention">retention and deletion details</Link> before deleting your account.</p></>,
       },
       {
         id: 'suspension', title: 'Suspension & termination',
@@ -85,11 +85,11 @@ export const policies = {
   privacy: {
     label: 'Privacy',
     title: 'Privacy Policy',
-    intro: 'How information moves through your digital wardrobe: what Malabis collects, why it is used, which providers help process it, and the choices available to you.',
+    intro: 'What data Malabis collects, how it is used, which providers process it, and your privacy choices.',
     summary: [
-      ['Information for your wardrobe', 'Account details, clothing photos, wardrobe records, and technical service data.'],
+      ['Data collected', 'Account details, clothing photos, wardrobe records, and technical service data.'],
       ['No sale or targeted ads', 'Malabis does not sell personal information or use it for cross-site targeted advertising.'],
-      ['Practical privacy controls', 'Manage your account and browser choices, or email Nayef about your data.'],
+      ['Privacy controls', 'Manage your account and browser choices, or email Nayef about your data.'],
     ],
     sections: [
       {
@@ -130,7 +130,7 @@ export const policies = {
       },
       {
         id: 'retention', title: 'Retention & the limits of deletion',
-        body: <><p>Account and wardrobe records remain while your account is active to support the Service. You can delete items and outfits individually. Deleting your account in <Link to="/account">My corner</Link> requests deletion of Cloudinary images tracked as uploaded by your account, including unsaved uploads, then removes your profile and associated clothing and outfit records from the active database, invalidates associated server caches, and ends the current session. If a hosted-image deletion fails, account deletion stops and you can retry.</p><p><strong>Older uploads may need help.</strong> Images uploaded before Malabis began recording their Cloudinary identifiers may not be found by the automatic account deletion process. Email {email} with your username and relevant image URLs, if available, to request removal. I may need to verify ownership and identify the assets. Deleting an individual clothing record does not delete its hosted image; tracked images are removed when the account is deleted.</p><p>Provider caches, logs, and backups may retain copies after active records are removed. Cloudinary cache invalidation may take time to propagate. Retention depends on provider configuration and applicable obligations; a fixed deletion time for every provider copy cannot be guaranteed. Security investigations, legal obligations, or claims may require longer retention for the relevant purpose. Correspondence is retained as needed to handle enquiries and related obligations.</p><p>Local preferences remain until changed or cleared. Copies saved by you or others outside Malabis are outside the account deletion process.</p></>,
+        body: <><p>Account and wardrobe records remain while your account is active to support the Service. You can delete items and outfits individually. Deleting your account in <Link to="/account">Account settings</Link> requests deletion of Cloudinary images tracked as uploaded by your account, including unsaved uploads, then removes your profile and associated clothing and outfit records from the active database, invalidates associated server caches, and ends the current session. If a hosted-image deletion fails, account deletion stops and you can retry.</p><p><strong>Older uploads may need help.</strong> Images uploaded before Malabis began recording their Cloudinary identifiers may not be found by the automatic account deletion process. Email {email} with your username and relevant image URLs, if available, to request removal. I may need to verify ownership and identify the assets. Deleting an individual clothing record does not delete its hosted image; tracked images are removed when the account is deleted.</p><p>Provider caches, logs, and backups may retain copies after active records are removed. Cloudinary cache invalidation may take time to propagate. Retention depends on provider configuration and applicable obligations; a fixed deletion time for every provider copy cannot be guaranteed. Security investigations, legal obligations, or claims may require longer retention for the relevant purpose. Correspondence is retained as needed to handle enquiries and related obligations.</p><p>Local preferences remain until changed or cleared. Copies saved by you or others outside Malabis are outside the account deletion process.</p></>,
       },
       {
         id: 'security', title: 'Security & protecting your account',
@@ -138,7 +138,7 @@ export const policies = {
       },
       {
         id: 'rights', title: 'Your controls & privacy rights',
-        body: <><p>Use <Link to="/account">My corner</Link> to update your display name or password or delete your account. You can remove individual clothing items and outfits, and use <Link to="/cookie-settings">Cookie settings</Link> for optional browser choices.</p><p>Depending on your location and whether the relevant law applies, you may have rights to access or obtain a copy of information, correct inaccuracies, request deletion or portability, restrict processing, withdraw consent, or object to processing based on legitimate interests. <strong>You may object to legitimate-interest processing where applicable law provides that right.</strong> Exceptions may apply, including for legal obligations and other people's rights.</p><p>Send requests to {email} with your username and an explanation; never send your password. I may request proportionate information to verify identity or an authorized agent's authority. I will respond within applicable legal deadlines and explain if a request cannot be fulfilled. The app does not currently provide a bulk download control.</p><p>You may complain to your local data protection authority where that right applies. If applicable law provides an appeal right, reply to the contact address and request review. I do not unlawfully discriminate against you for exercising protected privacy rights.</p></>,
+        body: <><p>Use <Link to="/account">Account settings</Link> to update your display name or password or delete your account. You can remove individual clothing items and outfits, and use <Link to="/cookie-settings">Cookie settings</Link> for optional browser choices.</p><p>Depending on your location and whether the relevant law applies, you may have rights to access or obtain a copy of information, correct inaccuracies, request deletion or portability, restrict processing, withdraw consent, or object to processing based on legitimate interests. <strong>You may object to legitimate-interest processing where applicable law provides that right.</strong> Exceptions may apply, including for legal obligations and other people's rights.</p><p>Send requests to {email} with your username and an explanation; never send your password. I may request proportionate information to verify identity or an authorized agent's authority. I will respond within applicable legal deadlines and explain if a request cannot be fulfilled. The app does not currently provide a bulk download control.</p><p>You may complain to your local data protection authority where that right applies. If applicable law provides an appeal right, reply to the contact address and request review. I do not unlawfully discriminate against you for exercising protected privacy rights.</p></>,
       },
       {
         id: 'california', title: 'California residents & tracking signals',
@@ -164,7 +164,7 @@ export const policies = {
     intro: 'What Malabis stores in your browser, what each item does, how long it stays, and how to manage your choices.',
     summary: [
       ['A cookie for signing in', 'An essential session cookie connects your browser to your account.'],
-      ['Storage for a smoother visit', 'Tab storage caches your wardrobe; local storage remembers your choices.'],
+      ['Browser storage', 'Tab storage caches your wardrobe; local storage remembers your choices.'],
       ['Optional tracking is inactive', 'No optional analytics, personalization, or advertising trackers load in the current app.'],
     ],
     sections: [
@@ -186,7 +186,7 @@ export const policies = {
       },
       {
         id: 'manage', title: 'Saving, changing & withdrawing choices',
-        body: <><p>Open <Link to="/cookie-settings">Cookie settings</Link> at any time. Select the optional categories you want and choose "Save choices," or choose "Necessary only" to turn both optional categories off. Changes are saved when you press a save button. Optional settings start off in a browser with no saved choices.</p><p>You can withdraw an optional choice by turning it off and saving again. Preferences are browser-specific: repeat your choices on other browsers or devices. Clearing local storage removes saved choices and returns optional categories to their default off state. If browser storage is blocked, choices may not persist after your visit.</p><p>Optional settings do not delete your account, change server-side records, or turn off hosting logs. Use <Link to="/account">My corner</Link> or contact me for those separate account and privacy matters.</p></>,
+        body: <><p>Open <Link to="/cookie-settings">Cookie settings</Link> at any time. Select the optional categories you want and choose "Save choices," or choose "Necessary only" to turn both optional categories off. Changes are saved when you press a save button. Optional settings start off in a browser with no saved choices.</p><p>You can withdraw an optional choice by turning it off and saving again. Preferences are browser-specific: repeat your choices on other browsers or devices. Clearing local storage removes saved choices and returns optional categories to their default off state. If browser storage is blocked, choices may not persist after your visit.</p><p>Optional settings do not delete your account, change server-side records, or turn off hosting logs. Use <Link to="/account">Account settings</Link> or contact me for those separate account and privacy matters.</p></>,
       },
       {
         id: 'browser-controls', title: 'Browser controls & tracking signals',

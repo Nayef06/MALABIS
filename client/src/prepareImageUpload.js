@@ -12,7 +12,7 @@ function encodeImage(canvas, type, quality) {
 }
 
 export async function prepareImageUpload(file) {
-  if (!file.type.startsWith('image/')) throw new Error('Choose an image file for this piece.');
+  if (!file.type.startsWith('image/')) throw new Error('Choose an image file for this item.');
   if (file.size <= MAX_UPLOAD_BYTES) return file;
 
   const url = URL.createObjectURL(file);

@@ -17,20 +17,20 @@ export default function LoginPage() {
     event.preventDefault(); setError(''); setSubmitting(true);
     try {
       const response = await apiFetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
-      if (!response.ok) throw new Error('That username and password did not match.');
+      if (!response.ok) throw new Error('Incorrect username or password.');
       clearDataCache(); navigate('/clothes');
-    } catch (err) { setError(err.message || 'We could not open your wardrobe just now.'); }
+    } catch (err) { setError(err.message || 'Could not log in. Try again.'); }
     finally { setSubmitting(false); }
   };
 
   return (
-    <AuthShell eyebrow="Welcome back" title="Welcome to your wardrobe" note="Your clothes are right where you left them, ready for whatever you want to wear next.">
+    <AuthShell eyebrow="Malabis" title="Log in" note="Log in to manage your clothes and saved outfits.">
       <form className="auth-fields" onSubmit={handleSubmit}>
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="field"><label htmlFor="username">Username</label><input className="input" id="username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" required /></div>
         <div className="field"><label htmlFor="password">Password</label><input className="input" id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required /></div>
-        <button className="button button--rose button--wide" disabled={submitting}>{submitting ? 'Opening…' : <>Open my closet <Icon name="arrow" size={17}/></>}</button>
-        <p className="auth-switch">New here? <Link to="/signup">Make a wardrobe</Link></p>
+        <button className="button button--rose button--wide" disabled={submitting}>{submitting ? 'Logging in…' : <>Log in <Icon name="arrow" size={17}/></>}</button>
+        <p className="auth-switch">Need an account? <Link to="/signup">Create account</Link></p>
       </form>
     </AuthShell>
   );

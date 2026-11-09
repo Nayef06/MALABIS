@@ -7,6 +7,6 @@ import './AccountPage.css';
 export default function DashboardPage(){
   const [user,setUser]=useState(null);const [loading,setLoading]=useState(true);const navigate=useNavigate();
   useEffect(()=>{getProfile().then(setUser).catch(()=>navigate('/login')).finally(()=>setLoading(false))},[navigate]);
-  if(loading)return <div className="utility-loading">Waking up your wardrobe…</div>;
-  return <div className="page welcome-page"><section className="welcome-note"><p className="eyebrow">A note on your door</p><h1>Hello, {user?.displayName||'you'}.</h1><p>Whenever you are ready, start with the clothes you own and let Malabis help you put together a look.</p><div className="button-row"><Link className="button button--rose" to="/clothes"><Icon name="hanger"/>Open my closet</Link><Link className="button button--paper" to="/generator"><Icon name="sparkle"/>Make a look</Link></div><span className="welcome-note__tape"/></section></div>
+  if(loading)return <div className="utility-loading">Loading…</div>;
+  return <div className="page welcome-page"><section className="welcome-note"><p className="eyebrow">Dashboard</p><h1>{user?.displayName ? `Hi, ${user.displayName}.` : 'Welcome back.'}</h1><p>Manage your clothes or create an outfit from your closet.</p><div className="button-row"><Link className="button button--rose" to="/clothes"><Icon name="hanger"/>Open my closet</Link><Link className="button button--paper" to="/generator"><Icon name="sparkle"/>Create an outfit</Link></div><span className="welcome-note__tape"/></section></div>
 }

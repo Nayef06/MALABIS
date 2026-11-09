@@ -1,7 +1,7 @@
 function loadImage(src) {
   return new Promise((resolve, reject) => {
     if (!src) {
-      reject(new Error('A piece is missing its image.'));
+      reject(new Error('An item is missing its image.'));
       return;
     }
     const image = new Image();
@@ -15,14 +15,14 @@ function loadImage(src) {
     };
     image.crossOrigin = 'anonymous';
     image.onload = () => finish();
-    image.onerror = () => finish(new Error('A piece’s image could not be loaded for export. Its host may block downloads.'));
+    image.onerror = () => finish(new Error('Could not load an item image for export. Its host may block downloads.'));
     image.src = src;
   });
 }
 
 // Render from the same piece positions as OutfitCanvas, without selection tools.
-export async function exportOutfit(pieces, name = 'Untitled look') {
-  if (!pieces.length) throw new Error('Add a piece before exporting this look.');
+export async function exportOutfit(pieces, name = 'Untitled outfit') {
+  if (!pieces.length) throw new Error('Add an item before exporting this outfit.');
   const ordered = [...pieces].sort((a, b) => a.z - b.z);
   const images = await Promise.all(ordered.map((piece) => loadImage(piece.item.imageLink)));
   const canvas = document.createElement('canvas');
@@ -64,7 +64,7 @@ export async function exportOutfit(pieces, name = 'Untitled look') {
 
   context.fillStyle = '#a75f5c';
   context.font = '24px sans-serif';
-  context.fillText('MALABIS · MY LOOKBOOK', margin, height + margin + 56);
+  context.fillText('MALABIS · MY OUTFITS', margin, height + margin + 56);
   context.fillStyle = '#3f332f';
   context.font = '600 42px sans-serif';
   context.fillText(name, margin, height + margin + 114, width);

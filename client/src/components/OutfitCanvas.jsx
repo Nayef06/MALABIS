@@ -34,7 +34,7 @@ export function placeItems(items = []) {
   });
 }
 
-export default function OutfitCanvas({ pieces, emptyCopy = 'Choose a piece to begin', className = '' }) {
+export default function OutfitCanvas({ pieces, emptyCopy = 'Select an item to start an outfit.', className = '' }) {
   return (
     <div className={`outfit-canvas-wrap ${className}`}>
       <div className="outfit-canvas">
