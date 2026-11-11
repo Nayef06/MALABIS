@@ -41,7 +41,7 @@
 .preview-closet__bank { position: absolute; inset: 38px 0 35px; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 0 3px 8px; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
 .preview-closet__bank::-webkit-scrollbar { display: none; }
 .preview-closet__item { display: block; flex: none; width: 61px; padding: 6px 5px 4px; text-align: center; border: 1px solid #e1d7cb; background: var(--paper); cursor: pointer; }
-.preview-closet__item:hover, .preview-closet__item.is-selected { border-color: var(--rose-deep); background: #f1e5dc; }
+.preview-closet__item:hover, .preview-closet__item.is-selected { border-color: var(--rose-deep); background: var(--accent-selected); }
 .preview-closet__item img { display: block; height: 41px; width: 100%; object-fit: contain; mix-blend-mode: multiply; }
 .preview-closet__item .preview-image-fallback { height: 41px; white-space: normal; font-size: .4rem; }
 .preview-closet__item span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 4px; font-size: .48rem; line-height: 1.2; color: var(--ink-soft); }
@@ -73,10 +73,10 @@
 .outfit-preview__controls { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 13px 16px; border-top: 1px solid var(--line); }
 .outfit-preview__controls button { display: inline-flex; gap: 7px; align-items: center; justify-content: center; cursor: pointer; font-size: .66rem; min-height: 38px; padding: 8px 11px; transition: background .2s; }
 .preview-shuffle { background: var(--brown); color: var(--paper); }
-.preview-shuffle:hover { background: var(--rose-deep); }
+.preview-shuffle:hover { background: var(--ink); }
 .preview-save { background: transparent; color: var(--ink-soft); }
-.preview-save:hover, .preview-save.is-saved { color: var(--rose-deep); background: #f4e9e2; }
-.preview-save.is-saved svg { fill: #d9a6a155; }
+.preview-save:hover, .preview-save.is-saved { color: var(--rose-deep); background: var(--accent-soft); }
+.preview-save.is-saved svg { fill: rgba(var(--accent-rgb),.2); }
 .preview-footnote { display: flex; justify-content: center; gap: 6px; align-items: center; font-size: .61rem; margin-top: 23px; color: var(--ink-soft); }
 .preview-footnote svg { color: var(--rose-deep); }
 .landing__how { width: min(1320px, calc(100% - 96px)); margin: auto; padding: 49px 0 58px; border-top: 1px solid var(--line); scroll-margin-top: 30px; }

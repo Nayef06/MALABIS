@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { apiFetch } from './api';
 import Brand from './components/Brand';
 import { DoodleStar, Icon } from './components/Icons';
@@ -95,12 +95,16 @@ function OutfitPreview() {
 }
 
 export default function LandingPage() {
-  const [signedIn, setSignedIn] = useState(false);
+  const [signedIn, setSignedIn] = useState(null);
   useEffect(() => {
     const controller = new AbortController();
-    apiFetch('/api/auth/status', { signal: controller.signal }).then((response) => setSignedIn(response.ok)).catch(() => {});
+    apiFetch('/api/auth/status', { signal: controller.signal })
+      .then((response) => { if (!controller.signal.aborted) setSignedIn(response.ok); })
+      .catch(() => { if (!controller.signal.aborted) setSignedIn(false); });
     return () => controller.abort();
   }, []);
+  if (signedIn === null) return <div className="utility-loading" role="status">Loading…</div>;
+  if (signedIn) return <Navigate to="/clothes" replace />;
   const wardrobeLink = signedIn ? '/clothes' : '/signup';
   return (
     <div className="landing">

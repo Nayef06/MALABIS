@@ -12,10 +12,8 @@ export default function LegalPage({ type }) {
   const relatedType = type === 'terms' ? 'privacy' : type === 'privacy' ? 'cookies' : 'privacy';
 
   useEffect(() => {
-    const previousTitle = document.title;
     const description = document.querySelector('meta[name="description"]');
     const previousDescription = description?.content;
-    document.title = `${policy.title} | Malabis`;
     if (description) description.content = policy.intro;
     setActiveSection(policy.sections[0].id);
     setContentsOpen(false);
@@ -36,7 +34,6 @@ export default function LegalPage({ type }) {
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
-      document.title = previousTitle;
       if (description) description.content = previousDescription;
     };
   }, [policy]);

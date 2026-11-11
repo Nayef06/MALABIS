@@ -62,7 +62,7 @@ export async function exportOutfit(pieces, name = 'Untitled outfit') {
   });
   context.restore();
 
-  context.fillStyle = '#a75f5c';
+  context.fillStyle = '#4e3932';
   context.font = '24px sans-serif';
   context.fillText('MALABIS · MY OUTFITS', margin, height + margin + 56);
   context.fillStyle = '#3f332f';

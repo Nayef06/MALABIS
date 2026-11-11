@@ -11,6 +11,7 @@ import LegalPage from './pages/LegalPage';
 import CookieSettingsPage from './pages/CookieSettingsPage';
 
 import Navbar from './components/Navbar';
+import PageTitle from './components/PageTitle';
 import './App.css';
 
 const WardrobeShell = () => (
@@ -24,6 +25,7 @@ const WardrobeShell = () => (
 function App() {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <PageTitle />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />

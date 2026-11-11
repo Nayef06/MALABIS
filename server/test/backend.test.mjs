@@ -671,6 +671,47 @@ test("Cloudinary upload preparation bounds decoded image size and preserves imag
   }
 });
 
+test("sessions renew for 30 days on activity and expire after inactivity", async (t) => {
+  const day = 24 * 60 * 60 * 1000;
+  let now = Math.floor(Date.now() / 1000) * 1000;
+  t.mock.method(Date, "now", () => now);
+
+  function assertSessionExpiry(response) {
+    const cookie = response.headers.get("set-cookie");
+    assert.ok(cookie);
+    assert.match(cookie, /; HttpOnly/);
+    assert.match(cookie, /; SameSite=Lax/);
+    const expires = cookie.match(/; Expires=([^;]+)/);
+    assert.ok(expires);
+    assert.equal(new Date(expires[1]).getTime(), now + 30 * day);
+  }
+
+  const anonymous = await request("/api/auth/status");
+  assert.equal(anonymous.status, 401);
+  assert.equal(anonymous.headers.get("set-cookie"), null);
+
+  assert.equal((await signUp("session-lifetime")).status, 201);
+  const login = await logIn("session-lifetime");
+  assert.equal(login.status, 200);
+  assertSessionExpiry(login);
+
+  // Each read extends the session, including beyond the initial login expiry.
+  for (let visit = 0; visit < 2; visit += 1) {
+    now += 28 * day;
+    const response = await request("/api/auth/status", { cookie: login.cookie });
+    assert.equal(response.status, 200);
+    assert.equal(response.data.username, "session-lifetime");
+    assert.equal(response.cookie, login.cookie);
+    assertSessionExpiry(response);
+  }
+
+  // Replaying the cookie after the idle timeout cannot restore the session.
+  now += 31 * day;
+  const expired = await request("/api/auth/status", { cookie: login.cookie });
+  assert.equal(expired.status, 401);
+  assert.equal(expired.headers.get("set-cookie"), null);
+});
+
 test("API workflow covers auth, wardrobe, outfits, generation, and failures", async () => {
   users.clear();
   clothingItems.clear();

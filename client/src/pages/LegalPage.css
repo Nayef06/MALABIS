@@ -36,8 +36,8 @@
 .legal-toc ol { padding: 0; margin: 0; list-style: none; }
 .legal-toc a { display: grid; grid-template-columns: 20px 1fr; gap: 9px; padding: 8px 9px; border-left: 2px solid transparent; color: var(--ink-soft); font-size: .73rem; line-height: 1.55; }
 .legal-toc a > span { padding-top: 1px; color: var(--ink-soft); font-size: .62rem; font-variant-numeric: tabular-nums; }
-.legal-toc a:hover { background: rgba(217, 166, 161, .1); color: var(--brown); }
-.legal-toc a[aria-current="location"] { border-left-color: var(--rose-deep); background: rgba(217, 166, 161, .13); color: var(--brown); font-weight: 600; }
+.legal-toc a:hover { background: var(--accent-soft); color: var(--brown); }
+.legal-toc a[aria-current="location"] { border-left-color: var(--rose-deep); background: var(--accent-selected); color: var(--brown); font-weight: 600; }
 .legal-help { margin-top: 24px; padding: 20px 0 5px; border-top: 1px solid var(--line); }
 .legal-help p { margin: 0 0 6px; color: var(--ink-soft); font-size: .72rem; }
 .legal-help a { display: inline-flex; align-items: center; gap: 20px; color: var(--brown); font-size: .78rem; font-weight: 700; }
@@ -52,7 +52,7 @@
 .legal-section__body { color: #62564f; font-size: .89rem; line-height: 1.9; overflow-wrap: anywhere; }
 .legal-section__body p { margin: 0 0 15px; }
 .legal-section__body > :last-child { margin-bottom: 0; }
-.legal-section__body a, .cookie-policy-link a { color: #874541; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.legal-section__body a, .cookie-policy-link a { color: var(--rose-deep); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .legal-section__body a:hover, .cookie-policy-link a:hover { color: var(--ink); }
 .legal-section__body ul { margin: 0 0 18px; padding-left: 21px; }
 .legal-section__body li { padding-left: 4px; margin-bottom: 8px; }

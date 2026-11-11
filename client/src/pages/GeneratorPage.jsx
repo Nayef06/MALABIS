@@ -94,12 +94,12 @@ export default function GeneratorPage() {
   return <div className="page create-page">
     <Toast {...toast}/>
     <header className="page-heading create-heading">
-      <div><p className="eyebrow">Outfit generator</p><h1>Create an outfit</h1></div>
-      <p className="page-heading__copy">Choose clothing types, generate an outfit from your closet, and save it.</p>
+      <div><p className="eyebrow">Automatic selection</p><h1>Create an outfit</h1></div>
+      <p className="page-heading__copy">Save a look to My outfits to wear it again or export it as an image.</p>
     </header>
     <div className="create-layout">
       <aside className="recipe-panel" aria-busy={loading}>
-        <header><p className="eyebrow">Options</p><h2>Choose clothing types</h2><p>Select the types to include and the number of accessories.</p></header>
+        <header><p className="eyebrow">Options</p><h2>Choose clothing types</h2><p>One piece is picked from each selected type. Add accessories below.</p></header>
         <div className="type-list">{TYPE_OPTIONS.map((type) => {
           const count = byType[type.id]?.length || 0;
           const checked = count > 0 && selectedTypes.includes(type.id);

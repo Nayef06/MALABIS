@@ -54,8 +54,9 @@ const sessionOptions = {
   secret: process.env.SESSION_SECRET || "test-session-secret",
   saveUninitialized: false,
   resave: false,
+  rolling: true,
   cookie: {
-    maxAge: 60000 * 60 * 24,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
