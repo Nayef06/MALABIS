@@ -3,6 +3,7 @@ import OutfitCanvas, { placeItems } from '../components/OutfitCanvas';
 import OutfitCreator from '../components/OutfitCreator';
 import { Icon } from '../components/Icons';
 import { ConfirmDialog, EmptyState, Modal, Toast } from '../components/UI';
+import { BuilderSkeleton, OutfitCreatorSkeleton, OutfitsSkeleton } from '../components/LoadingSkeletons';
 import { apiFetch } from '../api';
 import { exportOutfit } from '../exportOutfit';
 import { addOutfit, getInventory, getOutfits, removeOutfit, updateOutfit } from '../dataCache';
@@ -57,7 +58,7 @@ function Builder({ open,onClose,onSaved }) {
         <div className="builder-closet__heading"><h3>Your clothes</h3><span>{items.length} selected</span></div>
         <p className="builder-closet__copy">Select an item to add it. Select it again to remove it.</p>
         <div className="builder-filters" aria-label="Clothing categories">{TYPES.map(([id,label])=><button type="button" key={id} className={filter===id?'is-active':''} aria-pressed={filter===id} onClick={()=>setFilter(id)}>{label}</button>)}</div>
-        <div className="builder-garments">{loading ? <p className="builder-message">Loading clothes…</p> : visible.length ? visible.map((item) => {
+        <div className="builder-garments">{loading ? <BuilderSkeleton/> : visible.length ? visible.map((item) => {
           const selected = selectedIds.has(item._id);
           return <button className={`builder-garment ${selected ? 'is-selected' : ''}`} type="button" key={item._id} onClick={() => togglePiece(item)} aria-pressed={selected} aria-label={`${selected ? 'Remove' : 'Add'} ${item.name} ${selected ? 'from' : 'to'} outfit`} disabled={saving}>
             <img src={item.imageLink} alt="" draggable="false"/>
@@ -67,7 +68,7 @@ function Builder({ open,onClose,onSaved }) {
         }) : <p className="builder-message">No items in this category.</p>}</div>
       </aside>
       <section className="builder-table">
-        <OutfitCreator items={items} name={name} onNameChange={setName} onSave={save} saving={saving} error={error} placeholder="Weekend outfit"/>
+        {loading ? <OutfitCreatorSkeleton/> : <OutfitCreator items={items} name={name} onNameChange={setName} onSave={save} saving={saving} error={error} placeholder="Weekend outfit"/>}
       </section>
     </div>
   </Modal>;
@@ -174,5 +175,5 @@ export default function OutfitsPage(){
   };
   return <div className="page lookbook-page"><Toast {...toast}/><header className="page-heading lookbook-heading"><div><p className="eyebrow">Saved for later</p><h1>My outfits</h1></div><p className="page-heading__copy">Export a look as an image to keep it on your phone or share it.</p><button className="button button--rose" onClick={()=>setBuilder(true)}><Icon name="plus" size={18}/> Create an outfit</button></header>
     <div className="lookbook-tabs"><button className={filter==='all'?'is-active':''} onClick={()=>setFilter('all')}>All outfits</button><button className={filter==='favorites'?'is-active':''} onClick={()=>setFilter('favorites')}><Icon name="heart" size={15}/> Favorites</button><span>{visible.length} {visible.length===1?'outfit':'outfits'}</span></div>
-    {loading?<div className="lookbook-loading">Loading outfits…</div>:visible.length?<div className="lookbook-grid" ref={gridRef}><button className="new-page" onClick={()=>setBuilder(true)}><span><Icon name="plus" size={27}/></span><strong>Create an outfit</strong><small>Select items from your closet</small></button>{visible.map((outfit,index)=><Look key={outfit._id||index} outfit={outfit} index={index} onFavorite={favorite} onDelete={setConfirmId} onRename={rename}/>)}</div>:<EmptyState title={filter==='favorites'?'No favorite outfits yet':'No saved outfits yet'} copy={filter==='favorites'?'Select the heart on an outfit to add it to favorites.':'Select items from your closet to create your first outfit.'} action={filter==='favorites'?()=>setFilter('all'):()=>setBuilder(true)} actionLabel={filter==='favorites'?'View all outfits':'Create an outfit'}/>}<Builder open={builder} onClose={()=>setBuilder(false)} onSaved={saved}/><ConfirmDialog open={!!confirmId} onClose={()=>setConfirmId(null)} onConfirm={remove} noun="outfit"/></div>
+    {loading?<OutfitsSkeleton/>:visible.length?<div className="lookbook-grid" ref={gridRef}><button className="new-page" onClick={()=>setBuilder(true)}><span><Icon name="plus" size={27}/></span><strong>Create an outfit</strong><small>Select items from your closet</small></button>{visible.map((outfit,index)=><Look key={outfit._id||index} outfit={outfit} index={index} onFavorite={favorite} onDelete={setConfirmId} onRename={rename}/>)}</div>:<EmptyState title={filter==='favorites'?'No favorite outfits yet':'No saved outfits yet'} copy={filter==='favorites'?'Select the heart on an outfit to add it to favorites.':'Select items from your closet to create your first outfit.'} action={filter==='favorites'?()=>setFilter('all'):()=>setBuilder(true)} actionLabel={filter==='favorites'?'View all outfits':'Create an outfit'}/>}<Builder open={builder} onClose={()=>setBuilder(false)} onSaved={saved}/><ConfirmDialog open={!!confirmId} onClose={()=>setConfirmId(null)} onConfirm={remove} noun="outfit"/></div>
 }

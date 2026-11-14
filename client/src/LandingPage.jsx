@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { apiFetch } from './api';
 import Brand from './components/Brand';
 import { DoodleStar, Icon } from './components/Icons';
+import { LandingSkeleton } from './components/LoadingSkeletons';
 import { defaultClothingItems } from './starterClothing.mjs';
 import './LandingPage.css';
 
@@ -103,7 +104,7 @@ export default function LandingPage() {
       .catch(() => { if (!controller.signal.aborted) setSignedIn(false); });
     return () => controller.abort();
   }, []);
-  if (signedIn === null) return <div className="utility-loading" role="status">Loading…</div>;
+  if (signedIn === null) return <LandingSkeleton />;
   if (signedIn) return <Navigate to="/clothes" replace />;
   const wardrobeLink = signedIn ? '/clothes' : '/signup';
   return (

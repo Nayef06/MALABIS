@@ -398,6 +398,28 @@ test("outfit generation is deterministic, honors locks, and reports gaps", () =>
   });
 });
 
+test("generation honors clothing and accessory locks regardless of ID casing", () => {
+  const inventory = [
+    { _id: "abcdef0123456789abcdef01", type: "shirt" },
+    { _id: "abcdef0123456789abcdef02", type: "shirt" },
+    { _id: "abcdef0123456789abcdef03", type: "accessory" },
+    { _id: "abcdef0123456789abcdef04", type: "accessory" },
+  ];
+  const lockedIds = [inventory[1]._id, inventory[3]._id];
+
+  for (const lockedItems of [
+    lockedIds,
+    lockedIds.map((id) => id.toUpperCase()),
+    lockedIds.map((id) => id.replaceAll("a", "A")),
+  ]) {
+    const result = generateOutfit(inventory, {
+      selectedTypes: ["shirt"], lockedItems, accessoryCount: 1,
+    }, () => 0);
+
+    assert.deepEqual(result.outfit.map(asId), lockedIds);
+  }
+});
+
 test("generation fills the requested accessory count without duplicates", () => {
   const inventory = Array.from({ length: 6 }, (_, index) => ({
     _id: `accessory-${index}`,

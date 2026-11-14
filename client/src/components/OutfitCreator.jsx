@@ -1,6 +1,7 @@
 import React, { useId, useMemo } from 'react';
 import OutfitCanvas, { placeItems } from './OutfitCanvas';
 import { Icon } from './Icons';
+import { OutfitCanvasSkeleton } from './LoadingSkeletons';
 import './OutfitCreator.css';
 
 export default function OutfitCreator({
@@ -23,7 +24,7 @@ export default function OutfitCreator({
       <span className="outfit-creator__badge"><Icon name="hanger" size={22}/>Outfit</span>
       <span className="outfit-creator__count" aria-live="polite">{busy ? 'Generating…' : `${items.length} ${items.length === 1 ? 'item' : 'items'}`}</span>
     </header>
-    <OutfitCanvas pieces={pieces} emptyCopy={busy ? 'Generating outfit…' : emptyCopy}/>
+    {busy ? <OutfitCanvasSkeleton/> : <OutfitCanvas pieces={pieces} emptyCopy={emptyCopy}/>}
     {children}
     <footer className="outfit-creator__footer">
       <div className="field">

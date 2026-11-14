@@ -18,7 +18,7 @@ export function generateOutfit(
   random = Math.random,
 ) {
   const selectedTypeSet = new Set(selectedTypes);
-  const lockedItemIds = new Set(lockedItems);
+  const lockedItemIds = new Set(lockedItems.map((itemId) => itemId.toLowerCase()));
   const itemsByType = inventory.reduce((groups, item) => {
     (groups[item.type] ??= []).push(item);
     return groups;

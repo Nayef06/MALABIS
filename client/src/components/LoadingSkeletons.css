@@ -1,0 +1,65 @@
+.skeleton { display: block; flex: none; max-width: 100%; border-radius: 5px; background: linear-gradient(100deg, #e6dcd0 15%, #f8f2e9 45%, #e6dcd0 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s ease-in-out infinite; }
+@keyframes skeleton-shimmer { to { background-position-x: -200%; } }
+.skeleton-inline { display: flex; align-items: center; gap: 15px; }
+.skeleton-stack { display: grid; align-content: center; justify-items: start; gap: 14px; min-width: 0; }
+.skeleton-brand { width: 145px; height: 33px; }
+.skeleton-nav-link { width: 75px; height: 16px; }
+.skeleton-button { width: 150px; height: 45px; border-radius: 3px; }
+.skeleton-eyebrow { width: 125px; height: 12px; }
+.skeleton-copy { width: min(100%, 350px); height: 15px; }
+.skeleton-copy--short { width: min(75%, 260px); }
+.skeleton-hero-line { width: min(100%, 510px); height: clamp(42px, 6vw, 72px); }
+.skeleton-hero-line--short { width: min(80%, 390px); margin-bottom: 14px; }
+.landing-skeleton .landing__hero { align-items: stretch; }
+.skeleton-landing-preview { align-self: center; min-width: 0; width: 100%; padding: 15px; border: 1px solid var(--line); background: var(--cream); box-shadow: var(--shadow-paper); }
+.skeleton-preview-header { width: 45%; height: 23px; margin-bottom: 16px; }
+.skeleton-preview-body { display: grid; grid-template-columns: 70px 1fr; gap: 16px; }
+.skeleton-preview-rail { display: grid; gap: 9px; }
+.skeleton-preview-item { width: 65px; height: 62px; }
+.skeleton-preview-canvas { width: 100%; height: 278px; }
+.skeleton-preview-footer { width: 45%; height: 32px; margin-top: 15px; }
+.skeleton-welcome-title { width: min(100%, 450px); height: 60px; margin: 18px 0 5px; }
+.welcome-note > .skeleton-copy { margin: 12px 0; }
+.welcome-note .button-row .skeleton-button { margin: 0; }
+.skeleton-portrait { width: 100%; height: 255px; border-radius: 0; }
+.skeleton-account-name { width: 70%; height: 25px; margin: 20px auto 10px; }
+.skeleton-account-handle { width: 45%; height: 13px; margin: auto; }
+.skeleton-account-label { width: 130px; height: 18px; }
+.skeleton-account-detail { width: 180px; height: 12px; }
+.skeleton-setting-label { display: flex; align-items: flex-start; gap: 15px; }
+.skeleton-setting-label > div, .skeleton-recipe-row > div { display: grid; gap: 10px; }
+.skeleton-setting-icon { width: 22px; height: 22px; }
+.skeleton-setting-value { width: 68%; height: 17px; }
+.skeleton-closet-rail { min-height: 310px; }
+.skeleton-rail-heading { width: 130px; height: 25px; }
+.skeleton-rail-count { width: 75px; height: 14px; }
+.skeleton-garment { flex: 0 0 clamp(175px, 17vw, 245px); padding: 14px 5px 10px; }
+.skeleton-garment-image { width: 100%; aspect-ratio: 1; border-radius: 45%; }
+.skeleton-garment-name { width: 70%; height: 16px; margin: 13px 0 8px; }
+.skeleton-garment-detail { width: 42%; height: 11px; }
+.skeleton-look-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 17px; }
+.skeleton-look-badge { width: 90px; height: 30px; border-radius: 20px; }
+.skeleton-look-actions { width: 75px; height: 28px; }
+.skeleton-look-canvas { width: 100%; aspect-ratio: 8 / 9; border-radius: 8px; }
+.skeleton-look-details { display: grid; gap: 12px; margin-top: 20px; padding: 18px 0; border-top: 1px solid var(--line); }
+.skeleton-look-title { width: 65%; height: 23px; }
+.skeleton-look-button { width: 100%; height: 46px; border-radius: 8px; }
+.skeleton-canvas-wrap { position: relative; width: 100%; aspect-ratio: 8 / 9; overflow: hidden; border-radius: 8px; background: #eee8de; }
+.skeleton-canvas-piece { position: absolute; width: 31%; aspect-ratio: 1; border-radius: 35%; }
+.skeleton-canvas-piece--top { top: 15%; left: 13%; }
+.skeleton-canvas-piece--bottom { top: 48%; left: 23%; height: 37%; }
+.skeleton-canvas-piece--shoes { top: 50%; right: 12%; width: 25%; }
+.skeleton-recipe > .skeleton-copy { margin: 15px 0; width: 90%; }
+.skeleton-recipe-title { width: 75%; height: 25px; }
+.skeleton-recipe-list { display: grid; gap: 5px; margin: 18px 0; border-block: 1px solid var(--line); padding: 16px 0; }
+.skeleton-recipe-row { min-height: 62px; display: flex; align-items: center; gap: 12px; padding: 9px; }
+.skeleton-creator-footer { display: grid; gap: 16px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+.builder-skeleton { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; padding: 3px; }
+.skeleton-builder-garment { cursor: default; }
+.skeleton-builder-image { width: 100%; aspect-ratio: 1; }
+.skeleton-builder-label { width: 75%; height: 13px; }
+@media (max-width: 780px) { .skeleton-portrait { height: 180px; } }
+@media (max-width: 800px) { .landing-skeleton .landing__nav > .skeleton-inline:nth-child(2) { display: none; } .landing-skeleton .landing__hero { grid-template-columns: 1fr; } .landing-skeleton .skeleton-stack { justify-items: center; } .landing-skeleton .skeleton-landing-preview { max-width: 510px; } }
+@media (max-width: 700px) { .skeleton-garment { flex-basis: 180px; } }
+@media (max-width: 520px) { .skeleton-garment { flex-basis: 166px; } .landing-skeleton .skeleton-inline { gap: 8px; } .landing-skeleton .skeleton-nav-link { width: 48px; } .landing-skeleton .skeleton-brand { width: 100px; } .landing-skeleton .skeleton-button { width: 105px; } .skeleton-preview-body { grid-template-columns: 50px 1fr; gap: 8px; } .skeleton-preview-item { width: 45px; } .skeleton-preview-canvas { height: 238px; } }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; background: #e6dcd0; } }

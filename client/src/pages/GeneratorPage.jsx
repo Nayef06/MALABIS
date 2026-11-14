@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import OutfitCreator from '../components/OutfitCreator';
 import { Icon } from '../components/Icons';
 import { Toast } from '../components/UI';
+import { GeneratorSkeleton } from '../components/LoadingSkeletons';
 import { apiFetch } from '../api';
 import { addOutfit, getInventory } from '../dataCache';
 import './GeneratorPage.css';
@@ -91,6 +92,14 @@ export default function GeneratorPage() {
     }
   };
 
+  if (loading) return <div className="page create-page">
+    <header className="page-heading create-heading">
+      <div><p className="eyebrow">Automatic selection</p><h1>Create an outfit</h1></div>
+      <p className="page-heading__copy">Save a look to My outfits to wear it again or export it as an image.</p>
+    </header>
+    <GeneratorSkeleton/>
+  </div>;
+
   return <div className="page create-page">
     <Toast {...toast}/>
     <header className="page-heading create-heading">
@@ -98,7 +107,7 @@ export default function GeneratorPage() {
       <p className="page-heading__copy">Save a look to My outfits to wear it again or export it as an image.</p>
     </header>
     <div className="create-layout">
-      <aside className="recipe-panel" aria-busy={loading}>
+      <aside className="recipe-panel">
         <header><p className="eyebrow">Options</p><h2>Choose clothing types</h2><p>One piece is picked from each selected type. Add accessories below.</p></header>
         <div className="type-list">{TYPE_OPTIONS.map((type) => {
           const count = byType[type.id]?.length || 0;
@@ -106,7 +115,7 @@ export default function GeneratorPage() {
           return <label key={type.id} className={`${checked ? 'is-checked' : ''} ${!count ? 'is-disabled' : ''}`}>
             <input type="checkbox" checked={checked} disabled={!count || generating || saving} onChange={() => toggleType(type.id)}/>
             <span className="type-list__check"><Icon name={checked ? 'check' : 'plus'} size={15}/></span>
-            <span className="type-list__copy"><b>{type.label}</b><small>{loading ? 'Loading clothes…' : count ? `${type.note} · ${count} in closet` : 'No items yet'}</small></span>
+            <span className="type-list__copy"><b>{type.label}</b><small>{count ? `${type.note} · ${count} in closet` : 'No items yet'}</small></span>
             <Icon name={type.id} size={20}/>
           </label>;
         })}</div>
