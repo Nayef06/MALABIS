@@ -87,6 +87,7 @@ app.use(passport.session());
 
 app.get("/api/health", (_req, res) => {
   const databaseConnected = mongoose.connection.readyState === 1;
+  res.set("Cache-Control", "no-store");
   res.status(databaseConnected ? 200 : 503).json({
     status: databaseConnected ? "ok" : "unavailable",
     database: databaseConnected ? "connected" : "disconnected",

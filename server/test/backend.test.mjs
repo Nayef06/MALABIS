@@ -311,6 +311,13 @@ after(async () => {
   await new Promise((resolve) => server.close(resolve));
 });
 
+test("health responses are never cached", async () => {
+  const response = await request("/api/health");
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.equal(response.data.database, "disconnected");
+});
+
 test("password helpers hash and verify asynchronously", async () => {
   const password = "a-secure-password";
   const hashing = hashPassword(password);
