@@ -1050,6 +1050,28 @@ test("API workflow covers auth, wardrobe, outfits, generation, and failures", as
   assert.equal(response.status, 400);
   assert.deepEqual(response.data, { error: "Only image files are allowed" });
 
+  for (const path of ["/api/clothing", "/api/clothing/upload"]) {
+    for (const fields of [["photo"], ["image", "image"]]) {
+      const unexpectedFiles = new FormData();
+      for (const field of fields) {
+        unexpectedFiles.append(
+          field,
+          new Blob(["image"], { type: "image/png" }),
+          "item.png",
+        );
+      }
+      response = await request(path, {
+        method: "POST",
+        cookie: aliceCookie,
+        body: unexpectedFiles,
+      });
+      assert.equal(response.status, 400, `${path}: ${fields.join(", ")}`);
+      assert.deepEqual(response.data, {
+        error: "Upload a single image using the image field.",
+      });
+    }
+  }
+
   const oversizedUpload = new FormData();
   oversizedUpload.append(
     "image",

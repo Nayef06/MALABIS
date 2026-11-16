@@ -110,6 +110,9 @@ app.use((error, _req, res, next) => {
   if (error.code === "LIMIT_FILE_SIZE") {
     status = 413;
     message = "Image must be 5 MB or smaller.";
+  } else if (error.code === "LIMIT_UNEXPECTED_FILE") {
+    status = 400;
+    message = "Upload a single image using the image field.";
   } else if (error.message === "Only image files are allowed") {
     status = 400;
     message = error.message;
