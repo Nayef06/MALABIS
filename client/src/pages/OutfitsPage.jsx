@@ -10,7 +10,7 @@ import { addOutfit, getInventory, getOutfits, removeOutfit, updateOutfit } from 
 import { useAnimatedReorder } from '../hooks/useAnimatedReorder';
 import './OutfitsPage.css';
 
-const TYPES = [ ['all','All'],['shirt','Tops'],['pants','Bottoms'],['jacket','Jackets'],['shoes','Shoes'],['hat','Hats'],['accessory','Accessories'] ];
+const TYPES = [ ['all','All'],['shirt','Tops'],['pants','Bottoms'],['jacket','Outerwear'],['shoes','Shoes'],['hat','Hats'],['accessory','Accessories'] ];
 
 function Builder({ open,onClose,onSaved }) {
   const [inventory, setInventory] = useState([]);

@@ -10,7 +10,7 @@ import './GeneratorPage.css';
 const TYPE_OPTIONS = [
   { id: 'shirt', label: 'Top', note: 'T-shirts, shirts & sweaters' },
   { id: 'pants', label: 'Bottom', note: 'pants, shorts & skirts' },
-  { id: 'jacket', label: 'Jacket', note: 'jackets & coats' },
+  { id: 'jacket', label: 'Outerwear', note: 'jackets, coats & hoodies' },
   { id: 'shoes', label: 'Shoes', note: 'sneakers, boots & other shoes' },
   { id: 'hat', label: 'Hat', note: 'caps, beanies & other hats' },
 ];

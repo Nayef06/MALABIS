@@ -10,7 +10,7 @@ import './ClothesPage.css';
 
 const TYPES = [
   { id: 'shirt', label: 'Tops', singular: 'Top' }, { id: 'pants', label: 'Bottoms', singular: 'Bottom' },
-  { id: 'jacket', label: 'Jackets', singular: 'Jacket' }, { id: 'shoes', label: 'Shoes', singular: 'Shoes' },
+  { id: 'jacket', label: 'Outerwear', singular: 'Outerwear' }, { id: 'shoes', label: 'Shoes', singular: 'Shoes' },
   { id: 'hat', label: 'Hats', singular: 'Hat' }, { id: 'accessory', label: 'Accessories', singular: 'Accessory' },
 ];
 const COLORS = [
