@@ -59,8 +59,9 @@ export const loginValidationSchema = {
   },
   password: {
     in: ["body"],
-    isString: true,
+    isString: { bail: true, errorMessage: "Password must be a string" },
     notEmpty: { errorMessage: "Password is required" },
+    custom: passwordValidation.custom,
   },
 };
 

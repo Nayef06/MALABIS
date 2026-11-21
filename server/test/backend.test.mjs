@@ -479,6 +479,14 @@ test("new passwords respect bcrypt's byte limit and validation omits submitted v
   const login = await logIn("password-limits", password);
   assert.equal(login.status, 200);
 
+  for (const invalidPassword of [`${password}x`, "x".repeat(73), null, 42]) {
+    const rejectedLogin = await logIn("password-limits", invalidPassword);
+    assert.equal(rejectedLogin.status, 400);
+    assert.ok(rejectedLogin.data.errors.some((error) => error.path === "password"));
+    assert.ok(rejectedLogin.data.errors.every((error) => !Object.hasOwn(error, "value")));
+    assert.equal(rejectedLogin.cookie, undefined);
+  }
+
   const response = await request("/api/auth/update-profile", {
     method: "POST", cookie: login.cookie, json: { password: `${password}x` },
   });
